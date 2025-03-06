@@ -1,8 +1,9 @@
 using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
-using ChatRumi.Account.Application.IntegrationEvents;
+using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Projections;
 using ChatRumi.Account.Application.Queries;
+using ChatRumi.Account.Application.Services;
 using FluentValidation;
 using Marten;
 using Marten.Events;
@@ -10,6 +11,8 @@ using Marten.Events.Daemon.Resiliency;
 using Marten.Events.Projections;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 using Weasel.Core;
 using IMediator = MediatR.IMediator;
 
@@ -35,24 +38,44 @@ builder.Services.AddMarten(options =>
         .UniqueIndex(x => x.Email);
 
     options.Events.StreamIdentity = StreamIdentity.AsGuid;
-    
 }).AddAsyncDaemon(DaemonMode.Solo);
 
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<VerifyAccount.EventHandler>();
+    x.AddConsumer<ChatRumi.Account.Application.IntegrationEvents.VerifyAccount.EventHandler>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("amqps://b-4560229a-1bc8-4813-92bb-bfb9441d9c53.mq.us-east-1.amazonaws.com:5671", h =>
+        cfg.Host(builder.Configuration.GetConnectionString("MassTransit"), h =>
         {
-            h.Username("rabbit-admin");
-            h.Password("rabbit-admin-pass");
+            h.Username("admin");
+            h.Password("rbadminpass");
         });
 
         cfg.ReceiveEndpoint("verify-account-event-queue",
-            e => { e.ConfigureConsumer<VerifyAccount.EventHandler>(context); });
+            e =>
+            {
+                e.ConfigureConsumer<ChatRumi.Account.Application.IntegrationEvents.VerifyAccount.EventHandler>(context);
+            });
     });
+});
+builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
+{
+    var options = sp.GetRequiredService<IOptions<RedisOptions>>().Value;
+    return ConnectionMultiplexer.Connect(new ConfigurationOptions
+    {
+        EndPoints = { { options.Host, options.Port } },
+        User = options.User,
+        Password = options.Password
+    });
+});
+builder.Services.Configure<SmsOfficeOptions>(builder.Configuration.GetSection(SmsOfficeOptions.Name));
+builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.Name));
+builder.Services.AddScoped<ISmsService, SmsOfficeService>();
+builder.Services.AddHttpClient<ISmsService, SmsOfficeService>((sp, httpClient) =>
+{
+    var options = sp.GetRequiredService<IOptions<SmsOfficeOptions>>().Value;
+    httpClient.BaseAddress = new Uri(options.BaseUrl);
 });
 
 var app = builder.Build();
@@ -74,6 +97,17 @@ app.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator media
         );
     })
     .WithName("create-account")
+    .WithOpenApi();
+
+app.MapPatch("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
+    {
+        var result = await mediator.Send(new VerifyAccount.Command(accountId));
+        return result.Match(
+            Results.Ok,
+            Results.NotFound
+        );
+    })
+    .WithName("verify-account")
     .WithOpenApi();
 
 

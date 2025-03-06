@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace ChatRumi.Account.Application;
+namespace ChatRumi.Account.Application.Services;
 
 public class PasswordHasher
 {

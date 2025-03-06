@@ -12,6 +12,8 @@ public sealed record AccountProjection
     public required string LastName { get; set; }
     public required string PhoneNumber { get; set; }
     public required string CountryCode { get; set; }
+    
+    public bool IsVerified { get; set; }
 }
 
 public class AccountProjectionTransform : SingleStreamProjection<AccountProjection>

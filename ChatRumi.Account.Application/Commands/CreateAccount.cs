@@ -1,4 +1,5 @@
 ﻿using ChatRumi.Account.Application.Projections;
+using ChatRumi.Account.Application.Services;
 using ChatRumi.Account.Domain.Events;
 using ErrorOr;
 using FluentValidation;
@@ -76,7 +77,7 @@ public sealed class CreateAccount
                 return Error.Conflict("Account already exists.");
             }
 
-            PasswordHasher.CreatePasswordHash("SecurePassword123!", out var passwordHash, out var passwordSalt);
+            PasswordHasher.CreatePasswordHash(request.Password, out var passwordHash, out var passwordSalt);
             var @event = new AccountCreateEvent
             {
                 UserName = request.UserName,
@@ -92,12 +93,13 @@ public sealed class CreateAccount
             @event.Version = action.Version;
             await session.SaveChangesAsync(cancellationToken);
 
-            // await publisher.Publish(new VerifyAccount.Event
-            // {
-            //     AccountId = @event.Id,
-            //     Email = request.Email,
-            //     PhoneNumber = request.PhoneNumber
-            // }, cancellationToken);
+            await publisher.Publish(new IntegrationEvents.VerifyAccount.Event
+            {
+                AccountId = @event.Id,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                CountryCode = request.CountryCode
+            }, cancellationToken);
 
             return action.Id;
         }
