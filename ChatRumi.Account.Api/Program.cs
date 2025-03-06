@@ -18,8 +18,6 @@ using IMediator = MediatR.IMediator;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblies(Application.Assembly));
 builder.Services.AddValidatorsFromAssembly(Application.Assembly);
 
@@ -80,12 +78,6 @@ builder.Services.AddHttpClient<ISmsService, SmsOfficeService>((sp, httpClient) =
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.UseHttpsRedirection();
 
 app.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator mediator) =>
@@ -99,9 +91,20 @@ app.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator media
     .WithName("create-account")
     .WithOpenApi();
 
+app.MapPut("activate", async ([FromBody] VerifyAccount.Command request, IMediator mediator) =>
+    {
+        var result = await mediator.Send(request);
+        return result.Match(
+            Results.Ok,
+            Results.NotFound
+        );
+    })
+    .WithName("activate-account")
+    .WithOpenApi();
+
 app.MapPatch("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
-        var result = await mediator.Send(new VerifyAccount.Command(accountId));
+        var result = await mediator.Send(new VerificationRequest.Command(accountId));
         return result.Match(
             Results.Ok,
             Results.NotFound
@@ -109,7 +112,6 @@ app.MapPatch("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator me
     })
     .WithName("verify-account")
     .WithOpenApi();
-
 
 app.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {

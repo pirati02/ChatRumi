@@ -18,6 +18,7 @@ public class Account
     public required string CountryCode { get; set; }
     
     public bool IsVerified { get; set; } = false;
+    public DateTimeOffset VerifiedOn { get; set; }
     public bool MfaEnabled { get; set; } = false;
     
     public byte[] PasswordHash { get; set; } = [];
@@ -34,5 +35,11 @@ public class Account
         
         IsVerified = false;
         MfaEnabled = false;
+    }
+
+    public void Apply(VerifyAccountEvent @event)
+    {
+        IsVerified = true;
+        VerifiedOn = DateTimeOffset.UtcNow;
     }
 }

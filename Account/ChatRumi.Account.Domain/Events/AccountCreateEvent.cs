@@ -2,7 +2,7 @@
 
 public class AccountCreateEvent
 {
-    public Guid Id { get; set; } = Guid.CreateVersion7();
+    public Guid AccountId { get; set; } = Guid.CreateVersion7();
     public required string UserName { get; set; }
     public required string Email { get; set; }
     public required string FirstName { get; set; }

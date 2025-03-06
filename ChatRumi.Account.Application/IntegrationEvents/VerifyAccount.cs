@@ -1,5 +1,6 @@
 ﻿using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Services;
+using ChatRumi.Account.Domain.ValueObjects;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -42,13 +43,12 @@ public class VerifyAccount
         }
 
         private async Task<bool> SendSmsOtpAsync(ConsumeContext<Event> context)
-        {
-            var otp = OtpGenerate.New();
-            var key = $"{context.Message.AccountId}-sms-{context.Message.PhoneNumber}";
+        { 
             var database = connectionMultiplexer.GetDatabase(0);
-            if (!await database.StringSetAsync(key, otp, TimeSpan.FromMinutes(options.Value.Expiration))) return false;
+            var smsCode = new SmsCode(context.Message.PhoneNumber, OtpGenerate.New());
+            if (!await database.StringSetAsync(smsCode.Key(), smsCode.Otp, TimeSpan.FromMinutes(options.Value.Expiration))) return false;
            
-            var result = await smsService.SendSmsAsync($"{context.Message.CountryCode}{context.Message.PhoneNumber}", $"Your otp code is: {otp}");
+            var result = await smsService.SendSmsAsync($"{context.Message.CountryCode}{context.Message.PhoneNumber}", $"Your otp code is: {smsCode.Otp}");
             return result.Success && result.ErrorCode.Equals("0", StringComparison.OrdinalIgnoreCase);
         }
 

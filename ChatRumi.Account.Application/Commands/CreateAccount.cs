@@ -89,13 +89,13 @@ public sealed class CreateAccount
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt
             };
-            var action = session.Events.StartStream<Domain.Aggregate.Account>(@event.Id, @event);
+            var action = session.Events.StartStream<Domain.Aggregate.Account>(@event.AccountId, @event);
             @event.Version = action.Version;
             await session.SaveChangesAsync(cancellationToken);
 
             await publisher.Publish(new IntegrationEvents.VerifyAccount.Event
             {
-                AccountId = @event.Id,
+                AccountId = @event.AccountId,
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 CountryCode = request.CountryCode

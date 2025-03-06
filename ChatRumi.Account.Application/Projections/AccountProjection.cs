@@ -14,6 +14,7 @@ public sealed record AccountProjection
     public required string CountryCode { get; set; }
     
     public bool IsVerified { get; set; }
+    public DateTimeOffset VerifiedOn { get; set; }
 }
 
 public class AccountProjectionTransform : SingleStreamProjection<AccountProjection>
@@ -22,13 +23,19 @@ public class AccountProjectionTransform : SingleStreamProjection<AccountProjecti
     {
         ProjectEvent<AccountCreateEvent>((account, @event) =>
         {
-            account.Id = @event.Id;
+            account.Id = @event.AccountId;
             account.UserName = @event.UserName;
             account.Email = @event.Email;
             account.FirstName = @event.FirstName;
             account.LastName = @event.LastName;
             account.PhoneNumber = @event.PhoneNumber;
             account.CountryCode = @event.CountryCode;
+        });
+        ProjectEvent<VerifyAccountEvent>((account, @event) =>
+        {
+            account.Id = @event.AccountId;
+            account.IsVerified = true;
+            account.VerifiedOn = DateTimeOffset.UtcNow;
         });
     }
 }

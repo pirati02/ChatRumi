@@ -1,47 +1,57 @@
 ﻿using ChatRumi.Account.Application.Projections;
+using ChatRumi.Account.Domain.Events;
+using ChatRumi.Account.Domain.ValueObjects;
 using ErrorOr;
 using Marten;
-using MassTransit;
 using MediatR;
+using StackExchange.Redis;
 
 namespace ChatRumi.Account.Application.Commands;
 
 public class VerifyAccount
 {
-    public record Command(Guid AccountId) : IRequest<ErrorOr<bool>>;
+    public record Command(string Code, Guid AccountId) : IRequest<ErrorOr<bool>>;
 
     public class Handler(
         IDocumentStore store,
-        IPublishEndpoint publisher
+        IConnectionMultiplexer connectionMultiplexer
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
         public async Task<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
-            var account = await session.Query<AccountProjection>().FirstOrDefaultAsync(
-                a => a.Id == request.AccountId,
-                token: cancellationToken
-            );
+            var account = await session.Query<AccountProjection>()
+                .FirstOrDefaultAsync(a => a.Id == request.AccountId, cancellationToken);
 
             if (account is null)
             {
-                return Error.NotFound("Account not found.");
+                return Error.NotFound("Account not found.", $"Account with id {request.AccountId} not found.");
             }
 
             if (account.IsVerified)
             {
-                return Error.Conflict("Account is already verified.");
+                return Error.Conflict("Account is already verified.", $"Account with id {request.AccountId} is aleady verified.");
             }
 
-            await publisher.Publish(new IntegrationEvents.VerifyAccount.Event
+            await using (connectionMultiplexer)
             {
-                AccountId = account.Id,
-                Email = account.Email,
-                PhoneNumber = account.PhoneNumber,
-                CountryCode = account.CountryCode,
-            }, cancellationToken);
+                var database = connectionMultiplexer.GetDatabase(0);
 
-            return true;
+                var smsCode = new SmsCode(account.PhoneNumber, request.Code);
+                var accountCode = await database.StringGetDeleteAsync(smsCode.Key());
+                if (!accountCode.HasValue || accountCode != request.Code)
+                {
+                    return false;
+                }
+
+                var @event = new VerifyAccountEvent
+                {
+                    AccountId = account.Id
+                };
+                session.Events.Append(account.Id, @event);
+                await session.SaveChangesAsync(cancellationToken);
+                return true;
+            }
         }
     }
 }
