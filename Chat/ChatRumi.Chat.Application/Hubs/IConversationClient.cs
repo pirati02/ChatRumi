@@ -1,7 +1,9 @@
-﻿namespace ChatRumi.Chat.Application.Hubs;
+﻿using ChatRumi.Chat.Application.Dto.Response;
+
+namespace ChatRumi.Chat.Application.Hubs;
 
 public interface IConversationClient
 {
-    Task NewConversationCreated(Guid conversationId, Guid[] participants);
-    void MessageSent(Guid conversationId, Guid messageId);
+    Task ConversationStarted(Guid conversationId);
+    Task MessageSent(Guid conversationId, MessageResponse message);
 }

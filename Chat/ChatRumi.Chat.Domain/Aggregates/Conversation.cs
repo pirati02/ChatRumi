@@ -8,24 +8,14 @@ public record Conversation : Aggregate
 {
     public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.UtcNow;
     public List<Message> Messages { get; set; } = [];
-    public List<Guid> Participants { get; set; } = [];
-
-    public static Conversation Begin(Message message, Guid[] withParticipants)
-    {
-        var conversation = new Conversation();
-        conversation.Fire(new ConversationStartedEvent
-        {
-            Message = message,
-            ParticipantIds = withParticipants
-        });
-        return conversation;
-    }
-
+    public Guid ParticipantId1 { get; set; }
+    public Guid ParticipantId2 { get; set; }
+    
     public void Apply(ConversationStartedEvent @event)
     {
         CreationDate = @event.Timestamp;
-        Participants = [.. @event.ParticipantIds];
-        Messages = [@event.Message];
+        ParticipantId1 = @event.ParticipantId1;
+        ParticipantId2 = @event.ParticipantId2;
     }
 
     public void Apply(MessageSentEvent @event)

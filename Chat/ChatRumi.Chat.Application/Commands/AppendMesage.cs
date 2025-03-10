@@ -1,4 +1,5 @@
 ﻿using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Domain.Aggregates;
 using ChatRumi.Chat.Domain.Events;
 using ErrorOr;
@@ -9,13 +10,13 @@ namespace ChatRumi.Chat.Application.Commands;
 
 public class AppendMesage
 {
-    public record Command(Guid ConversationId, MessageRequest Request) : IRequest<ErrorOr<Guid>>;
+    public record Command(Guid ConversationId, MessageRequest Request) : IRequest<ErrorOr<MessageResponse>>;
 
     public class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Command, ErrorOr<Guid>>
+    ) : IRequestHandler<Command, ErrorOr<MessageResponse>>
     {
-        public async Task<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<MessageResponse>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var conversation =
@@ -38,7 +39,7 @@ public class AppendMesage
             session.Events.Append(conversation.Id, conversation.Events);
             await session.SaveChangesAsync(cancellationToken);
 
-            return @event.Id;
+            return new MessageResponse(conversation.Id, request.Request.Content, request.Request.SenderId, request.Request.ReplyOf);
         }
     }
 }
