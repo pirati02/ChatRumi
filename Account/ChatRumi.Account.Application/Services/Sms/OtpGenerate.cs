@@ -1,4 +1,4 @@
-﻿namespace ChatRumi.Account.Application.Services;
+﻿namespace ChatRumi.Account.Application.Services.Sms;
 
 public class OtpGenerate
 {

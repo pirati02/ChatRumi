@@ -7,10 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Marten" Version="7.38.1" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\ChatRumi.Kernel\ChatRumi.Kernel.csproj" />
     </ItemGroup>
 

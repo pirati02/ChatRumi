@@ -4,6 +4,8 @@ using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Projections;
 using ChatRumi.Account.Application.Queries;
 using ChatRumi.Account.Application.Services;
+using ChatRumi.Account.Application.Services.Sms;
+using ChatRumi.Account.Domain.Aggregate;
 using FluentValidation;
 using Marten;
 using Marten.Events;
@@ -31,6 +33,7 @@ builder.Services.AddMarten(options =>
     }
 
     options.Projections.Add<AccountProjectionTransform>(ProjectionLifecycle.Inline);
+    options.Projections.LiveStreamAggregation<Account>();
     options.Schema.For<AccountProjection>()
         .UniqueIndex(x => x.UserName)
         .UniqueIndex(x => x.Email);

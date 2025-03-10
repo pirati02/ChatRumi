@@ -1,5 +1,6 @@
 ﻿using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Services;
+using ChatRumi.Account.Application.Services.Sms;
 using ChatRumi.Account.Domain.ValueObjects;
 using MassTransit;
 using Microsoft.Extensions.Options;

@@ -17,5 +17,5 @@
     <ItemGroup>
       <ProjectReference Include="..\ChatRumi.Account.Application\ChatRumi.Account.Application.csproj" />
     </ItemGroup>
-
+    
 </Project>

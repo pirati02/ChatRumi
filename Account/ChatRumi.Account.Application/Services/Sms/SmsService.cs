@@ -2,11 +2,11 @@
 using ChatRumi.Account.Application.Options;
 using Microsoft.Extensions.Options;
 
-namespace ChatRumi.Account.Application.Services;
+namespace ChatRumi.Account.Application.Services.Sms;
 
 public interface ISmsService
 {
-    Task<SmsResponse> SendSmsAsync(string phoneNumber, string message);
+    Task<SmsResponse?> SendSmsAsync(string phoneNumber, string message);
 }
 
 public class SmsOfficeService(
@@ -14,7 +14,7 @@ public class SmsOfficeService(
     HttpClient client
 ) : ISmsService
 {
-    public async Task<SmsResponse> SendSmsAsync(string phoneNumber, string message)
+    public async Task<SmsResponse?> SendSmsAsync(string phoneNumber, string message)
     {
         try
         {
@@ -28,12 +28,4 @@ public class SmsOfficeService(
             return null!;
         }
     }
-}
-
-public class SmsResponse
-{
-    public bool Success { get; set; }
-    public required string Message { get; set; }
-    public object? Output { get; set; }
-    public required string ErrorCode { get; set; }
 }

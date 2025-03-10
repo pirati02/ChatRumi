@@ -41,7 +41,7 @@ public class VerifyAccount
                 var accountCode = await database.StringGetDeleteAsync(smsCode.Key());
                 if (!accountCode.HasValue || accountCode != request.Code)
                 {
-                    return false;
+                    return Error.Conflict("Invalid verification code.", $"Invalid verification code.");;
                 }
 
                 var @event = new VerifyAccountEvent

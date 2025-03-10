@@ -1,7 +1,8 @@
-﻿namespace ChatRumi.Account.Domain.Events;
+﻿using ChatRumi.Kernel;
 
-public class VerifyAccountEvent
+namespace ChatRumi.Account.Domain.Events;
+
+public record VerifyAccountEvent: DomainEvent
 {
-    public Guid AccountId { get; set; }
-    public long Version { get; set; } = 1;
+    public Guid AccountId { get; init; }
 }

@@ -1,6 +1,8 @@
-﻿namespace ChatRumi.Account.Domain.Events;
+﻿using ChatRumi.Kernel;
 
-public class AccountCreateEvent
+namespace ChatRumi.Account.Domain.Events;
+
+public record AccountCreateEvent : DomainEvent
 {
     public Guid AccountId { get; set; } = Guid.CreateVersion7();
     public required string UserName { get; set; }
@@ -11,6 +13,4 @@ public class AccountCreateEvent
     public required string CountryCode { get; set; }
     public byte[] PasswordHash { get; set; } = [];
     public byte[] PasswordSalt { get; set; } = [];
-    
-    public long Version { get; set; } = 1;
 }
