@@ -51,12 +51,6 @@ public class StartConversation
                 ParticipantId1 = request.ParticipantId1,
                 ParticipantId2 = request.ParticipantId2
             });
-            conversation.Fire(new MessageSentEvent(
-                conversation.Id,
-                request.InitialMessage.SenderId,
-                request.InitialMessage.Content,
-                request.InitialMessage.ReplyOf
-            ));
             session.Events.StartStream<Conversation>(conversation.Id, conversation.Events);
             await session.SaveChangesAsync(cancellationToken);
             return conversation.Id;

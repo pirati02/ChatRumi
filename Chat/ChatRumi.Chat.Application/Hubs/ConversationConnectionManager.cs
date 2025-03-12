@@ -4,29 +4,29 @@ namespace ChatRumi.Chat.Application.Hubs;
 
 public class ConversationConnectionManager
 {
-    private readonly ConcurrentDictionary<Guid, List<string>> _connections = new();
+    private readonly ConcurrentDictionary<Guid, List<(Guid accountId, string connectionId)>> _connections = new();
 
-    public void SetConversation(Guid conversationId, string connectionId)
+    public void SetConversation(Guid conversationId, Guid accountId, string connectionId)
     {
         if (_connections.TryGetValue(conversationId, out var clientIds))
         {
-            _connections[conversationId] = [.. clientIds, connectionId];
+            _connections[conversationId] = [.. clientIds, (accountId, connectionId)];
             return;
         }
 
-        _connections.TryAdd(conversationId, [connectionId]);
+        _connections.TryAdd(conversationId, [(accountId, connectionId)]);
     }
 
-    public IReadOnlyList<string> GetConversationConnections(Guid conversationId)
+    public IReadOnlyList<(Guid accountId, string connectionId)> GetConversationConnections(Guid conversationId)
     {
         return _connections.TryGetValue(conversationId, out var connections) ? connections : [];
     }
 
-    public void RemoveConnection(Guid conversationId, string connectionId)
+    public void RemoveConnection(Guid conversationId, Guid accountId, string connectionId)
     {
         if (!_connections.TryGetValue(conversationId, out var clientIds)) return;
         
-        clientIds.Remove(connectionId);
+        clientIds.Remove((accountId, connectionId));
         _connections[conversationId] = clientIds;
     }
 }
