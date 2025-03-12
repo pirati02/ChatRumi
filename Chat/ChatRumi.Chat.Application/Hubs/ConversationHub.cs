@@ -9,7 +9,7 @@ namespace ChatRumi.Chat.Application.Hubs;
 
 public class ConversationHub(
     IServiceProvider serviceProvider,
-    ConversationConnectionManager conversationConnectionManager) : Hub<IConversationClient>
+    ConversationConnectionManager connectionManager) : Hub<IConversationClient>
 {
     public override Task OnConnectedAsync()
     {
@@ -17,8 +17,18 @@ public class ConversationHub(
             return Task.CompletedTask;
         if (!Guid.TryParse(queryValue, out var conversationId)) return Task.CompletedTask;
 
-        conversationConnectionManager.SetConversation(conversationId, Context.ConnectionId);
+        connectionManager.SetConversation(conversationId, Context.ConnectionId);
         return Task.CompletedTask;
+    }
+    
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        if (!Context.GetHttpContext().Request.Query.TryGetValue("conversationId", out var queryValue))
+            return Task.CompletedTask;
+        if (!Guid.TryParse(queryValue, out var conversationId)) return Task.CompletedTask;
+
+        connectionManager.RemoveConnection(conversationId, Context.ConnectionId); 
+        return base.OnDisconnectedAsync(exception);
     }
 
     public async Task StartConversation(
@@ -43,7 +53,7 @@ public class ConversationHub(
             return;
         }
 
-        conversationConnectionManager.SetConversation(conversationStartResult.Value, Context.ConnectionId);
+        connectionManager.SetConversation(conversationStartResult.Value, Context.ConnectionId);
         await Clients.Clients(Context.ConnectionId).ConversationStarted(conversationStartResult.Value);
     }
 
@@ -59,7 +69,7 @@ public class ConversationHub(
             return;
         }
 
-        var clientIds = conversationConnectionManager.GetConversationConnections(conversationId);
+        var clientIds = connectionManager.GetConversationConnections(conversationId);
         await Clients.Clients(clientIds).MessageSent(conversationId, result.Value); 
     }
 
@@ -76,7 +86,7 @@ public class ConversationHub(
             return;
         }
 
-        var clientIds = conversationConnectionManager.GetConversationConnections(conversationId);
+        var clientIds = connectionManager.GetConversationConnections(conversationId);
         var (id, status) = result.Value;
         await Clients.Clients(clientIds).MessageStateUpdated(conversationId, id, status);
     }
