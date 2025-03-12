@@ -31,13 +31,13 @@ public class UpdateMessageState
             
             conversation.Fire(new MessageStatusChangeEvent
             {
-                MessageId = request.Message.Id,
+                MessageId = request.Message.MessageId,
                 SenderId = request.Message.SenderId,
                 Status = request.Status
             });
             session.Events.Append(conversation.Id, conversation.Events);
             await session.SaveChangesAsync(cancellationToken);
-            return (request.Message.Id, request.Status);
+            return (request.Message.MessageId, request.Status);
         }
     }
 }

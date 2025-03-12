@@ -7,28 +7,19 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatRumi.Chat.Application.Hubs;
 
-public class ConversationHub(IServiceProvider serviceProvider) : Hub<IConversationClient>
+public class ConversationHub(
+    IServiceProvider serviceProvider,
+    ConversationConnectionManager conversationConnectionManager) : Hub<IConversationClient>
 {
     public override Task OnConnectedAsync()
     {
         if (!Context.GetHttpContext().Request.Query.TryGetValue("conversationId", out var queryValue))
             return Task.CompletedTask;
+        if (!Guid.TryParse(queryValue, out var conversationId)) return Task.CompletedTask;
 
-        if (Guid.TryParse(queryValue, out var conversationId)
-            && Context.Items.TryGetValue(conversationId, out var clientIdsObject))
-        {
-            var clientIds = clientIdsObject as List<string>;
-            clientIds!.Add(Context.ConnectionId);
-            return Task.CompletedTask;
-        }
-
-        Context.Items[conversationId] = new List<string>()
-        {
-            Context.ConnectionId
-        };
+        conversationConnectionManager.SetConversation(conversationId, Context.ConnectionId);
         return Task.CompletedTask;
     }
-
 
     public async Task StartConversation(
         Guid? conversationId,
@@ -52,19 +43,8 @@ public class ConversationHub(IServiceProvider serviceProvider) : Hub<IConversati
             return;
         }
 
-        conversationId = conversationStartResult.Value;
-        if (Context.Items.TryGetValue(conversationId.Value, out var clientIdsObjects))
-        {
-            var clientIds = clientIdsObjects as List<string>;
-            clientIds!.Add(Context.ConnectionId);
-            Context.Items[conversationId.Value] = clientIds;
-            return;
-        }
-
-        {
-            Context.Items[conversationId.Value] = new List<string> { Context.ConnectionId };
-            await Clients.Clients(Context.ConnectionId).ConversationStarted(conversationId.Value);
-        }
+        conversationConnectionManager.SetConversation(conversationStartResult.Value, Context.ConnectionId);
+        await Clients.Clients(Context.ConnectionId).ConversationStarted(conversationStartResult.Value);
     }
 
     public async Task SendMessage(Guid conversationId, MessageRequest message)
@@ -78,15 +58,13 @@ public class ConversationHub(IServiceProvider serviceProvider) : Hub<IConversati
             //or retry to send automatically
             return;
         }
-        
-        if (Context.Items.TryGetValue(conversationId, out var clientIdsObjects))
-        {
-            var clientIds = clientIdsObjects as List<string>;
-            await Clients.Clients(clientIds).MessageSent(conversationId, result.Value);
-        }
+
+        var clientIds = conversationConnectionManager.GetConversationConnections(conversationId);
+        await Clients.Clients(clientIds).MessageSent(conversationId, result.Value); 
     }
 
-    public async Task UpdateMessageState(Guid conversationId, ExistingMessageRequest message, MessageStatus messageStatus)
+    public async Task UpdateMessageState(Guid conversationId, ExistingMessageRequest message,
+        MessageStatus messageStatus)
     {
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -97,12 +75,9 @@ public class ConversationHub(IServiceProvider serviceProvider) : Hub<IConversati
             //or retry to send automatically
             return;
         }
-        
-        if (Context.Items.TryGetValue(conversationId, out var clientIdsObjects))
-        {
-            var clientIds = clientIdsObjects as List<string>;
-            var (id, status) = result.Value;
-            await Clients.Clients(clientIds).MessageStateUpdated(conversationId, id, status);
-        }
+
+        var clientIds = conversationConnectionManager.GetConversationConnections(conversationId);
+        var (id, status) = result.Value;
+        await Clients.Clients(clientIds).MessageStateUpdated(conversationId, id, status);
     }
 }

@@ -20,6 +20,16 @@ using IMediator = MediatR.IMediator;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policyBuilder =>
+    {
+        policyBuilder.WithOrigins("http://localhost:4200") // Angular frontend URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // Important for SignalR
+    });
+});
 builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblies(Application.Assembly));
 builder.Services.AddValidatorsFromAssembly(Application.Assembly);
 
@@ -82,6 +92,7 @@ builder.Services.AddHttpClient<ISmsService, SmsOfficeService>((sp, httpClient) =
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");
 
 app.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator mediator) =>
     {
@@ -125,6 +136,14 @@ app.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator medi
         );
     })
     .WithName("get-account")
+    .WithOpenApi();
+
+app.MapGet("", async (IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetAccounts.Query());
+        return Results.Ok(result);
+    })
+    .WithName("get-accounts")
     .WithOpenApi();
 
 app.Run();

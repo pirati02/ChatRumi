@@ -7,13 +7,13 @@ namespace ChatRumi.Account.Application.Queries;
 
 public class GetAccount
 {
-    public record Query(Guid AccountId) : IRequest<ErrorOr<AccountDto>>;
+    public record Query(Guid AccountId) : IRequest<ErrorOr<AccountResponse>>;
 
     public class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Query, ErrorOr<AccountDto>>
+    ) : IRequestHandler<Query, ErrorOr<AccountResponse>>
     {
-        public async Task<ErrorOr<AccountDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             
@@ -26,7 +26,7 @@ public class GetAccount
                     description: $"Account by id '{request.AccountId}' not found.");
             }
 
-            return new AccountDto(
+            return new AccountResponse(
                 account.Id,
                 account.UserName,
                 account.Email,
@@ -40,7 +40,7 @@ public class GetAccount
     }
 }
 
-public record AccountDto(
+public record AccountResponse(
     Guid Id,
     string UserName,
     string Email,

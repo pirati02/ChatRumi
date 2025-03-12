@@ -53,7 +53,7 @@ builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
     });
 });
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Application.Assembly));
-
+builder.Services.AddSingleton<ConversationConnectionManager>();
 builder.Services.AddSignalR();
 builder.Services.AddOpenApi();
 
