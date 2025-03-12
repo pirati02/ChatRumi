@@ -1,4 +1,5 @@
 using ChatRumi.Chat.Application;
+using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Projections;
 using ChatRumi.Chat.Application.Queries;
@@ -73,6 +74,16 @@ app.MapGet("/existing/{participantId1}/{participantId2}", async (
 ) =>
 {
     var result = await mediator.Send(new GetConversationByParticipant.Query(participantId1, participantId2));
+    return result.Match(Results.Ok, Results.NotFound);
+});
+
+app.MapPost("/mark-as-read/{conversationId:guid}", async (
+    [FromRoute] Guid conversationId,
+    [FromBody] Guid[] messageIds,
+    IMediator mediator
+) =>
+{
+    var result = await mediator.Send(new MarkConversationRead.Command(conversationId, messageIds));
     return result.Match(Results.Ok, Results.NotFound);
 });
 app.MapHub<ConversationHub>("/conversation");

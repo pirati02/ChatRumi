@@ -25,7 +25,9 @@ public class GetConversationByParticipant
         {
             await using var session = store.LightweightSession();
 
-            var existing = await session.TryGetExistingConversation(request.ParticipantId1, request.ParticipantId2, cancellationToken);
+            var existing =
+                await session.TryGetExistingConversation(request.ParticipantId1, request.ParticipantId2,
+                    cancellationToken);
             if (existing is null)
             {
                 return Error.NotFound("Conversation not found.", "Conversation not found.");
@@ -39,7 +41,14 @@ public class GetConversationByParticipant
                 conversation!.Id,
                 conversation.Messages
                     .Select(m =>
-                        new MessageResponse(conversation.Id, m.Content.Content, m.ParticipantId, m.ReplyOf?.Id))
+                        new MessageResponse(
+                            conversation.Id, m.Id,
+                            m.LatestStatus(),
+                            m.Content.Content,
+                            m.ParticipantId,
+                            m.ReplyOf?.Id
+                        )
+                    )
                     .ToArray()
             );
         }

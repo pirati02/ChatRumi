@@ -1,5 +1,6 @@
 ﻿using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Domain.ValueObject;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -82,6 +83,26 @@ public class ConversationHub(IServiceProvider serviceProvider) : Hub<IConversati
         {
             var clientIds = clientIdsObjects as List<string>;
             await Clients.Clients(clientIds).MessageSent(conversationId, result.Value);
+        }
+    }
+
+    public async Task UpdateMessageState(Guid conversationId, ExistingMessageRequest message, MessageStatus messageStatus)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var result = await mediator.Send(new UpdateMessageState.Command(conversationId, message, messageStatus));
+        if (result.IsError)
+        {
+            //Todo: fire failed message to sent error
+            //or retry to send automatically
+            return;
+        }
+        
+        if (Context.Items.TryGetValue(conversationId, out var clientIdsObjects))
+        {
+            var clientIds = clientIdsObjects as List<string>;
+            var (id, status) = result.Value;
+            await Clients.Clients(clientIds).MessageStateUpdated(conversationId, id, status);
         }
     }
 }

@@ -9,15 +9,15 @@ using MediatR;
 
 namespace ChatRumi.Chat.Application.Commands;
 
-public class AppendMesage
+public class UpdateMessageState
 {
-    public record Command(Guid ConversationId, MessageRequest Request) : IRequest<ErrorOr<MessageResponse>>;
+    public record Command(Guid ConversationId, ExistingMessageRequest Message, MessageStatus Status) : IRequest<ErrorOr<(Guid idd, MessageStatus status)>>;
 
     public class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Command, ErrorOr<MessageResponse>>
+    ) : IRequestHandler<Command, ErrorOr<(Guid idd, MessageStatus status)>>
     {
-        public async Task<ErrorOr<MessageResponse>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<(Guid idd, MessageStatus status)>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var conversation =
@@ -28,26 +28,16 @@ public class AppendMesage
                 return Error.NotFound("Conversation not found.",
                     $"Conversation by '{request.ConversationId}' not found.");
             }
-
-            var @event = new MessageSentEvent(
-                conversation.Id,
-                request.Request.SenderId,
-                request.Request.Content,
-                request.Request.ReplyOf
-            );
-            conversation.Fire(@event);
-
+            
+            conversation.Fire(new MessageStatusChangeEvent
+            {
+                MessageId = request.Message.Id,
+                SenderId = request.Message.SenderId,
+                Status = request.Status
+            });
             session.Events.Append(conversation.Id, conversation.Events);
             await session.SaveChangesAsync(cancellationToken);
-
-            return new MessageResponse(
-                conversation.Id,
-                @event.Id,
-                MessageStatus.Sent,
-                request.Request.Content,
-                request.Request.SenderId,
-                request.Request.ReplyOf
-            );
+            return (request.Message.Id, request.Status);
         }
     }
 }

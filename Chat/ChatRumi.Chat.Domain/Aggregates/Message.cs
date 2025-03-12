@@ -13,4 +13,19 @@ public record Message
     public MessageType? Sent { get; set; }
     public MessageType? Seen { get; set; }
     public Message? ReplyOf { get; set; }
+
+    public MessageStatus LatestStatus()
+    {
+        if (Seen is not null)
+        {
+            return MessageStatus.Seen;
+        }
+
+        if (Delivered is not null)
+        {
+            return MessageStatus.Delivered;
+        }
+
+        return MessageStatus.Sent;
+    }
 }

@@ -10,7 +10,7 @@ public record Conversation : Aggregate
     public List<Message> Messages { get; set; } = [];
     public Guid ParticipantId1 { get; set; }
     public Guid ParticipantId2 { get; set; }
-    
+
     public void Apply(ConversationStartedEvent @event)
     {
         CreationDate = @event.Timestamp;
@@ -30,11 +30,40 @@ public record Conversation : Aggregate
                 },
                 ConversationId = Id,
                 ParticipantId = @event.SenderId,
-                Sent = new MessageType
-                {
-                    Timestamp = DateTimeOffset.Now
-                }
+                Sent = MessageType.Sent()
             }
         );
+    }
+
+    public void Apply(MessageStatusChangeEvent @event)
+    {
+        var message = Messages.FirstOrDefault(m => m.Id == @event.MessageId);
+        if (message is null)
+        {
+            return;
+        }
+
+        switch (@event.Status)
+        {
+            case MessageStatus.Sent:
+                message.Sent = MessageType.Sent();
+                break;
+            case MessageStatus.Delivered:
+                message.Delivered = MessageType.Delivered();
+                break;
+            case MessageStatus.Seen:
+                message.Seen = MessageType.Seen();
+                break;
+        }
+    }
+
+    public void Apply(MarkConversationReadEvent @event)
+    {
+        var messages = Messages.Where(a => @event.MessageIds.Contains(a.Id));
+        foreach (var message in messages)
+        {
+            message.Delivered = MessageType.Delivered();
+            message.Seen = MessageType.Seen();
+        }
     }
 }
