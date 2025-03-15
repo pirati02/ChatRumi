@@ -8,6 +8,9 @@ public class ConversationConnectionManager
 
     public void SetConversation(Guid conversationId, Guid accountId, string connectionId)
     {
+        if (conversationId == Guid.Empty)
+            return;
+        
         if (_connections.TryGetValue(conversationId, out var clientIds))
         {
             _connections[conversationId] = [.. clientIds, (accountId, connectionId)];
@@ -25,7 +28,7 @@ public class ConversationConnectionManager
     public void RemoveConnection(Guid conversationId, Guid accountId, string connectionId)
     {
         if (!_connections.TryGetValue(conversationId, out var clientIds)) return;
-        
+
         clientIds.Remove((accountId, connectionId));
         _connections[conversationId] = clientIds;
     }
