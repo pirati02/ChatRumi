@@ -1,31 +1,9 @@
 ﻿using ChatRumi.Account.Domain.Events;
-using Marten.Events;
 
 namespace ChatRumi.Account.Domain.Aggregate;
 
-public class Account
+public record Account : Kernel.Aggregate
 {
-    public Account()
-    {
-        
-    }
-
-    public static Account Create(IEvent<AccountCreateEvent> created)
-    {
-        var @event = created.Data;
-        return new Account
-        {
-            Email = @event.Email,
-            UserName = @event.UserName,
-            CountryCode = @event.CountryCode,
-            FirstName = @event.FirstName,
-            LastName = @event.LastName,
-            PhoneNumber = @event.PhoneNumber,
-            PasswordHash = @event.PasswordHash,
-            PasswordSalt = @event.PasswordSalt
-        };
-    }
-
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public required string UserName { get; set; }
     public required string Email { get; set; }

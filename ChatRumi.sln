@@ -18,6 +18,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Chat.Application",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Chat.Api", "Chat\ChatRumi.Chat.Api\ChatRumi.Chat.Api.csproj", "{0805A41E-9A09-4194-ADDE-E221C764773B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Friendship", "Friendship", "{310781DD-1AE4-4CB0-A0F6-5BD2EA60BDE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.Domain", "Friendship\ChatRumi.Friendship.Domain\ChatRumi.Friendship.Domain.csproj", "{92A3328B-65A2-4FA4-9563-BCAB39585154}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.Application", "Friendship\ChatRumi.Friendship.Application\ChatRumi.Friendship.Application.csproj", "{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +36,8 @@ Global
 		{9D84049D-9069-42B7-8261-BF68CDF3CF86} = {89A1299C-1F52-4889-8A27-7B11BEBFA5F9}
 		{B8FEBD3F-581C-4DA3-9DAA-6D7147E27E2C} = {57C1E32E-4FF1-4628-9FFD-3FBA4F917940}
 		{0805A41E-9A09-4194-ADDE-E221C764773B} = {57C1E32E-4FF1-4628-9FFD-3FBA4F917940}
+		{92A3328B-65A2-4FA4-9563-BCAB39585154} = {310781DD-1AE4-4CB0-A0F6-5BD2EA60BDE4}
+		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C} = {310781DD-1AE4-4CB0-A0F6-5BD2EA60BDE4}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5DD817CA-342E-4174-9A95-EAFA0EF0C31A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -60,5 +68,13 @@ Global
 		{0805A41E-9A09-4194-ADDE-E221C764773B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0805A41E-9A09-4194-ADDE-E221C764773B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0805A41E-9A09-4194-ADDE-E221C764773B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92A3328B-65A2-4FA4-9563-BCAB39585154}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92A3328B-65A2-4FA4-9563-BCAB39585154}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92A3328B-65A2-4FA4-9563-BCAB39585154}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92A3328B-65A2-4FA4-9563-BCAB39585154}.Release|Any CPU.Build.0 = Release|Any CPU
+		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
