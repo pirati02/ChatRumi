@@ -24,6 +24,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.Domain"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.Application", "Friendship\ChatRumi.Friendship.Application\ChatRumi.Friendship.Application.csproj", "{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.Api", "Friendship\ChatRumi.Friendship.Api\ChatRumi.Friendship.Api.csproj", "{C3C410C3-0AB5-4DDA-A884-6381B2EFE77F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRum.InterCommunication", "ChatRum.InterCommunication\ChatRum.InterCommunication.csproj", "{6CE2B550-B666-4D73-AB28-8A176F085B35}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRum.Gateway", "ChatRum.Gateway\ChatRum.Gateway.csproj", "{0B4E5907-8F6E-4A47-832B-939A1BF3EE35}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +44,7 @@ Global
 		{0805A41E-9A09-4194-ADDE-E221C764773B} = {57C1E32E-4FF1-4628-9FFD-3FBA4F917940}
 		{92A3328B-65A2-4FA4-9563-BCAB39585154} = {310781DD-1AE4-4CB0-A0F6-5BD2EA60BDE4}
 		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C} = {310781DD-1AE4-4CB0-A0F6-5BD2EA60BDE4}
+		{C3C410C3-0AB5-4DDA-A884-6381B2EFE77F} = {310781DD-1AE4-4CB0-A0F6-5BD2EA60BDE4}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5DD817CA-342E-4174-9A95-EAFA0EF0C31A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -76,5 +83,17 @@ Global
 		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{062B8C54-61FB-425E-8C5F-DA1B05C3C88C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3C410C3-0AB5-4DDA-A884-6381B2EFE77F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3C410C3-0AB5-4DDA-A884-6381B2EFE77F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3C410C3-0AB5-4DDA-A884-6381B2EFE77F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3C410C3-0AB5-4DDA-A884-6381B2EFE77F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CE2B550-B666-4D73-AB28-8A176F085B35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CE2B550-B666-4D73-AB28-8A176F085B35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CE2B550-B666-4D73-AB28-8A176F085B35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CE2B550-B666-4D73-AB28-8A176F085B35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B4E5907-8F6E-4A47-832B-939A1BF3EE35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B4E5907-8F6E-4A47-832B-939A1BF3EE35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B4E5907-8F6E-4A47-832B-939A1BF3EE35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B4E5907-8F6E-4A47-832B-939A1BF3EE35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

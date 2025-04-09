@@ -50,6 +50,8 @@ public class VerifyAccount
                 };
                 session.Events.Append(account.Id, @event);
                 await session.SaveChangesAsync(cancellationToken);
+                
+                
                 return true;
             }
         }

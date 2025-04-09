@@ -78,6 +78,7 @@ public class ConversationHub(
             //or retry to send automatically
             return;
         }
+        
 
         var receiver = connectionManager.GetConversationConnections(conversationId)
             .FirstOrDefault(a => a.accountId != message.SenderId);
