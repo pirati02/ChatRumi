@@ -18,15 +18,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
-app.UseHttpsRedirection();
-
 app.MapGet("{peerId:guid}",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetFriendsAsync(peerId)))
     .WithName("friends")
     .WithOpenApi();
 
-app.MapGet("{peerId:guid}",
+app.MapGet("{peerId:guid}/requests",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetFriendRequestsAsync(peerId)))
     .WithName("friend-request")

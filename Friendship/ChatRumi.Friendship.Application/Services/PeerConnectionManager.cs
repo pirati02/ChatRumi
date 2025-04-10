@@ -59,7 +59,7 @@ public class PeerConnectionManager : IPeerConnectionManager
         await _session.RunAsync(query, parameters);
     }
 
-    public async Task AcceptFriendRequestAsync(Guid peerId1, Guid peerId2)
+    public async Task AcceptFriendRequestAsync(Guid peerId2, Guid peerId1)
     {
         const string query = """
                                  MATCH (a1:Account {peerId: $peerId1})-[r:FRIEND_REQUEST {status: 'pending'}]->(a2:Account {peerId: $peerId2})
@@ -70,7 +70,7 @@ public class PeerConnectionManager : IPeerConnectionManager
 
         var parameters = new { peerId1 = peerId1.ToString(), peerId2 = peerId2.ToString() };
 
-        await _session.RunAsync(query, parameters);
+        var result = await _session.RunAsync(query, parameters);
     }
 
     public async Task<List<PeerResponse>> GetFriendsAsync(Guid peerId)

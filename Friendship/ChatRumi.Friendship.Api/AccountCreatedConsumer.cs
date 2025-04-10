@@ -18,51 +18,54 @@ public class AccountCreatedConsumer(
         WriteIndented = true
     };
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await using var scope = serviceProvider.CreateAsyncScope();
-        var peerConnectionManager = scope.ServiceProvider.GetRequiredService<IPeerConnectionManager>();
-
-        var consumerConfig = new ConsumerConfig
+        return Task.Run(async () =>
         {
-            BootstrapServers = options.Value.ConnectionString,
-            GroupId = "webapi-consumer-group",
-            AutoOffsetReset = AutoOffsetReset.Earliest
-        };
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var peerConnectionManager = scope.ServiceProvider.GetRequiredService<IPeerConnectionManager>();
 
-        using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
-        consumer.Subscribe(Topics.AccountCreatedTopic);
-
-        logger.LogInformation("Kafka Consumer started...");
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
+            var consumerConfig = new ConsumerConfig
             {
-                var cr = consumer.Consume(stoppingToken);
+                BootstrapServers = options.Value.ConnectionString,
+                GroupId = "webapi-consumer-group",
+                AutoOffsetReset = AutoOffsetReset.Earliest
+            };
 
-                if (!string.IsNullOrWhiteSpace(cr.Message.Value))
+            using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
+            consumer.Subscribe(Topics.AccountCreatedTopic);
+
+            logger.LogInformation("Kafka Consumer started...");
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
                 {
-                    var @event = JsonSerializer.Deserialize<AccountCreated>(cr.Message.Value, SerializerOptions);
-                    if (@event is null)
+                    var cr = consumer.Consume(stoppingToken);
+
+                    if (!string.IsNullOrWhiteSpace(cr.Message.Value))
                     {
-                        return;
+                        var @event = JsonSerializer.Deserialize<AccountCreated>(cr.Message.Value, SerializerOptions);
+                        if (@event is null)
+                        {
+                            return;
+                        }
+
+                        await peerConnectionManager.CreatePeerAsync(@event.AccountId, @event.UserName, DateTime.UtcNow);
                     }
 
-                    await peerConnectionManager.CreatePeerAsync(@event.AccountId, @event.UserName, DateTime.UtcNow);
+                    logger.LogInformation("Consumed message: Key = {Key}, Value = {Value}", cr.Message.Key,
+                        cr.Message.Value);
+                }
+                catch (ConsumeException ex)
+                {
+                    logger.LogError(ex, "Kafka consume error");
                 }
 
-                logger.LogInformation("Consumed message: Key = {Key}, Value = {Value}", cr.Message.Key,
-                    cr.Message.Value);
-            }
-            catch (ConsumeException ex)
-            {
-                logger.LogError(ex, "Kafka consume error");
+                await Task.Delay(100, stoppingToken); // optional delay
             }
 
-            await Task.Delay(100, stoppingToken); // optional delay
-        }
-
-        consumer.Close();
+            consumer.Close();
+        }, stoppingToken);
     }
 }
