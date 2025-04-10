@@ -87,4 +87,5 @@ app.MapPost("/mark-as-read/{conversationId:guid}", async (
     return result.Match(Results.Ok, Results.NotFound);
 });
 app.MapHub<ConversationHub>("/conversation");
-app.Run();
+
+await app.RunAsync();

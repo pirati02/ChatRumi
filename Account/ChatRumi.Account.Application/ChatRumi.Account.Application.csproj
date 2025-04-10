@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
       <ProjectReference Include="..\ChatRumi.Account.Domain\ChatRumi.Account.Domain.csproj" />
     </ItemGroup>
 

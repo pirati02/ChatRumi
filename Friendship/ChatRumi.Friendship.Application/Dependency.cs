@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using ChatRumi.Friendship.Application.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatRumi.Friendship.Application;
 

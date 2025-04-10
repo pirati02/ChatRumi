@@ -1,8 +1,8 @@
 ﻿namespace ChatRumi.Friendship.Application;
 
-public record ApplicationOptions
+public record Neo4jOptions
 {
-    public const string Name = nameof(ApplicationOptions);
+    public const string Name = nameof(Neo4jOptions);
   
     public required string Neo4jConnection { get; set; }
     public required string Neo4jUser { get; set; }

@@ -92,13 +92,13 @@ public sealed class CreateAccount
             var action = session.Events.StartStream<Domain.Aggregate.Account>(@event.AccountId, @event);
             await session.SaveChangesAsync(cancellationToken);
 
-            // await publisher.Publish(new IntegrationEvents.VerifyAccount.Event
-            // {
-            //     AccountId = @event.AccountId,
-            //     Email = request.Email,
-            //     PhoneNumber = request.PhoneNumber,
-            //     CountryCode = request.CountryCode
-            // }, cancellationToken);
+            await publisher.Publish(new Events.VerifyAccount.Event
+            {
+                AccountId = @event.AccountId,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                CountryCode = request.CountryCode
+            }, cancellationToken);
 
             return action.Id;
         }

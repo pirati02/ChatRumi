@@ -1,93 +1,14 @@
+using ChatRumi.Account.Api;
 using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
-using ChatRumi.Account.Application.Options;
-using ChatRumi.Account.Application.Projections;
 using ChatRumi.Account.Application.Queries;
-using ChatRumi.Account.Application.Services;
-using ChatRumi.Account.Application.Services.Sms;
-using ChatRumi.Account.Domain.Aggregate;
-using FluentValidation;
-using Marten;
-using Marten.Events;
-using Marten.Events.Daemon.Resiliency;
-using Marten.Events.Projections;
-using MassTransit;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using Weasel.Core;
 using IMediator = MediatR.IMediator;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy", policyBuilder =>
-    {
-        policyBuilder.WithOrigins("http://localhost:4200") // Angular frontend URL
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials(); // Important for SignalR
-    });
-});
-builder.Services.AddMediatR(config => config.RegisterServicesFromAssemblies(Application.Assembly));
-builder.Services.AddValidatorsFromAssembly(Application.Assembly);
-
-builder.Services.AddMarten(options =>
-{
-    options.Connection(builder.Configuration.GetConnectionString("Marten")!);
-    options.UseSystemTextJsonForSerialization();
-    if (builder.Environment.IsDevelopment())
-    {
-        options.AutoCreateSchemaObjects = AutoCreate.All;
-    }
-
-    options.Projections.Add<AccountProjectionTransform>(ProjectionLifecycle.Inline);
-    options.Projections.LiveStreamAggregation<Account>();
-    options.Schema.For<AccountProjection>()
-        .UniqueIndex(x => x.UserName)
-        .UniqueIndex(x => x.Email);
-
-    options.Events.StreamIdentity = StreamIdentity.AsGuid;
-}).AddAsyncDaemon(DaemonMode.Solo);
-
-builder.Services.AddMassTransit(x =>
-{
-    x.AddConsumer<ChatRumi.Account.Application.IntegrationEvents.VerifyAccount.EventHandler>();
-
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host(builder.Configuration.GetConnectionString("MassTransit"), h =>
-        {
-            h.Username("admin");
-            h.Password("rbadminpass");
-        });
-
-        cfg.ReceiveEndpoint("verify-account-event-queue",
-            e =>
-            {
-                e.ConfigureConsumer<ChatRumi.Account.Application.IntegrationEvents.VerifyAccount.EventHandler>(context);
-            });
-    });
-});
-builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
-{
-    var options = sp.GetRequiredService<IOptions<RedisOptions>>().Value;
-    return ConnectionMultiplexer.Connect(new ConfigurationOptions
-    {
-        EndPoints = { { options.Host, options.Port } },
-        User = options.User,
-        Password = options.Password
-    });
-});
-builder.Services.Configure<SmsOfficeOptions>(builder.Configuration.GetSection(SmsOfficeOptions.Name));
-builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.Name));
-builder.Services.AddScoped<ISmsService, SmsOfficeService>();
-builder.Services.AddHttpClient<ISmsService, SmsOfficeService>((sp, httpClient) =>
-{
-    var options = sp.GetRequiredService<IOptions<SmsOfficeOptions>>().Value;
-    httpClient.BaseAddress = new Uri(options.BaseUrl);
-});
+builder.Services.AddApi(builder.Configuration, builder.Environment);
+builder.Services.AddApplication();
 
 var app = builder.Build();
 
@@ -146,4 +67,4 @@ app.MapGet("", async (IMediator mediator) =>
     .WithName("get-accounts")
     .WithOpenApi();
 
-app.Run();
+await app.RunAsync();

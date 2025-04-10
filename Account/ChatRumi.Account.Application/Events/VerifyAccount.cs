@@ -1,12 +1,11 @@
 ﻿using ChatRumi.Account.Application.Options;
-using ChatRumi.Account.Application.Services;
 using ChatRumi.Account.Application.Services.Sms;
 using ChatRumi.Account.Domain.ValueObjects;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
-namespace ChatRumi.Account.Application.IntegrationEvents;
+namespace ChatRumi.Account.Application.Events;
 
 public class VerifyAccount
 {
@@ -30,7 +29,7 @@ public class VerifyAccount
             {
                 try
                 {
-                    if (await SendSmsOtpAsync(context))
+                    if (!await SendSmsOtpAsync(context))
                     {
                         throw new Exception("Internal exception occured, sending sms");
                     }
@@ -50,7 +49,7 @@ public class VerifyAccount
             if (!await database.StringSetAsync(smsCode.Key(), smsCode.Otp, TimeSpan.FromMinutes(options.Value.Expiration))) return false;
            
             var result = await smsService.SendSmsAsync($"{context.Message.CountryCode}{context.Message.PhoneNumber}", $"Your otp code is: {smsCode.Otp}");
-            return result.Success && result.ErrorCode.Equals("0", StringComparison.OrdinalIgnoreCase);
+            return result is { Success: true, ErrorCode: 0 };
         }
 
         // private async Task SendEmailOtpAsync(ConsumeContext<Event> context)

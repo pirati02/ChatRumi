@@ -33,7 +33,7 @@ public class VerificationRequest
                 return Error.Conflict("Account is already verified.", $"Account with id {request.AccountId} is aleady verified.");
             }
 
-            await publisher.Publish(new IntegrationEvents.VerifyAccount.Event
+            await publisher.Publish(new Events.VerifyAccount.Event
             {
                 AccountId = account.Id,
                 Email = account.Email,

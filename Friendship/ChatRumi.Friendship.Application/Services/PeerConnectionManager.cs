@@ -1,37 +1,43 @@
-﻿using ChatRumi.Friendship.Domain.Aggregates;
+﻿using ChatRumi.Friendship.Application.Dto.Request;
 using Microsoft.Extensions.Options;
 using Neo4j.Driver;
 
-namespace ChatRumi.Friendship.Application;
+namespace ChatRumi.Friendship.Application.Services;
 
 public interface IPeerConnectionManager
 {
     Task CreatePeerAsync(Guid peerId, string userName, DateTime createdDate);
-    Task<bool> PeerExistsAsync(Guid peerId);
     Task SendFriendRequestAsync(Guid peerId1, Guid peerId2);
     Task AcceptFriendRequestAsync(Guid peerId1, Guid peerId2);
-    Task<IEnumerable<Peer>> GetFriendsAsync(Guid peerId);
+    Task<List<PeerResponse>> GetFriendsAsync(Guid peerId);
+    Task<List<PeerResponse>> GetFriendRequestsAsync(Guid peerId);
 }
 
 public class PeerConnectionManager : IPeerConnectionManager
 {
     private readonly IAsyncSession _session;
+
     public PeerConnectionManager(
         IDriver driver,
-        IOptions<ApplicationOptions> options
+        IOptions<Neo4jOptions> options
     )
     {
         _session = driver.AsyncSession(builder => builder.WithDatabase(options.Value.Neo4jDatabase));
     }
-    
+
     public async Task CreatePeerAsync(Guid peerId, string userName, DateTime createdDate)
     {
+        if (await PeerExistsAsync(peerId))
+        {
+            return;
+        }
+
         const string query = "CREATE (a:Account {peerId: $peerId, userName: $userName, createdDate: $createdDate})";
         var parameters = new { peerId = peerId.ToString(), userName, createdDate };
 
         await _session.RunAsync(query, parameters);
     }
-    
+
     public async Task<bool> PeerExistsAsync(Guid peerId)
     {
         const string query = "MATCH (a:Account {peerId: $peerId}) RETURN a";
@@ -40,7 +46,7 @@ public class PeerConnectionManager : IPeerConnectionManager
         var result = await _session.RunAsync(query, parameters);
         return await result.FetchAsync();
     }
-    
+
     public async Task SendFriendRequestAsync(Guid peerId1, Guid peerId2)
     {
         const string query = """
@@ -67,7 +73,7 @@ public class PeerConnectionManager : IPeerConnectionManager
         await _session.RunAsync(query, parameters);
     }
 
-    public async Task<IEnumerable<Peer>> GetFriendsAsync(Guid peerId)
+    public async Task<List<PeerResponse>> GetFriendsAsync(Guid peerId)
     {
         const string query = """
                                  MATCH (a:Account {peerId: $peerId})-[:FRIENDS_WITH]-(friend:Account)
@@ -75,20 +81,29 @@ public class PeerConnectionManager : IPeerConnectionManager
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
-        var friends = new List<Peer>();
-
+ 
         var result = await _session.RunAsync(query, parameters);
-        await result.ForEachAsync(record =>
-        {
-            var peer = new Peer
-            {
-                Id = Guid.Parse(record["friend.peerId"].As<string>()),
-                UserName = record["friend.userName"].As<string>(),
-                CreatedDate = record["friend.createdDate"].As<DateTime>()
-            };
-            friends.Add(peer);
-        });
+        return await result.ToListAsync(record => new PeerResponse(
+            Guid.Parse(record["friend.peerId"].As<string>()),
+            record["friend.userName"].As<string>(),
+            record["friend.createdDate"].As<DateTime>()
+        ));
+    }
+    
+    public async Task<List<PeerResponse>> GetFriendRequestsAsync(Guid peerId)
+    {
+        const string query = """
+                                 MATCH (a:Account {peerId: $peerId})-[:FRIEND_REQUEST]-(friend:Account)
+                                 RETURN friend.peerId, friend.userName, friend.createdDate
+                             """;
 
-        return friends;
+        var parameters = new { peerId = peerId.ToString() };
+ 
+        var result = await _session.RunAsync(query, parameters);
+        return await result.ToListAsync(record => new PeerResponse(
+            Guid.Parse(record["friend.peerId"].As<string>()),
+            record["friend.userName"].As<string>(),
+            record["friend.createdDate"].As<DateTime>()
+        ));
     }
 }
