@@ -9,8 +9,8 @@ public interface IPeerConnectionManager
     Task CreatePeerAsync(Guid peerId, string userName, DateTime createdDate);
     Task SendFriendRequestAsync(Guid peerId1, Guid peerId2);
     Task AcceptFriendRequestAsync(Guid peerId1, Guid peerId2);
-    Task<List<PeerResponse>> GetFriendsAsync(Guid peerId);
-    Task<List<PeerResponse>> GetFriendRequestsAsync(Guid peerId);
+    Task<PeerResponse[]> GetFriendsAsync(Guid peerId);
+    Task<PeerResponse[]> GetFriendRequestsAsync(Guid peerId);
 }
 
 public class PeerConnectionManager : IPeerConnectionManager
@@ -73,7 +73,7 @@ public class PeerConnectionManager : IPeerConnectionManager
         var result = await _session.RunAsync(query, parameters);
     }
 
-    public async Task<List<PeerResponse>> GetFriendsAsync(Guid peerId)
+    public async Task<PeerResponse[]> GetFriendsAsync(Guid peerId)
     {
         const string query = """
                                  MATCH (a:Account {peerId: $peerId})-[:FRIENDS_WITH]-(friend:Account)
@@ -81,16 +81,18 @@ public class PeerConnectionManager : IPeerConnectionManager
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
- 
+
         var result = await _session.RunAsync(query, parameters);
-        return await result.ToListAsync(record => new PeerResponse(
-            Guid.Parse(record["friend.peerId"].As<string>()),
-            record["friend.userName"].As<string>(),
-            record["friend.createdDate"].As<DateTime>()
-        ));
+        return (await result.ToListAsync(record => new PeerResponse(
+                Guid.Parse(record["friend.peerId"].As<string>()),
+                record["friend.userName"].As<string>(),
+                record["friend.createdDate"].As<ZonedDateTime>().UtcDateTime
+            )))
+            .DistinctBy(a => a.PeerId)
+            .ToArray();
     }
-    
-    public async Task<List<PeerResponse>> GetFriendRequestsAsync(Guid peerId)
+
+    public async Task<PeerResponse[]> GetFriendRequestsAsync(Guid peerId)
     {
         const string query = """
                                  MATCH (a:Account {peerId: $peerId})-[:FRIEND_REQUEST]-(friend:Account)
@@ -98,12 +100,14 @@ public class PeerConnectionManager : IPeerConnectionManager
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
- 
+
         var result = await _session.RunAsync(query, parameters);
-        return await result.ToListAsync(record => new PeerResponse(
-            Guid.Parse(record["friend.peerId"].As<string>()),
-            record["friend.userName"].As<string>(),
-            record["friend.createdDate"].As<DateTime>()
-        ));
+        return (await result.ToListAsync(record => new PeerResponse(
+                Guid.Parse(record["friend.peerId"].As<string>()),
+                record["friend.userName"].As<string>(),
+                record["friend.createdDate"].As<DateTime>()
+            )))
+            .DistinctBy(a => a.PeerId)
+            .ToArray();
     }
 }
