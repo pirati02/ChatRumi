@@ -20,19 +20,7 @@ public record Conversation : Aggregate
 
     public void Apply(MessageSentEvent @event)
     {
-        Messages.Add(
-            new Message
-            {
-                Id = @event.Id,
-                Content = new PlainTextContent
-                {
-                    Content = @event.Content
-                },
-                ConversationId = Id,
-                ParticipantId = @event.SenderId,
-                Sent = MessageType.Sent()
-            }
-        );
+        Messages.Add(@event.AsMessage());
     }
 
     public void Apply(MessageStatusChangeEvent @event)

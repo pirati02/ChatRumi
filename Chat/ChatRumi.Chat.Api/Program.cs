@@ -6,6 +6,7 @@ using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Domain.Aggregates;
 using Marten;
 using Marten.Events;
+using Marten.Events.Daemon;
 using Marten.Events.Daemon.Resiliency;
 using Marten.Events.Projections;
 using MediatR;
@@ -36,12 +37,18 @@ builder.Services.AddCors(options =>
             options.AutoCreateSchemaObjects = AutoCreate.All;
         }
 
-        options.Projections.Add<ExistingConversationProjectionTransform>(ProjectionLifecycle.Inline);
         options.Projections.LiveStreamAggregation<Conversation>();
+        
+        options.Projections.Add<ExistingConversationProjectionTransform>(ProjectionLifecycle.Inline);
         options.Schema.For<ExistingConversationProjection>();
 
+        options.Projections.Add<LatestConversationProjectionTransform>(ProjectionLifecycle.Async);
+        options.Schema.For<LatestConversationProjection>();
+        
         options.Events.StreamIdentity = StreamIdentity.AsGuid;
-    }).AddAsyncDaemon(DaemonMode.Solo);
+    })
+    .AddAsyncDaemon(DaemonMode.Solo);
+
 builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
 {
     var options = sp.GetRequiredService<IOptions<RedisOptions>>().Value;
@@ -66,6 +73,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
+
+app.MapGet("/{participantId:guid}/top10/", async (
+    [FromRoute] Guid participantId,
+    [FromQuery(Name = "Ids")] Guid[] responderParticipantIds,
+    IMediator mediator
+) =>
+{
+    var result = await mediator.Send(new GetTop10LatestConversation.Query(participantId, responderParticipantIds));
+    return result.Match(Results.Ok, Results.NotFound);
+});
 
 app.MapGet("/existing/{participantId1}/{participantId2}", async (
     [FromRoute] Guid participantId1,

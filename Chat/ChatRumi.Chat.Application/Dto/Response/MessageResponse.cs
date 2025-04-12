@@ -1,4 +1,5 @@
-﻿using ChatRumi.Chat.Domain.ValueObject;
+﻿using ChatRumi.Chat.Domain.Aggregates;
+using ChatRumi.Chat.Domain.ValueObject;
 
 namespace ChatRumi.Chat.Application.Dto.Response;
 
@@ -8,4 +9,18 @@ public record MessageResponse(
     MessageStatus Status,
     string Content,
     Guid SenderId,
-    Guid? ReplyOf);
+    Guid? ReplyOf
+)
+{
+    public static MessageResponse From(Message m)
+    {
+        return new MessageResponse(
+            m.ConversationId,
+            m.Id,
+            m.LatestStatus(),
+            m.Content.Content,
+            m.ParticipantId,
+            m.ReplyOf?.Id
+        );
+    }
+}

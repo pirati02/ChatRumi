@@ -51,7 +51,7 @@ public class MarkConversationRead
                 })
                 .ToArray();
 
-            foreach (var (messageId, status, connectionid) in senders)
+            foreach (var (messageId, _, connectionid) in senders)
             {
                 await context.Clients.Clients(connectionid).MessageStateUpdated(conversation.Id, messageId, MessageStatus.Seen);
             }

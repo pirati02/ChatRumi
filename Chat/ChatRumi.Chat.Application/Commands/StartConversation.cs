@@ -44,10 +44,9 @@ public class StartConversation
             }
 
             var conversation = new Conversation();
-            var conversationId = Guid.CreateVersion7();
             conversation.Fire(new ConversationStartedEvent
             {
-                Id = conversationId,
+                Id = conversation.Id,
                 ParticipantId1 = request.ParticipantId1,
                 ParticipantId2 = request.ParticipantId2
             });

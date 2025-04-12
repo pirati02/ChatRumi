@@ -40,15 +40,7 @@ public class GetConversationByParticipant
             return new GetConversationResponse(
                 conversation!.Id,
                 conversation.Messages
-                    .Select(m =>
-                        new MessageResponse(
-                            conversation.Id, m.Id,
-                            m.LatestStatus(),
-                            m.Content.Content,
-                            m.ParticipantId,
-                            m.ReplyOf?.Id
-                        )
-                    )
+                    .Select(MessageResponse.From)
                     .ToArray()
             );
         }
