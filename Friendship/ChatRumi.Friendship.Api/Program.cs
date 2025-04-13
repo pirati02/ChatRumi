@@ -25,16 +25,16 @@ app.MapGet("{peerId:guid}",
     .WithName("friends")
     .WithOpenApi();
 
-app.MapGet("{peerId:guid}/requests",
+app.MapGet("{peerId:guid}/received-requests",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetFriendRequestsAsync(peerId)))
-    .WithName("friend-request")
+    .WithName("received-requests")
     .WithOpenApi();
 
-app.MapGet("{peerId:guid}/my-requests",
+app.MapGet("{peerId:guid}/sent-requests",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetRequestsISent(peerId)))
-    .WithName("my-friend-request")
+    .WithName("sent-requests")
     .WithOpenApi();
 
 app.MapPut("{peerId:guid}/request", async (

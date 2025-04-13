@@ -26,7 +26,6 @@ public class LatestConversationProjectionTransform : SingleStreamProjection<Late
 
         ProjectEvent<MessageSentEvent>((projection, @event) =>
         {
-            projection.Id = @event.Id;
             projection.LatestMessage = @event.AsLatestMessage();
         });
     }
@@ -44,7 +43,8 @@ public static class LatestConversationProjectionExtensions
         
         return session.Query<LatestConversationProjection>()
             .Where(
-                p => p.ParticipantId1 == participantId && otherParticipantIds.Contains(p.ParticipantId2)
+                p => (p.ParticipantId1 == participantId && otherParticipantIds.Contains(p.ParticipantId2)) ||
+                     p.ParticipantId2 == participantId && otherParticipantIds.Contains(p.ParticipantId1)
             )
             .ToListAsync(token: cancellationToken);
     }

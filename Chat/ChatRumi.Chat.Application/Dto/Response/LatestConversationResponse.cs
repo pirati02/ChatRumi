@@ -2,5 +2,6 @@
 
 public record LatestConversationResponse(
     Guid ConversationId,
-    LatestMessageResponse? Message
+    LatestMessageResponse? Message,
+    Guid[] ParticipantIds
 );

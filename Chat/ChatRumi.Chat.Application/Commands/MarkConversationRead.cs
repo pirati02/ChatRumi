@@ -45,9 +45,9 @@ public class MarkConversationRead
                 )
                 .Select(m =>
                 {
-                    var (_, connectionid) = connectionManager.GetConversationConnections(conversation.Id)
+                    var (_, connectionId) = connectionManager.GetConversationConnections(conversation.Id)
                         .FirstOrDefault(a => a.accountId == m.ParticipantId);
-                    return (m.Id, m.LatestStatus(), connectionid);
+                    return (m.Id, m.LatestStatus(), connectionid: connectionId);
                 })
                 .ToArray();
 

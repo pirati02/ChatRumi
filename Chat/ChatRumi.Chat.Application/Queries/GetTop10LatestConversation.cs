@@ -25,10 +25,12 @@ public class GetTop10LatestConversation
                     cancellationToken);
 
 
-            return conversations.Select(conversation => new LatestConversationResponse(conversation.Id,
+            return conversations.Select(conversation => new LatestConversationResponse(
+                conversation.Id,
                 conversation.LatestMessage is not null
                     ? LatestMessageResponse.From(conversation.Id, conversation.LatestMessage)
-                    : null
+                    : null,
+                [conversation.ParticipantId2, conversation.ParticipantId1]
             )).ToArray();
         }
     }
