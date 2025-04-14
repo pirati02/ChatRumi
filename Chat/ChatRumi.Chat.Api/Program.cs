@@ -1,68 +1,15 @@
-using ChatRumi.Chat.Application;
+using ChatRum.InterCommunication.ServiceDiscovery;
+using ChatRumi.Chat.Api;
 using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Hubs;
-using ChatRumi.Chat.Application.Projections;
 using ChatRumi.Chat.Application.Queries;
-using ChatRumi.Chat.Domain.Aggregates;
-using Marten;
-using Marten.Events;
-using Marten.Events.Daemon;
-using Marten.Events.Daemon.Resiliency;
-using Marten.Events.Projections;
+using Consul;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using Weasel.Core;
-using RedisOptions = ChatRumi.Chat.Application.Options.RedisOptions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("CorsPolicy", policyBuilder =>
-        {
-            policyBuilder.WithOrigins("http://localhost:4200") // Angular frontend URL
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials(); // Important for SignalR
-        });
-    })
-    .AddMarten(options =>
-    {
-        options.Connection(builder.Configuration.GetConnectionString("Marten")!);
-        options.UseSystemTextJsonForSerialization();
-        if (builder.Environment.IsDevelopment())
-        {
-            options.AutoCreateSchemaObjects = AutoCreate.All;
-        }
-
-        options.Projections.LiveStreamAggregation<Conversation>();
-        
-        options.Projections.Add<ExistingConversationProjectionTransform>(ProjectionLifecycle.Inline);
-        options.Schema.For<ExistingConversationProjection>();
-
-        options.Projections.Add<LatestConversationProjectionTransform>(ProjectionLifecycle.Async);
-        options.Schema.For<LatestConversationProjection>();
-        
-        options.Events.StreamIdentity = StreamIdentity.AsGuid;
-    })
-    .AddAsyncDaemon(DaemonMode.Solo);
-
-builder.Services.AddScoped<IConnectionMultiplexer>(sp =>
-{
-    var options = sp.GetRequiredService<IOptions<RedisOptions>>().Value;
-    return ConnectionMultiplexer.Connect(new ConfigurationOptions
-    {
-        EndPoints = { { options.Host, options.Port } },
-        User = options.User,
-        Password = options.Password
-    });
-});
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Application.Assembly));
-builder.Services.AddSingleton<ConversationConnectionManager>();
-builder.Services.AddSignalR();
-builder.Services.AddOpenApi();
+builder.Services.AddApi(builder.Configuration, builder.Environment);
+builder.Services.AddConsulService();
 
 var app = builder.Build();
 
@@ -104,5 +51,6 @@ app.MapPost("/mark-as-read/{conversationId:guid}", async (
     return result.Match(Results.Ok, Results.NotFound);
 });
 app.MapHub<ConversationHub>("/conversation");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"));
 
 await app.RunAsync();

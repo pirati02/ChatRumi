@@ -1,0 +1,42 @@
+﻿{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/account/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "accountservice",
+      "UpstreamPathTemplate": "/account/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/chat/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "chatservice",
+      "UpstreamPathTemplate": "/chat/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/friendship/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "friendshipservice",
+      "UpstreamPathTemplate": "/friendship/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/hub/chat",
+      "DownstreamScheme": "http",
+      "ServiceName": "chatservice",
+      "UpstreamPathTemplate": "/hub/chat",
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1"
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://localhost:5136",
+    "ServiceDiscoveryProvider": {
+      "Host": "localhost",
+      "Port": 8500,
+      "Type": "Consul"
+    }
+  }
+}

@@ -1,13 +1,16 @@
+using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRumi.Friendship.Api;
 using ChatRumi.Friendship.Application;
 using ChatRumi.Friendship.Application.Dto.Request;
 using ChatRumi.Friendship.Application.Dto.Response;
 using ChatRumi.Friendship.Application.Services;
+using Consul;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApi()
     .AddApplication();
+builder.Services.AddConsulService();
 
 var app = builder.Build();
 
@@ -73,5 +76,7 @@ app.MapDelete("{peerId:guid}/unfriend", async (
     })
     .WithName("unfriend")
     .WithOpenApi();
+
+app.MapGet("/health", () => Results.Ok("Healthy ✅"));
 
 await app.RunAsync();

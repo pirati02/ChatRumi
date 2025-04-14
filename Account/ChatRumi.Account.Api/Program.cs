@@ -1,7 +1,9 @@
+using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRumi.Account.Api;
 using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
 using ChatRumi.Account.Application.Queries;
+using Consul;
 using Microsoft.AspNetCore.Mvc;
 using IMediator = MediatR.IMediator;
 
@@ -9,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApi(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
+builder.Services.AddConsulService();
 
 var app = builder.Build();
 
@@ -66,5 +69,6 @@ app.MapGet("", async (IMediator mediator) =>
     })
     .WithName("get-accounts")
     .WithOpenApi();
+app.MapGet("/health", () => Results.Ok("Healthy ✅"));
 
 await app.RunAsync();
