@@ -1,0 +1,80 @@
+﻿version: "3.9"
+
+services:
+  consul:
+    image: hashicorp/consul:1.16.2
+    container_name: consul
+    ports:
+      - "8500:8500"
+    command: agent -dev -ui -client=0.0.0.0
+    networks:
+      - backend
+
+  accountservice:
+    build:
+      context: .
+      dockerfile: Account/ChatRumi.Account.Api/Dockerfile
+    container_name: accountservice
+    ports:
+      - "5049:5049"
+    environment:
+      - ASPNETCORE_URLS=http://+:5049
+      - Consul__ServiceName=accountservice
+      - Consul__ServiceAddress=http://accountservice:5049
+    networks:
+      - backend
+    depends_on:
+      - consul
+
+  chatservice:
+    build:
+      context: .
+      dockerfile: Chat/ChatRumi.Chat.Api/Dockerfile
+    container_name: chatservice
+    ports:
+      - "5111:5111"
+    environment:
+      - ASPNETCORE_URLS=http://+:5111
+      - Consul__ServiceName=chatservice
+      - Consul__ServiceAddress=http://chatservice:5111
+    networks:
+      - backend
+    depends_on:
+      - consul
+
+  friendshipservice:
+    build:
+      context: .
+      dockerfile: Friendship/ChatRumi.Friendship.Api/Dockerfile
+    container_name: friendshipservice
+    ports:
+      - "5031:5031"
+    environment:
+      - ASPNETCORE_URLS=http://+:5031
+      - Consul__ServiceName=friendshipservice
+      - Consul__ServiceAddress=http://friendshipservice:5031
+    networks:
+      - backend
+    depends_on:
+      - consul
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ChatRum.Gateway/Dockerfile
+    container_name: gateway
+    ports:
+      - "7000:7000"
+    environment:
+      - ASPNETCORE_URLS=http://+:7000
+    networks:
+      - backend
+    depends_on:
+      - accountservice
+      - chatservice
+      - friendshipservice
+      - consul
+
+networks:
+  backend:
+    driver: bridge

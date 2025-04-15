@@ -36,6 +36,7 @@ public class ConsulServiceRegistration(
         };
 
         await consulClient.Agent.ServiceRegister(registration, cancellationToken);
+        Console.WriteLine("Health Check URL: " + $"{uri.Scheme}://{uri.Host}:{uri.Port}/health");
         Console.WriteLine($"✅ Registered {serviceName} with Consul at {uri}");
     }
 
