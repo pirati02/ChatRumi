@@ -9,9 +9,18 @@ builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange
 builder.Services.AddOcelot()
     .AddConsul();
 
-var app = builder.Build();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
-// Optional: Add root status check
+var app = builder.Build();
+app.UseCors("AllowAll");
 app.MapGet("/", () => Results.Ok("Gateway is running"));
 
 // Run Ocelot middleware
