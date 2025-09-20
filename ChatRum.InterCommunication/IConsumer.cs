@@ -8,19 +8,14 @@ public interface IConsumer
     void Consume(string topic);
 }
 
-public class KafkaConsumer
+public class KafkaConsumer(IOptions<KafkaOptions> options)
 {
-    private readonly ConsumerConfig _config;
-
-    public KafkaConsumer(IOptions<KafkaOptions> options)
+    private readonly ConsumerConfig _config = new()
     {
-        _config = new ConsumerConfig
-        {
-            BootstrapServers = options.Value.ConnectionString,
-            GroupId = "my-consumer-group",
-            AutoOffsetReset = AutoOffsetReset.Earliest
-        };
-    }
+        BootstrapServers = options.Value.ConnectionString,
+        GroupId = "my-consumer-group",
+        AutoOffsetReset = AutoOffsetReset.Earliest
+    };
 
     public void Consume(string topic)
     {

@@ -3,7 +3,6 @@ using ChatRumi.Chat.Api;
 using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
-using Consul;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

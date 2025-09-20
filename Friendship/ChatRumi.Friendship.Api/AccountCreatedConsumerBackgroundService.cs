@@ -7,8 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace ChatRumi.Friendship.Api;
 
-public class AccountCreatedConsumer(
-    ILogger<AccountCreatedConsumer> logger,
+public class AccountCreatedConsumerBackgroundService(
+    ILogger<AccountCreatedConsumerBackgroundService> logger,
     IOptions<KafkaOptions> options,
     IServiceProvider serviceProvider
 ) : BackgroundService

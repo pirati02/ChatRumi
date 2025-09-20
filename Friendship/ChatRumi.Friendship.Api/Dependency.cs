@@ -28,7 +28,7 @@ public static class Dependency
             return GraphDatabase.Driver(options.Neo4jConnection,  AuthTokens.Basic(options.Neo4jUser, options.Neo4jPassword));
         });
 
-        services.AddHostedService<AccountCreatedConsumer>();
+        services.AddHostedService<AccountCreatedConsumerBackgroundService>();
         return services;
     }
 }

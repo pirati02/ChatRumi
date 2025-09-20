@@ -11,7 +11,13 @@ public static class ConsulDependency
         services.AddOptions<ConsulOptions>()
             .BindConfiguration(ConsulOptions.Name)
             .ValidateOnStart();
-        services.AddSingleton<IConsulClient, ConsulClient>();
-        services.AddSingleton<IHostedService, ConsulServiceRegistration>();
+        services.AddSingleton<IConsulClient, ConsulClient>(_ => new ConsulClient
+        {
+            Config =
+            {
+                Address = new Uri("http://localhost:8500")
+            }
+        });
+        services.AddSingleton<IHostedService, ConsulServiceRegistrationBackgroundService>();
     }
 }

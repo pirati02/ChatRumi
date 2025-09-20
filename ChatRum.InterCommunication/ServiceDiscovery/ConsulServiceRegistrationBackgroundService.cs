@@ -4,13 +4,13 @@ using Microsoft.Extensions.Options;
 
 namespace ChatRum.InterCommunication.ServiceDiscovery;
 
-public class ConsulServiceRegistration(
+public class ConsulServiceRegistrationBackgroundService(
     IConsulClient consulClient,
     IOptions<ConsulOptions> options
 )
     : IHostedService
 {
-    private string? _serviceId = null;
+    private string? _serviceId;
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -18,7 +18,14 @@ public class ConsulServiceRegistration(
         _serviceId = $"{serviceName}-{Guid.NewGuid()}";
 
         var uri = new Uri(options.Value.ServiceAddress);
-
+ 
+        var services = await consulClient.Agent.Services(cancellationToken);
+        if (services.Response.Values.Any(s => s.ID == _serviceId))
+        {
+            Console.WriteLine($"⚠️ Service {_serviceId} is already registered in Consul. Skipping registration.");
+            return;
+        }
+        
         var registration = new AgentServiceRegistration
         {
             ID = _serviceId,
@@ -45,6 +52,7 @@ public class ConsulServiceRegistration(
         if (!string.IsNullOrWhiteSpace(_serviceId))
         {
             await consulClient.Agent.ServiceDeregister(_serviceId, cancellationToken);
+            _serviceId = null;
             Console.WriteLine($"❌ Deregistered {_serviceId} from Consul");
         }
     }

@@ -10,7 +10,7 @@ using StackExchange.Redis;
 
 namespace ChatRumi.Account.Application.Commands;
 
-public class VerifyAccount
+public sealed class VerifyAccount
 {
     public record Command(string Code, Guid AccountId) : IRequest<ErrorOr<bool>>;
 
@@ -31,10 +31,10 @@ public class VerifyAccount
                 return Error.NotFound("Account not found.", $"Account with id {request.AccountId} not found.");
             }
 
-            // if (account.IsVerified)
-            // {
-            //     return Error.Conflict("Account is already verified.", $"Account with id {request.AccountId} is aleady verified.");
-            // }
+            if (account.IsVerified)
+            {
+                return Error.Conflict("Account is already verified.", $"Account with id {request.AccountId} is aleady verified.");
+            }
 
             await using (connectionMultiplexer)
             {
@@ -42,10 +42,10 @@ public class VerifyAccount
 
                 var smsCode = new SmsCode(account.PhoneNumber, request.Code);
                 var accountCode = await database.StringGetDeleteAsync(smsCode.Key());
-                // if (!accountCode.HasValue || accountCode != request.Code)
-                // {
-                //     return Error.Conflict("Invalid verification code.", $"Invalid verification code.");;
-                // }
+                if (!accountCode.HasValue || accountCode != request.Code)
+                {
+                    return Error.Conflict("Invalid verification code.", $"Invalid verification code.");;
+                }
 
                 var @event = new VerifyAccountEvent
                 {
