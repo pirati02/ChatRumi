@@ -5,8 +5,7 @@ services:
     image: hashicorp/consul:1.16.2
     container_name: consul
     ports:
-      - "8500:8500"
-    command: agent -dev -ui -client=0.0.0.0
+      - "8500:8500"   # Consul UI / HTTP API
     networks:
       - backend
 
@@ -21,10 +20,12 @@ services:
       - ASPNETCORE_URLS=http://+:5049
       - Consul__ServiceName=accountservice
       - Consul__ServiceAddress=http://accountservice:5049
-    networks:
-      - backend
+      - Consul__Host=consul
+      - Consul__Port=8500
     depends_on:
       - consul
+    networks:
+      - backend
 
   chatservice:
     build:
@@ -37,10 +38,12 @@ services:
       - ASPNETCORE_URLS=http://+:5111
       - Consul__ServiceName=chatservice
       - Consul__ServiceAddress=http://chatservice:5111
-    networks:
-      - backend
+      - Consul__Host=consul
+      - Consul__Port=8500
     depends_on:
       - consul
+    networks:
+      - backend
 
   friendshipservice:
     build:
@@ -53,10 +56,12 @@ services:
       - ASPNETCORE_URLS=http://+:5031
       - Consul__ServiceName=friendshipservice
       - Consul__ServiceAddress=http://friendshipservice:5031
-    networks:
-      - backend
+      - Consul__Host=consul
+      - Consul__Port=8500
     depends_on:
       - consul
+    networks:
+      - backend
 
   gateway:
     build:
@@ -67,13 +72,13 @@ services:
       - "7000:7000"
     environment:
       - ASPNETCORE_URLS=http://+:7000
-    networks:
-      - backend
     depends_on:
+      - consul
       - accountservice
       - chatservice
       - friendshipservice
-      - consul
+    networks:
+      - backend
 
 networks:
   backend:

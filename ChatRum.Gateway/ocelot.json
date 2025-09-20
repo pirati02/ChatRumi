@@ -5,21 +5,30 @@
       "DownstreamScheme": "http",
       "ServiceName": "accountservice",
       "UpstreamPathTemplate": "/account/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/api/chat/{everything}",
       "DownstreamScheme": "http",
       "ServiceName": "chatservice",
       "UpstreamPathTemplate": "/chat/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/api/friendship/{everything}",
       "DownstreamScheme": "http",
       "ServiceName": "friendshipservice",
       "UpstreamPathTemplate": "/friendship/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     },
     {
       "DownstreamPathTemplate": "/hub/chat",
@@ -28,15 +37,20 @@
       "UpstreamPathTemplate": "/hub/chat",
       "UpstreamHttpMethod": [ "GET", "POST" ],
       "UseWebSockets": true,
-      "DownstreamHttpVersion": "1.1"
+      "DownstreamHttpVersion": "1.1",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     }
   ],
   "GlobalConfiguration": {
+    "UseServiceDiscovery": true,
     "BaseUrl": "https://localhost:5136",
     "ServiceDiscoveryProvider": {
-      "Host": "localhost",
+      "Host": "consul",
       "Port": 8500,
-      "Type": "Consul"
+      "Type": "Consul",
+      "PollingInterval": 10000
     }
   }
 }

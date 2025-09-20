@@ -15,10 +15,9 @@ public class ConsulServiceRegistrationBackgroundService(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var serviceName = options.Value.ServiceName;
-        _serviceId = $"{serviceName}-{Guid.NewGuid()}";
-
         var uri = new Uri(options.Value.ServiceAddress);
- 
+        _serviceId = $"{serviceName}-{uri.Port}";
+        
         var services = await consulClient.Agent.Services(cancellationToken);
         if (services.Response.Values.Any(s => s.ID == _serviceId))
         {
@@ -30,8 +29,21 @@ public class ConsulServiceRegistrationBackgroundService(
         {
             ID = _serviceId,
             Name = serviceName,
-            Address = uri.Host,
+            Address = uri.Host,   // host.docker.internal
             Port = uri.Port,
+            TaggedAddresses = new Dictionary<string, ServiceTaggedAddress>
+            {
+                ["lan"] = new()
+                {
+                    Address = uri.Host,
+                    Port = uri.Port
+                },
+                ["wan"] = new()
+                {
+                    Address = uri.Host,
+                    Port = uri.Port
+                }
+            },
             Tags = ["api"],
             Check = new AgentServiceCheck
             {
