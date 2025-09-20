@@ -1,8 +1,6 @@
 ﻿using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Projections;
-using ChatRumi.Account.Application;
-using ChatRumi.Account.Application.Events;
-using ChatRumi.Account.Application.Services.Sms;
+using ChatRumi.Account.Application.Events; 
 using FluentValidation;
 using Marten;
 using Marten.Events;
