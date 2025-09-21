@@ -11,7 +11,7 @@ namespace ChatRumi.Account.Application.Commands;
 
 public sealed class CreateAccount
 {
-    public record Command(
+    public sealed record Command(
         string UserName,
         string Email,
         string FirstName,
@@ -21,7 +21,7 @@ public sealed class CreateAccount
         string Password
     ) : IRequest<ErrorOr<Guid>>;
 
-    public class Validator : AbstractValidator<Command>
+    public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {

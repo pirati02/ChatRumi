@@ -1,0 +1,57 @@
+﻿{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/account/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5049
+        }
+      ],
+      "UpstreamPathTemplate": "/account/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/chat/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5111
+        }
+      ],
+      "UpstreamPathTemplate": "/chat/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/friendship/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5031
+        }
+      ],
+      "UpstreamPathTemplate": "/friendship/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
+      "DownstreamPathTemplate": "/hub/chat",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5111
+        }
+      ],
+      "UpstreamPathTemplate": "/hub/chat",
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1"
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:7000"
+  }
+}

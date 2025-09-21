@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApi()
     .AddApplication();
-builder.Services.AddConsulService();
+builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();
 
@@ -22,25 +22,27 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
-app.MapGet("{peerId:guid}",
+var friendship = app.MapGroup("/api/friendship");
+
+friendship.MapGet("{peerId:guid}",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetFriendsAsync(peerId)))
     .WithName("friends")
     .WithOpenApi();
 
-app.MapGet("{peerId:guid}/received-requests",
+friendship.MapGet("{peerId:guid}/received-requests",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetFriendRequestsAsync(peerId)))
     .WithName("received-requests")
     .WithOpenApi();
 
-app.MapGet("{peerId:guid}/sent-requests",
+friendship.MapGet("{peerId:guid}/sent-requests",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetRequestsISent(peerId)))
     .WithName("sent-requests")
     .WithOpenApi();
 
-app.MapPut("{peerId:guid}/request", async (
+friendship.MapPut("{peerId:guid}/request", async (
         Guid peerId,
         [FromBody] InviteFriendRequest request,
         [FromServices] IPeerConnectionManager connectionManager
@@ -52,7 +54,7 @@ app.MapPut("{peerId:guid}/request", async (
     .WithName("invite-friend")
     .WithOpenApi();
 
-app.MapPut("{peerId:guid}/accept", async (
+friendship.MapPut("{peerId:guid}/accept", async (
         Guid peerId,
         [FromBody] AcceptFriendRequest request,
         [FromServices] IPeerConnectionManager connectionManager
@@ -65,7 +67,7 @@ app.MapPut("{peerId:guid}/accept", async (
     .WithOpenApi();
 
 
-app.MapDelete("{peerId:guid}/unfriend", async (
+friendship.MapDelete("{peerId:guid}/unfriend", async (
         Guid peerId,
         [FromBody] UnfriendRequest request,
         [FromServices] IPeerConnectionManager connectionManager
@@ -77,6 +79,6 @@ app.MapDelete("{peerId:guid}/unfriend", async (
     .WithName("unfriend")
     .WithOpenApi();
 
-app.MapGet("/health", () => Results.Ok("Healthy ✅"));
+friendship.MapGet("/health", () => Results.Ok("Healthy ✅"));
 
 await app.RunAsync();

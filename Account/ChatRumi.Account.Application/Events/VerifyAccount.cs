@@ -7,9 +7,9 @@ using StackExchange.Redis;
 
 namespace ChatRumi.Account.Application.Events;
 
-public class VerifyAccount
+public sealed class VerifyAccount
 {
-    public class Event
+    public sealed class Event
     {
         public Guid AccountId { get; init; }
         public required string Email { get; init; }
@@ -17,7 +17,7 @@ public class VerifyAccount
         public required string CountryCode { get; set; }
     }
 
-    public class EventHandler(
+    public sealed class EventHandler(
         IConnectionMultiplexer connectionMultiplexer,
         ISmsService smsService,
         IOptions<RedisOptions> options

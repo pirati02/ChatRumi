@@ -29,6 +29,7 @@ public static class Dependency
         });
 
         services.AddHostedService<AccountCreatedConsumerBackgroundService>();
+        
         return services;
     }
 }

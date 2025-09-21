@@ -4,7 +4,11 @@ using Ocelot.Provider.Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+var ocelotJson = builder.Environment.IsEnvironment("Local")
+    ? "ocelot.Local.json"
+    : "ocelot.json";
+
+builder.Configuration.AddJsonFile(ocelotJson, optional: false, reloadOnChange: true);
 
 builder.Services.AddOcelot()
     .AddConsul();

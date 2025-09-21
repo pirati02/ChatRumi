@@ -12,9 +12,9 @@ namespace ChatRumi.Account.Application.Commands;
 
 public sealed class VerifyAccount
 {
-    public record Command(string Code, Guid AccountId) : IRequest<ErrorOr<bool>>;
+    public sealed record Command(string Code, Guid AccountId) : IRequest<ErrorOr<bool>>;
 
-    public class Handler(
+    public sealed class Handler(
         IDocumentStore store,
         IConnectionMultiplexer connectionMultiplexer,
         IDispatcher dispatcher
@@ -44,7 +44,7 @@ public sealed class VerifyAccount
                 var accountCode = await database.StringGetDeleteAsync(smsCode.Key());
                 if (!accountCode.HasValue || accountCode != request.Code)
                 {
-                    return Error.Conflict("Invalid verification code.", $"Invalid verification code.");;
+                    return Error.Conflict("Invalid verification code.", "Invalid verification code.");
                 }
 
                 var @event = new VerifyAccountEvent

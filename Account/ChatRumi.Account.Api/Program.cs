@@ -3,7 +3,6 @@ using ChatRumi.Account.Api;
 using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
 using ChatRumi.Account.Application.Queries;
-using Consul;
 using Microsoft.AspNetCore.Mvc;
 using IMediator = MediatR.IMediator;
 
@@ -11,14 +10,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApi(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
-builder.Services.AddConsulService();
+builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
+var accountGroup = app.MapGroup("/api/account");
 
-app.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator mediator) =>
+accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator mediator) =>
     {
         var result = await mediator.Send(command);
         return result.Match(
@@ -29,7 +29,7 @@ app.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator media
     .WithName("create-account")
     .WithOpenApi();
 
-app.MapPut("activate", async ([FromBody] VerifyAccount.Command request, IMediator mediator) =>
+accountGroup.MapPut("activate", async ([FromBody] VerifyAccount.Command request, IMediator mediator) =>
     {
         var result = await mediator.Send(request);
         return result.Match(
@@ -40,9 +40,9 @@ app.MapPut("activate", async ([FromBody] VerifyAccount.Command request, IMediato
     .WithName("activate-account")
     .WithOpenApi();
 
-app.MapPatch("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
+accountGroup.MapPatch("{accountId:guid}/resend-code", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
-        var result = await mediator.Send(new VerificationRequest.Command(accountId));
+        var result = await mediator.Send(new SendVerificationRequest.Command(accountId));
         return result.Match(
             Results.Ok,
             Results.NotFound
@@ -51,7 +51,7 @@ app.MapPatch("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator me
     .WithName("verify-account")
     .WithOpenApi();
 
-app.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
+accountGroup.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
         var result = await mediator.Send(new GetAccount.Query(accountId));
         return result.Match(
@@ -62,13 +62,15 @@ app.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator medi
     .WithName("get-account")
     .WithOpenApi();
 
-app.MapGet("", async (IMediator mediator) =>
+accountGroup.MapGet("", async (IMediator mediator) =>
     {
         var result = await mediator.Send(new GetAccounts.Query());
         return Results.Ok(result);
     })
     .WithName("get-accounts")
     .WithOpenApi();
-app.MapGet("/health", () => Results.Ok("Healthy ✅"));
+
+accountGroup.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("account-health");
 
 await app.RunAsync();

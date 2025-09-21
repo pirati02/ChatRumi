@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApi(builder.Configuration, builder.Environment);
-builder.Services.AddConsulService();
+builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();
 
@@ -20,7 +20,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
-app.MapGet("/{participantId:guid}/top10/", async (
+var chatGroup = app.MapGroup("/api/chat");
+
+chatGroup.MapGet("/{participantId:guid}/top10/", async (
     [FromRoute] Guid participantId,
     [FromQuery(Name = "Ids")] Guid[] responderParticipantIds,
     IMediator mediator
@@ -30,7 +32,7 @@ app.MapGet("/{participantId:guid}/top10/", async (
     return result.Match(Results.Ok, Results.NotFound);
 });
 
-app.MapGet("/existing/{participantId1}/{participantId2}", async (
+chatGroup.MapGet("/existing/{participantId1}/{participantId2}", async (
     [FromRoute] Guid participantId1,
     [FromRoute] Guid participantId2,
     IMediator mediator
@@ -40,7 +42,7 @@ app.MapGet("/existing/{participantId1}/{participantId2}", async (
     return result.Match(Results.Ok, Results.NotFound);
 });
 
-app.MapPost("/mark-as-read/{conversationId:guid}", async (
+chatGroup.MapPost("/mark-as-read/{conversationId:guid}", async (
     [FromRoute] Guid conversationId,
     [FromBody] Guid[] messageIds,
     IMediator mediator
@@ -49,7 +51,7 @@ app.MapPost("/mark-as-read/{conversationId:guid}", async (
     var result = await mediator.Send(new MarkConversationRead.Command(conversationId, messageIds));
     return result.Match(Results.Ok, Results.NotFound);
 });
-app.MapHub<ConversationHub>("/conversation");
-app.MapGet("/health", () => Results.Ok("Healthy ✅"));
+chatGroup.MapHub<ConversationHub>("/conversation");
+chatGroup.MapGet("/health", () => Results.Ok("Healthy ✅"));
 
 await app.RunAsync();

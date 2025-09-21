@@ -6,11 +6,11 @@ using MediatR;
 
 namespace ChatRumi.Account.Application.Commands;
 
-public class VerificationRequest
+public sealed class SendVerificationRequest
 {
-    public record Command(Guid AccountId) : IRequest<ErrorOr<bool>>;
+    public sealed record Command(Guid AccountId) : IRequest<ErrorOr<bool>>;
 
-    public class Handler(
+    public sealed class Handler(
         IDocumentStore store,
         IPublishEndpoint publisher
     ) : IRequestHandler<Command, ErrorOr<bool>>
@@ -22,7 +22,7 @@ public class VerificationRequest
                 a => a.Id == request.AccountId,
                 token: cancellationToken
             );
-            
+
             if (account is null)
             {
                 return Error.NotFound("Account not found.", $"Account with id {request.AccountId} not found.");
@@ -30,7 +30,8 @@ public class VerificationRequest
 
             if (account.IsVerified)
             {
-                return Error.Conflict("Account is already verified.", $"Account with id {request.AccountId} is aleady verified.");
+                return Error.Conflict("Account is already verified.",
+                    $"Account with id {request.AccountId} is aleady verified.");
             }
 
             await publisher.Publish(new Events.VerifyAccount.Event
