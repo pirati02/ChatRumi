@@ -7,13 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatRumi.Chat.Application.Hubs;
 
-public class ConversationHub(
+public class ChatHub(
     IServiceProvider serviceProvider,
     AccountConnectionManager accountConnectionManager) : Hub<IConversationClient>
 {
     public override Task OnConnectedAsync()
     {
-        if (!TryGetAccount(out var accountId))
+        if (TryGetAccount(out var accountId))
         {
             accountConnectionManager.AddAccount(accountId, Context.ConnectionId);
         }
@@ -23,7 +23,7 @@ public class ConversationHub(
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        if (!TryGetAccount(out var accountId))
+        if (TryGetAccount(out var accountId))
         {
             accountConnectionManager.RemoveConnection(accountId, Context.ConnectionId);
         }
@@ -111,17 +111,11 @@ public class ConversationHub(
         }
     }
 
-    private bool TryGetConversation(out Guid conversationId)
-    {
-        conversationId = Guid.Empty;
-        return !Context.GetHttpContext().Request.Query.TryGetValue("conversationId", out var conversationIdQueryValue)
-               || !Guid.TryParse(conversationIdQueryValue, out conversationId);
-    }
-
     private bool TryGetAccount(out Guid accountId)
     {
         accountId = Guid.Empty;
-        return !Context.GetHttpContext().Request.Query.TryGetValue("accountId", out var accountIdQueryValue)
-               || !Guid.TryParse(accountIdQueryValue, out accountId);
+
+        return Context.GetHttpContext()?.Request.Query.TryGetValue("accountId", out var values) == true &&
+               Guid.TryParse(values, out accountId);
     }
 }

@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddApi(builder.Configuration, builder.Environment);
 builder.Services.AddConsulService(builder.Configuration);
 
@@ -17,7 +18,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("CorsPolicy");
 
 var chatGroup = app.MapGroup("/api/chat");
@@ -32,7 +33,7 @@ chatGroup.MapGet("/{participantId:guid}/top10/", async (
     return result.Match(Results.Ok, Results.NotFound);
 });
 
-chatGroup.MapGet("/existing/{participantId1}/{participantId2}", async (
+chatGroup.MapGet("/existing/{participantId1:guid}/{participantId2:guid}", async (
     [FromRoute] Guid participantId1,
     [FromRoute] Guid participantId2,
     IMediator mediator
@@ -51,7 +52,7 @@ chatGroup.MapPost("/mark-as-read/{conversationId:guid}", async (
     var result = await mediator.Send(new MarkConversationRead.Command(conversationId, messageIds));
     return result.Match(Results.Ok, Results.NotFound);
 });
-chatGroup.MapHub<ConversationHub>("/conversation");
-chatGroup.MapGet("/health", () => Results.Ok("Healthy ✅"));
+
+app.MapHub<ChatHub>("/hub/chat");
 
 await app.RunAsync();

@@ -37,7 +37,7 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
     },
     {
-      "DownstreamPathTemplate": "/hub/chat",
+      "DownstreamPathTemplate": "/hub/chat/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -45,13 +45,13 @@
           "Port": 5111
         }
       ],
-      "UpstreamPathTemplate": "/hub/chat",
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamPathTemplate": "/hub/chat/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
       "UseWebSockets": true,
       "DownstreamHttpVersion": "1.1"
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:7000"
+    "BaseUrl": "http://localhost:5136"
   }
 }

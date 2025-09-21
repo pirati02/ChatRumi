@@ -14,7 +14,6 @@ builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 var accountGroup = app.MapGroup("/api/account");
 

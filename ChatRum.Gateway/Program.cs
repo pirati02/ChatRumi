@@ -9,24 +9,27 @@ var ocelotJson = builder.Environment.IsEnvironment("Local")
     : "ocelot.json";
 
 builder.Configuration.AddJsonFile(ocelotJson, optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddOcelot()
     .AddConsul();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policyBuilder =>
     {
-        policy.AllowAnyOrigin()
+        policyBuilder.WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowCredentials();
     });
 });
 
 var app = builder.Build();
-app.UseCors("AllowAll");
+
+app.UseCors("AllowFrontend");
+app.UseWebSockets();
 app.MapGet("/", () => Results.Ok("Gateway is running"));
 
-// Run Ocelot middleware
 await app.UseOcelot();
 await app.RunAsync();

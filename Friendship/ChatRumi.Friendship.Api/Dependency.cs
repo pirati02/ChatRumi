@@ -14,10 +14,9 @@ public static class Dependency
         {
             options.AddPolicy("CorsPolicy", policyBuilder =>
             {
-                policyBuilder.WithOrigins("http://localhost:4200") // Angular frontend URL
+                policyBuilder.WithOrigins("http://localhost:4200")
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials(); // Important for SignalR
+                    .AllowAnyMethod();
             });
         });
         services.AddOptions<KafkaOptions>().BindConfiguration(KafkaOptions.Name);

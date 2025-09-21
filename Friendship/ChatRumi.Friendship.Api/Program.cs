@@ -19,7 +19,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 
 var friendship = app.MapGroup("/api/friendship");

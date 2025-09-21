@@ -63,8 +63,8 @@ public static class Dependency
             });
         });
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Application.Application.Assembly));
-        services.AddSingleton<AccountConnectionManager>();
         
+        services.AddSingleton<AccountConnectionManager>();
         services.AddSignalR();
         services.AddOpenApi();
     }
