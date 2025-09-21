@@ -16,7 +16,7 @@ public class MarkConversationRead
     public class Handler(
         IDocumentStore store,
         IHubContext<ConversationHub, IConversationClient> context,
-        ConversationConnectionManager connectionManager
+        AccountConnectionManager connectionManager
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
         public async Task<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
@@ -40,20 +40,18 @@ public class MarkConversationRead
             var senders = conversation.Messages
                 .Where(a => a.LatestStatus() != MessageStatus.Seen)
                 .Where(m =>
-                    connectionManager.GetConversationConnections(conversation.Id)
-                        .Any(a => a.accountId == m.ParticipantId)
+                    connectionManager.TryGetConnection(m.ParticipantId, out _)
                 )
                 .Select(m =>
                 {
-                    var (_, connectionId) = connectionManager.GetConversationConnections(conversation.Id)
-                        .FirstOrDefault(a => a.accountId == m.ParticipantId);
-                    return (m.Id, m.LatestStatus(), connectionid: connectionId);
+                    connectionManager.TryGetConnection(m.ParticipantId, out var connectionIds);
+                    return (m.Id, m.LatestStatus(), connectionid: connectionIds);
                 })
                 .ToArray();
 
-            foreach (var (messageId, _, connectionid) in senders)
+            foreach (var (messageId, _, connectionIds) in senders)
             {
-                await context.Clients.Clients(connectionid).MessageStateUpdated(conversation.Id, messageId, MessageStatus.Seen);
+                await context.Clients.Clients(connectionIds).MessageStateUpdated(messageId, MessageStatus.Seen);
             }
 
             return true;

@@ -1,3 +1,3 @@
 ﻿namespace ChatRumi.Chat.Application.Dto.Request;
 
-public record ExistingMessageRequest(Guid MessageId, Guid SenderId, string Content, Guid? ReplyOf) : MessageRequest(SenderId, Content, ReplyOf);
+public record ExistingMessageRequest(Guid MessageId, Guid SenderId, Guid ReceiverId, string Content, Guid? ReplyOf) : MessageRequest(SenderId, ReceiverId, Content, ReplyOf);

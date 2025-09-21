@@ -7,19 +7,19 @@ using Marten;
 
 namespace ChatRumi.Chat.Application.Queries;
 
-public class GetConversationByParticipant
+public sealed class GetConversationByParticipant
 {
-    public record Query(
+    public sealed record Query(
         Guid ParticipantId1,
         Guid ParticipantId2
     ) : IRequest<ErrorOr<GetConversationResponse>>;
 
-    public record GetConversationResponse(
+    public sealed record GetConversationResponse(
         Guid ConversationId,
         MessageResponse[] Messages
     );
 
-    public class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<GetConversationResponse>>
+    public sealed class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<GetConversationResponse>>
     {
         public async Task<ErrorOr<GetConversationResponse>> Handle(Query request, CancellationToken cancellationToken)
         {

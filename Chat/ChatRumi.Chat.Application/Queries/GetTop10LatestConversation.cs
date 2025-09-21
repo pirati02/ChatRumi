@@ -7,12 +7,12 @@ using Marten;
 
 namespace ChatRumi.Chat.Application.Queries;
 
-public class GetTop10LatestConversation
+public sealed class GetTop10LatestConversation
 {
-    public record Query(Guid ParticipantId, Guid[] ResponderParticipantIds)
+    public sealed record Query(Guid ParticipantId, Guid[] ResponderParticipantIds)
         : IRequest<ErrorOr<LatestConversationResponse[]>>;
 
-    public class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<LatestConversationResponse[]>>
+    public sealed class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<LatestConversationResponse[]>>
     {
         public async Task<ErrorOr<LatestConversationResponse[]>> Handle(Query request,
             CancellationToken cancellationToken)

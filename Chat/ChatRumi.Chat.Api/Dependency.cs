@@ -23,14 +23,16 @@ public static class Dependency
             {
                 options.AddPolicy("CorsPolicy", policyBuilder =>
                 {
-                    policyBuilder.WithOrigins("http://localhost:4200") // Angular frontend URL
+                    policyBuilder.WithOrigins("http://localhost:4200")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowCredentials(); // Important for SignalR
+                        .AllowCredentials();
                 });
             })
             .AddMarten(options =>
             {
+                options.DisableNpgsqlLogging = true;
+                
                 options.Connection(configuration.GetConnectionString("Marten")!);
                 options.UseSystemTextJsonForSerialization();
                 if (environment.IsDevelopment())
@@ -61,7 +63,8 @@ public static class Dependency
             });
         });
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Application.Application.Assembly));
-        services.AddSingleton<ConversationConnectionManager>();
+        services.AddSingleton<AccountConnectionManager>();
+        
         services.AddSignalR();
         services.AddOpenApi();
     }

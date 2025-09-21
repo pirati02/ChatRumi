@@ -9,44 +9,37 @@ namespace ChatRumi.Chat.Application.Hubs;
 
 public class ConversationHub(
     IServiceProvider serviceProvider,
-    ConversationConnectionManager connectionManager) : Hub<IConversationClient>
+    AccountConnectionManager accountConnectionManager) : Hub<IConversationClient>
 {
     public override Task OnConnectedAsync()
     {
-        if (!Context.GetHttpContext().Request.Query.TryGetValue("conversationId", out var conversationIdQueryValue))
-            return Task.CompletedTask;
-        if (!Guid.TryParse(conversationIdQueryValue, out var conversationId)) return Task.CompletedTask;
-
-        if (!Context.GetHttpContext().Request.Query.TryGetValue("accountId", out var accountIdQueryValue))
-            return Task.CompletedTask;
-        if (!Guid.TryParse(accountIdQueryValue, out var accountId)) return Task.CompletedTask;
-
-        connectionManager.SetConversation(conversationId, accountId, Context.ConnectionId);
+        if (!TryGetAccount(out var accountId))
+        {
+            accountConnectionManager.AddAccount(accountId, Context.ConnectionId);
+        }
+        
         return Task.CompletedTask;
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
-        if (!Context.GetHttpContext().Request.Query.TryGetValue("conversationId", out var queryValue))
-            return Task.CompletedTask;
-        if (!Guid.TryParse(queryValue, out var conversationId)) return Task.CompletedTask;
-
-        if (!Context.GetHttpContext().Request.Query.TryGetValue("accountId", out var accountIdQueryValue))
-            return Task.CompletedTask;
-        if (!Guid.TryParse(accountIdQueryValue, out var accountId)) return Task.CompletedTask;
-
-        connectionManager.RemoveConnection(conversationId, accountId, Context.ConnectionId);
+        if (!TryGetAccount(out var accountId))
+        {
+            accountConnectionManager.RemoveConnection(accountId, Context.ConnectionId);
+        }
+        
         return base.OnDisconnectedAsync(exception);
     }
 
     public async Task StartConversation(
-        Guid? conversationId,
         Guid sender,
         Guid receiver,
-        MessageRequest initialMessage
+        MessageRequest? initialMessage
     )
     {
-        using var scope = serviceProvider.CreateScope();
+        var connections = accountConnectionManager.GetConnections([sender, receiver]);
+        
+        await using var scope = serviceProvider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         var conversationStartResult = await mediator.Send(
             new StartConversation.Command(
@@ -60,16 +53,21 @@ public class ConversationHub(
         {
             return;
         }
+ 
+        await Clients.Clients(connections).ConversationStarted(conversationStartResult.Value);
 
-        connectionManager.SetConversation(conversationStartResult.Value, sender, Context.ConnectionId);
-        await Clients.Clients(Context.ConnectionId).ConversationStarted(conversationStartResult.Value);
-
-        await SendMessage(conversationStartResult.Value, initialMessage);
+        if (initialMessage is not null)
+        {
+            await SendMessage(conversationStartResult.Value, initialMessage);
+        }
     }
 
-    public async Task SendMessage(Guid conversationId, MessageRequest message)
+    public async Task SendMessage(
+        Guid conversationId,
+        MessageRequest message
+    )
     {
-        using var scope = serviceProvider.CreateScope();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         var result = await mediator.Send(new AppendMesage.Command(conversationId, message));
         if (result.IsError)
@@ -78,24 +76,23 @@ public class ConversationHub(
             //or retry to send automatically
             return;
         }
-
-
-        var receivers = connectionManager.GetConversationConnections(conversationId)
-            .Where(a => a.accountId != message.SenderId)
-            .Select(a => a.connectionId)
-            .ToArray();
-
-        var senders = connectionManager.GetConversationConnections(conversationId)
-            .Where(a => a.accountId == message.SenderId)
-            .Select(a => a.connectionId)
-            .ToArray();
- 
-        await Clients.Clients(senders).MessageSent(conversationId, result.Value, false);
-        await Clients.Clients(receivers).MessageSent(conversationId, result.Value, true);
+        
+        if (accountConnectionManager.TryGetConnection(message.SenderId, out var senderConnectionIds))
+        {
+            await Clients.Clients(senderConnectionIds).MessageSent(result.Value, false);
+        }
+        
+        if (accountConnectionManager.TryGetConnection(message.ReceiverId, out var receiverConnectionIds))
+        {
+            await Clients.Clients(receiverConnectionIds).MessageSent(result.Value, true);
+        }
     }
 
-    public async Task UpdateMessageState(Guid conversationId, ExistingMessageRequest message,
-        MessageStatus messageStatus)
+    public async Task UpdateMessageState(
+        Guid conversationId,
+        ExistingMessageRequest message,
+        MessageStatus messageStatus
+    )
     {
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -107,9 +104,24 @@ public class ConversationHub(
             return;
         }
 
-        var sender = connectionManager.GetConversationConnections(conversationId)
-            .FirstOrDefault(a => a.accountId == message.SenderId);
-        var (id, status) = result.Value;
-        await Clients.Clients(sender.connectionId).MessageStateUpdated(conversationId, id, status);
+        if (accountConnectionManager.TryGetConnection(message.SenderId, out var senderConnectionIds))
+        { 
+            var (id, status) = result.Value;
+            await Clients.Clients(senderConnectionIds).MessageStateUpdated(id, status);
+        }
+    }
+
+    private bool TryGetConversation(out Guid conversationId)
+    {
+        conversationId = Guid.Empty;
+        return !Context.GetHttpContext().Request.Query.TryGetValue("conversationId", out var conversationIdQueryValue)
+               || !Guid.TryParse(conversationIdQueryValue, out conversationId);
+    }
+
+    private bool TryGetAccount(out Guid accountId)
+    {
+        accountId = Guid.Empty;
+        return !Context.GetHttpContext().Request.Query.TryGetValue("accountId", out var accountIdQueryValue)
+               || !Guid.TryParse(accountIdQueryValue, out accountId);
     }
 }

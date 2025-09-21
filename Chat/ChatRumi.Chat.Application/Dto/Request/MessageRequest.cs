@@ -2,6 +2,7 @@
 
 public record MessageRequest(
     Guid SenderId,
+    Guid ReceiverId,
     string Content,
     Guid? ReplyOf
 );

@@ -8,15 +8,15 @@ using MediatR;
 
 namespace ChatRumi.Chat.Application.Commands;
 
-public class StartConversation
+public sealed class StartConversation
 {
-    public record Command(
+    public sealed record Command(
         Guid ParticipantId1,
         Guid ParticipantId2,
-        MessageRequest InitialMessage
+        MessageRequest? InitialMessage
     ) : IRequest<ErrorOr<Guid>>;
 
-    public class Handler(
+    public sealed class Handler(
         IDocumentStore store
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
@@ -31,14 +31,19 @@ public class StartConversation
             {
                 var existingConversation =
                     await session.Events.AggregateStreamAsync<Conversation>(existing.Id, token: cancellationToken);
-                existingConversation!.Apply(new MessageSentEvent(
-                        existingConversation.Id,
-                        request.InitialMessage.SenderId,
-                        request.InitialMessage.Content,
-                        request.InitialMessage.ReplyOf
-                    )
-                );
-                session.Events.Append(existingConversation.Id, existingConversation.Events);
+
+                if (request.InitialMessage is not null)
+                {
+                    existingConversation!.Apply(new MessageSentEvent(
+                            existingConversation.Id,
+                            request.InitialMessage.SenderId,
+                            request.InitialMessage.Content,
+                            request.InitialMessage.ReplyOf
+                        )
+                    );
+                }
+                
+                session.Events.Append(existingConversation!.Id, existingConversation.Events);
                 await session.SaveChangesAsync(cancellationToken);
                 return existing.Id;
             }
