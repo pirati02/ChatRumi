@@ -23,7 +23,7 @@ public sealed class AccountConnectionManager
         if (!_connections.TryGetValue(accountId, out var clientIds))
             return;
 
-        if (!clientIds.Remove(connectionId))
+        if (clientIds.Contains(connectionId) && !clientIds.Remove(connectionId))
             return;
 
         if (clientIds.Count == 0)

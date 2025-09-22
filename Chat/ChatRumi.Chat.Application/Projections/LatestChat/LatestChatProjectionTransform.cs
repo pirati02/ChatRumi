@@ -11,6 +11,7 @@ public class LatestChatProjectionTransform : SingleStreamProjection<LatestChatPr
         {
             projection.Id = @event.Id;
             projection.Participants = @event.Participants;
+            projection.IsGroupChat = @event.IsGroupChat;
         });
 
         ProjectEvent<MessageSentEvent>((projection, @event) =>

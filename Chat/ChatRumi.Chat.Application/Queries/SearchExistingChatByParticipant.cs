@@ -1,4 +1,5 @@
-﻿using ChatRumi.Chat.Application.Dto.Request;
+﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
 using MediatR;
@@ -42,7 +43,7 @@ public sealed class SearchExistingChatByParticipant
             return new GetChatResponse(
                 chat!.Id,
                 chat.Messages
-                    .Select(MessageResponse.From)
+                    .Select(m => m.ToDto())
                     .ToArray()
             );
         }

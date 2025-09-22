@@ -34,7 +34,8 @@ public class ChatHub(
 
     public async Task StartChat(
         ParticipantDto[] participants,
-        bool isGroupChat
+        bool isGroupChat,
+        bool overrideExisting
     )
     {
         var participantIds = participants.Select(p => p.Id).ToArray();
@@ -45,6 +46,7 @@ public class ChatHub(
         var chatStartResult = await mediator.Send(
             new StartChat.Command( 
                 isGroupChat,
+                overrideExisting,
                 participants
             )
         );

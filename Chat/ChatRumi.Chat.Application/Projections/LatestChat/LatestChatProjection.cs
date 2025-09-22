@@ -6,6 +6,7 @@ namespace ChatRumi.Chat.Application.Projections.LatestChat;
 public sealed record LatestChatProjection
 {
     public Guid Id { get; set; }
+    public bool IsGroupChat { get; set; }
     public List<Participant> Participants { get; set; } = null!;
     public LatestMessage? LatestMessage { get; set; }
 }

@@ -1,8 +1,6 @@
 ﻿using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Request;
-using ChatRumi.Chat.Application.Projections;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
-using ChatRumi.Chat.Domain.Events;
 using ErrorOr;
 using Marten;
 using MediatR;
@@ -14,6 +12,7 @@ public sealed class StartChat
 {
     public sealed record Command(
         bool IsGroupChat,
+        bool OverrideExisting,
         ParticipantDto[] Participants
     ) : IRequest<ErrorOr<Guid>>;
 
@@ -25,7 +24,7 @@ public sealed class StartChat
         {
             await using var session = store.LightweightSession();
 
-            if (request.IsGroupChat)
+            if (request is { IsGroupChat: true, OverrideExisting: false })
             {
                 var existing = await session.TryGetExistingChat(
                     request.Participants,

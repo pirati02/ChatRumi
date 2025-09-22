@@ -24,12 +24,21 @@ app.UseCors("CorsPolicy");
 
 var chatGroup = app.MapGroup("/api/chat");
 
-chatGroup.MapGet("/{participantId:guid}/top10/", async (
+chatGroup.MapGet("/{participantId:guid}/top10", async (
     [FromRoute] Guid participantId,
     IMediator mediator
 ) =>
 {
     var result = await mediator.Send(new GetTop10LatestChat.Query(participantId));
+    return result.Match(Results.Ok, Results.NotFound);
+});
+
+chatGroup.MapGet("{chatId:guid}", async (
+    [FromRoute] Guid chatId,
+    IMediator mediator
+) =>
+{
+    var result = await mediator.Send(new GetChatById.Query(chatId));
     return result.Match(Results.Ok, Results.NotFound);
 });
 

@@ -28,6 +28,7 @@ public sealed class GetTop10LatestChat
 
             return chats.Select(chat => new LatestChatResponse(
                 chat.Id,
+                chat.IsGroupChat,
                 chat.LatestMessage is not null
                     ? LatestMessageResponse.From(chat.Id, chat.LatestMessage)
                     : null,
