@@ -2,6 +2,7 @@
 using ChatRumi.Chat.Application.Options;
 using ChatRumi.Chat.Application.Projections;
 using ChatRumi.Chat.Domain.Aggregates;
+using ChatRumi.Infrastructure;
 using Marten;
 using Marten.Events;
 using Marten.Events.Daemon.Resiliency;
@@ -19,6 +20,8 @@ public static class Dependency
         IConfiguration configuration,
         IWebHostEnvironment environment)
     {
+        DbInitializer.Initialize(configuration.GetConnectionString("Marten")!);
+        
         services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", policyBuilder =>
@@ -32,7 +35,6 @@ public static class Dependency
             .AddMarten(options =>
             {
                 options.DisableNpgsqlLogging = true;
-                
                 options.Connection(configuration.GetConnectionString("Marten")!);
                 options.UseSystemTextJsonForSerialization();
                 if (environment.IsDevelopment())

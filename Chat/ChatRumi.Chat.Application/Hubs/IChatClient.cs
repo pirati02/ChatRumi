@@ -3,7 +3,7 @@ using ChatRumi.Chat.Domain.ValueObject;
 
 namespace ChatRumi.Chat.Application.Hubs;
 
-public interface IConversationClient
+public interface IChatClient
 {
     Task ConversationStarted(Guid conversationId);
     Task MessageSent(MessageResponse message, bool updateState);

@@ -1,6 +1,7 @@
 ﻿using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Projections;
-using ChatRumi.Account.Application.Events; 
+using ChatRumi.Account.Application.Events;
+using ChatRumi.Infrastructure;
 using FluentValidation;
 using Marten;
 using Marten.Events;
@@ -31,9 +32,10 @@ public static class Dependency
             });
         });
         services.AddMediatR(config =>
-            config.RegisterServicesFromAssemblies(ChatRumi.Account.Application.Application.Assembly));
-        services.AddValidatorsFromAssembly(ChatRumi.Account.Application.Application.Assembly);
+            config.RegisterServicesFromAssemblies(Application.Application.Assembly));
+        services.AddValidatorsFromAssembly(Application.Application.Assembly);
 
+        DbInitializer.Initialize(configuration.GetConnectionString("Marten")!);
         services.AddMarten(options =>
         {
             options.Connection(configuration.GetConnectionString("Marten")!);

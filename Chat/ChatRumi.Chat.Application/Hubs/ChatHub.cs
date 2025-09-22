@@ -9,7 +9,7 @@ namespace ChatRumi.Chat.Application.Hubs;
 
 public class ChatHub(
     IServiceProvider serviceProvider,
-    AccountConnectionManager accountConnectionManager) : Hub<IConversationClient>
+    AccountConnectionManager accountConnectionManager) : Hub<IChatClient>
 {
     public override Task OnConnectedAsync()
     {

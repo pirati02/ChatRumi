@@ -15,7 +15,7 @@ public class MarkConversationRead
 
     public class Handler(
         IDocumentStore store,
-        IHubContext<ChatHub, IConversationClient> context,
+        IHubContext<ChatHub, IChatClient> context,
         AccountConnectionManager connectionManager
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
