@@ -1,25 +1,27 @@
-﻿using ChatRumi.Chat.Domain.Aggregates;
+﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Domain.Aggregates;
 using ChatRumi.Chat.Domain.ValueObject;
 
 namespace ChatRumi.Chat.Application.Dto.Response;
 
 public record MessageResponse(
-    Guid ConversationId,
+    Guid ChatId,
     Guid MessageId,
     MessageStatus Status,
     string Content,
-    Guid SenderId,
+    ParticipantDto Sender,
     Guid? ReplyOf
 )
 {
     public static MessageResponse From(Message m)
     {
         return new MessageResponse(
-            m.ConversationId,
+            m.ChatId,
             m.Id,
             m.LatestStatus(),
             m.Content.Content,
-            m.ParticipantId,
+            m.Participant.ToDto(),
             m.ReplyOf?.Id
         );
     }

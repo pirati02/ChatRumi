@@ -9,11 +9,12 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChatRumi.Chat.Application.Commands;
 
-public class MarkConversationRead
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class MarkChatRead
 {
-    public record Command(Guid ConversationId, Guid[] MessageIds) : IRequest<ErrorOr<bool>>;
+    public sealed record Command(Guid ChatId, Guid[] MessageIds) : IRequest<ErrorOr<bool>>;
 
-    public class Handler(
+    public sealed class Handler(
         IDocumentStore store,
         IHubContext<ChatHub, IChatClient> context,
         AccountConnectionManager connectionManager
@@ -22,29 +23,30 @@ public class MarkConversationRead
         public async Task<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
-            var conversation =
-                await session.Events.AggregateStreamAsync<Conversation>(request.ConversationId,
-                    token: cancellationToken);
-            if (conversation is null)
+            var chat = await session.Events.AggregateStreamAsync<Domain.Aggregates.Chat>(
+                request.ChatId,
+                token: cancellationToken
+            );
+            if (chat is null)
             {
-                return Error.NotFound("Conversation not found.");
+                return Error.NotFound("Chat not found.");
             }
 
-            conversation.Fire(new MarkConversationReadEvent
+            chat.Fire(new MarkChatReadEvent
             {
                 MessageIds = request.MessageIds
             });
-            session.Events.Append(conversation.Id, conversation.Events);
+            session.Events.Append(chat.Id, chat.Events);
             await session.SaveChangesAsync(cancellationToken);
 
-            var senders = conversation.Messages
+            var senders = chat.Messages
                 .Where(a => a.LatestStatus() != MessageStatus.Seen)
                 .Where(m =>
-                    connectionManager.TryGetConnection(m.ParticipantId, out _)
+                    connectionManager.TryGetConnection(m.Participant.Id, out _)
                 )
                 .Select(m =>
                 {
-                    connectionManager.TryGetConnection(m.ParticipantId, out var connectionIds);
+                    connectionManager.TryGetConnection(m.Participant.Id, out var connectionIds);
                     return (m.Id, m.LatestStatus(), connectionid: connectionIds);
                 })
                 .ToArray();

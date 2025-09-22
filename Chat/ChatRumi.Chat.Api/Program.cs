@@ -1,6 +1,7 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRumi.Chat.Api;
 using ChatRumi.Chat.Application.Commands;
+using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
 using MediatR;
@@ -25,31 +26,29 @@ var chatGroup = app.MapGroup("/api/chat");
 
 chatGroup.MapGet("/{participantId:guid}/top10/", async (
     [FromRoute] Guid participantId,
-    [FromQuery(Name = "Ids")] Guid[] responderParticipantIds,
     IMediator mediator
 ) =>
 {
-    var result = await mediator.Send(new GetTop10LatestConversation.Query(participantId, responderParticipantIds));
+    var result = await mediator.Send(new GetTop10LatestChat.Query(participantId));
     return result.Match(Results.Ok, Results.NotFound);
 });
 
-chatGroup.MapGet("/existing/{participantId1:guid}/{participantId2:guid}", async (
-    [FromRoute] Guid participantId1,
-    [FromRoute] Guid participantId2,
+chatGroup.MapPost("/search-existing", async (
+    [FromBody] ParticipantDto[] participants,
     IMediator mediator
 ) =>
 {
-    var result = await mediator.Send(new GetConversationByParticipant.Query(participantId1, participantId2));
+    var result = await mediator.Send(new SearchExistingChatByParticipant.Query(participants));
     return result.Match(Results.Ok, Results.NotFound);
 });
 
-chatGroup.MapPost("/mark-as-read/{conversationId:guid}", async (
-    [FromRoute] Guid conversationId,
+chatGroup.MapPost("/mark-as-read/{chatId:guid}", async (
+    [FromRoute] Guid chatId,
     [FromBody] Guid[] messageIds,
     IMediator mediator
 ) =>
 {
-    var result = await mediator.Send(new MarkConversationRead.Command(conversationId, messageIds));
+    var result = await mediator.Send(new MarkChatRead.Command(chatId, messageIds));
     return result.Match(Results.Ok, Results.NotFound);
 });
 

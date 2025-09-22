@@ -1,7 +1,8 @@
 ﻿using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Options;
 using ChatRumi.Chat.Application.Projections;
-using ChatRumi.Chat.Domain.Aggregates;
+using ChatRumi.Chat.Application.Projections.ExistingChat;
+using ChatRumi.Chat.Application.Projections.LatestChat;
 using ChatRumi.Infrastructure;
 using Marten;
 using Marten.Events;
@@ -42,13 +43,13 @@ public static class Dependency
                     options.AutoCreateSchemaObjects = AutoCreate.All;
                 }
 
-                options.Projections.LiveStreamAggregation<Conversation>();
+                options.Projections.LiveStreamAggregation<Domain.Aggregates.Chat>();
         
-                options.Projections.Add<ExistingConversationProjectionTransform>(ProjectionLifecycle.Inline);
-                options.Schema.For<ExistingConversationProjection>();
+                options.Projections.Add<ExistingChatProjectionTransform>(ProjectionLifecycle.Inline);
+                options.Schema.For<ExistingChatProjection>();
 
-                options.Projections.Add<LatestConversationProjectionTransform>(ProjectionLifecycle.Async);
-                options.Schema.For<LatestConversationProjection>();
+                options.Projections.Add<LatestChatProjectionTransform>(ProjectionLifecycle.Async);
+                options.Schema.For<LatestChatProjection>();
         
                 options.Events.StreamIdentity = StreamIdentity.AsGuid;
             })

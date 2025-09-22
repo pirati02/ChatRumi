@@ -1,3 +1,9 @@
 ﻿namespace ChatRumi.Chat.Application.Dto.Request;
 
-public record ExistingMessageRequest(Guid MessageId, Guid SenderId, Guid ReceiverId, string Content, Guid? ReplyOf) : MessageRequest(SenderId, ReceiverId, Content, ReplyOf);
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed record ExistingMessageRequest(
+    Guid MessageId,
+    ParticipantDto Sender,
+    string Content,
+    Guid? ReplyOf
+) : MessageRequest(Sender, Content, ReplyOf);

@@ -1,5 +1,6 @@
 ﻿using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Domain.ValueObject;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
@@ -31,72 +32,62 @@ public class ChatHub(
         return base.OnDisconnectedAsync(exception);
     }
 
-    public async Task StartConversation(
-        Guid sender,
-        Guid receiver,
-        MessageRequest? initialMessage
+    public async Task StartChat(
+        ParticipantDto[] participants,
+        bool isGroupChat
     )
     {
-        var connections = accountConnectionManager.GetConnections([sender, receiver]);
+        var participantIds = participants.Select(p => p.Id).ToArray();
+        var connections = accountConnectionManager.GetConnections(participantIds);
         
         await using var scope = serviceProvider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var conversationStartResult = await mediator.Send(
-            new StartConversation.Command(
-                sender,
-                receiver,
-                initialMessage
+        var chatStartResult = await mediator.Send(
+            new StartChat.Command( 
+                isGroupChat,
+                participants
             )
         );
 
-        if (conversationStartResult.IsError)
+        if (chatStartResult.IsError)
         {
             return;
         }
  
-        await Clients.Clients(connections).ConversationStarted(conversationStartResult.Value);
-
-        if (initialMessage is not null)
-        {
-            await SendMessage(conversationStartResult.Value, initialMessage);
-        }
+        await Clients.Clients(connections).ChatStarted(chatStartResult.Value);
     }
 
     public async Task SendMessage(
-        Guid conversationId,
+        Guid chatId,
         MessageRequest message
     )
     {
         await using var scope = serviceProvider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var result = await mediator.Send(new AppendMesage.Command(conversationId, message));
+        var result = await mediator.Send(new AppendMessage.Command(chatId, message));
         if (result.IsError)
         {
             //Todo: fire failed message to sent error
             //or retry to send automatically
             return;
         }
+
+        var chat = await mediator.Send(new GetChatById.Query(chatId));
+        var participantIds = chat.Value.Participants.Select(p => p.Id).ToArray();
+        var connections = accountConnectionManager.GetConnections(participantIds);
         
-        if (accountConnectionManager.TryGetConnection(message.SenderId, out var senderConnectionIds))
-        {
-            await Clients.Clients(senderConnectionIds).MessageSent(result.Value, false);
-        }
-        
-        if (accountConnectionManager.TryGetConnection(message.ReceiverId, out var receiverConnectionIds))
-        {
-            await Clients.Clients(receiverConnectionIds).MessageSent(result.Value, true);
-        }
+        await Clients.Clients(connections).MessageSent(result.Value, false);
     }
 
     public async Task UpdateMessageState(
-        Guid conversationId,
+        Guid chatId,
         ExistingMessageRequest message,
         MessageStatus messageStatus
     )
     {
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var result = await mediator.Send(new UpdateMessageState.Command(conversationId, message, messageStatus));
+        var result = await mediator.Send(new UpdateMessageState.Command(chatId, message, messageStatus));
         if (result.IsError)
         {
             //Todo: fire failed message to sent error
@@ -104,7 +95,7 @@ public class ChatHub(
             return;
         }
 
-        if (accountConnectionManager.TryGetConnection(message.SenderId, out var senderConnectionIds))
+        if (accountConnectionManager.TryGetConnection(message.Sender.Id, out var senderConnectionIds))
         { 
             var (id, status) = result.Value;
             await Clients.Clients(senderConnectionIds).MessageStateUpdated(id, status);

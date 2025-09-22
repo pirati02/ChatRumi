@@ -2,9 +2,9 @@
 
 namespace ChatRumi.Account.Domain.Aggregate;
 
-public record Account : Kernel.Aggregate
+// ReSharper disable once ClassNeverInstantiated.Global
+public class Account : Kernel.Aggregate
 {
-    public Guid Id { get; set; } = Guid.CreateVersion7();
     public required string UserName { get; set; }
     public required string Email { get; set; }
     public required string FirstName { get; set; }

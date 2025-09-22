@@ -1,6 +1,6 @@
 ﻿namespace ChatRumi.Kernel;
 
-public record Aggregate
+public class Aggregate
 {
     public Guid Id { get; init; } = Guid.CreateVersion7();
     

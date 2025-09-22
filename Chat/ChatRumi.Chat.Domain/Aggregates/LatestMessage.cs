@@ -1,9 +1,9 @@
 ﻿namespace ChatRumi.Chat.Domain.Aggregates;
 
-public class LatestMessage
+public sealed class LatestMessage
 {
-    public Guid Id { get; set; } = Guid.CreateVersion7();
-    public Guid ConversationId { get; set; }
-    public Guid ParticipantId { get; set; }
-    public string? Content { get; set; }
+    public Guid Id { get; init; } = Guid.CreateVersion7();
+    public Guid ChatId { get; set; }
+    public Participant Participant { get; init; } = null!;
+    public string? Content { get; init; }
 }

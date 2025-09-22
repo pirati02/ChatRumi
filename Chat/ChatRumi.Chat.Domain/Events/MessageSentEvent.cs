@@ -5,8 +5,8 @@ using ChatRumi.Kernel;
 namespace ChatRumi.Chat.Domain.Events;
 
 public record MessageSentEvent(
-    Guid ConversationId,
-    Guid SenderId,
+    Guid ChatId,
+    Participant SenderId,
     string Content,
     Guid? ReplyOf
 ) : DomainEvent
@@ -20,8 +20,8 @@ public record MessageSentEvent(
             {
                 Content = Content
             },
-            ConversationId = ConversationId,
-            ParticipantId = SenderId,
+            ChatId = ChatId,
+            Participant = SenderId,
             Sent = MessageType.Sent()
         };
     }
@@ -32,8 +32,8 @@ public record MessageSentEvent(
         {
             Id = Id,
             Content = Content,
-            ConversationId = ConversationId,
-            ParticipantId = SenderId
+            ChatId = ChatId,
+            Participant = SenderId
         };
     }
 }

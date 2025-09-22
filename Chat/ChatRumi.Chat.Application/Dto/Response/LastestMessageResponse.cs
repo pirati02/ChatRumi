@@ -1,21 +1,23 @@
-﻿using ChatRumi.Chat.Domain.Aggregates;
+﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Domain.Aggregates;
 
 namespace ChatRumi.Chat.Application.Dto.Response;
 
 public record LatestMessageResponse(
-    Guid ConversationId,
+    Guid ChatId,
     Guid MessageId,
     string? Content,
-    Guid SenderId
+    ParticipantDto Sender
 )
 {
-    public static LatestMessageResponse From(Guid conversationId, LatestMessage m)
+    public static LatestMessageResponse From(Guid chatId, LatestMessage m)
     {
         return new LatestMessageResponse(
-            conversationId,
+            chatId,
             m.Id,
             m.Content,
-            m.ParticipantId
+            m.Participant.ToDto()
         );
     }
 }

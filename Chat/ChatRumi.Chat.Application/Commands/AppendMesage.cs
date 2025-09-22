@@ -1,6 +1,6 @@
-﻿using ChatRumi.Chat.Application.Dto.Request;
+﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Dto.Response;
-using ChatRumi.Chat.Domain.Aggregates;
 using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
 using ErrorOr;
@@ -9,43 +9,45 @@ using MediatR;
 
 namespace ChatRumi.Chat.Application.Commands;
 
-public class AppendMesage
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class AppendMessage
 {
-    public record Command(Guid ConversationId, MessageRequest Request) : IRequest<ErrorOr<MessageResponse>>;
+    public sealed record Command(Guid ChatId, MessageRequest Request) : IRequest<ErrorOr<MessageResponse>>;
 
-    public class Handler(
+    public sealed class Handler(
         IDocumentStore store
     ) : IRequestHandler<Command, ErrorOr<MessageResponse>>
     {
         public async Task<ErrorOr<MessageResponse>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
-            var conversation =
-                await session.Events.AggregateStreamAsync<Conversation>(request.ConversationId,
-                    token: cancellationToken);
-            if (conversation is null)
+            var chat = await session.Events.AggregateStreamAsync<Domain.Aggregates.Chat>(
+                request.ChatId,
+                token: cancellationToken
+            );
+            
+            if (chat is null)
             {
-                return Error.NotFound("Conversation not found.",
-                    $"Conversation by '{request.ConversationId}' not found.");
+                return Error.NotFound("Chat not found.", $"Chat by '{request.ChatId}' not found.");
             }
 
             var @event = new MessageSentEvent(
-                conversation.Id,
-                request.Request.SenderId,
+                chat.Id,
+                request.Request.Sender.ToDomain(),
                 request.Request.Content,
                 request.Request.ReplyOf
             );
-            conversation.Fire(@event);
+            chat.Fire(@event);
 
-            session.Events.Append(conversation.Id, conversation.Events);
+            session.Events.Append(chat.Id, chat.Events);
             await session.SaveChangesAsync(cancellationToken);
 
             return new MessageResponse(
-                conversation.Id,
+                chat.Id,
                 @event.Id,
                 MessageStatus.Sent,
                 request.Request.Content,
-                request.Request.SenderId,
+                request.Request.Sender,
                 request.Request.ReplyOf
             );
         }

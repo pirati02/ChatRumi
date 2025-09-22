@@ -1,8 +1,7 @@
 ﻿namespace ChatRumi.Chat.Application.Dto.Request;
 
 public record MessageRequest(
-    Guid SenderId,
-    Guid ReceiverId,
+    ParticipantDto Sender,
     string Content,
     Guid? ReplyOf
 );

@@ -2,7 +2,8 @@
 
 namespace ChatRumi.Friendship.Domain.Aggregates;
 
-public record Peer: Aggregate
+// ReSharper disable once ClassNeverInstantiated.Global
+public class Peer: Aggregate
 {
     public required string UserName { get; set; }
     public DateTime CreatedDate { get; set; }

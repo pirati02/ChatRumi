@@ -1,0 +1,51 @@
+﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Application.Projections;
+using ChatRumi.Chat.Application.Projections.ExistingChat;
+using ChatRumi.Chat.Domain.Events;
+using ErrorOr;
+using Marten;
+using MediatR;
+
+namespace ChatRumi.Chat.Application.Commands;
+
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class StartChat
+{
+    public sealed record Command(
+        bool IsGroupChat,
+        ParticipantDto[] Participants
+    ) : IRequest<ErrorOr<Guid>>;
+
+    public sealed class Handler(
+        IDocumentStore store
+    ) : IRequestHandler<Command, ErrorOr<Guid>>
+    {
+        public async Task<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        {
+            await using var session = store.LightweightSession();
+
+            if (request.IsGroupChat)
+            {
+                var existing = await session.TryGetExistingChat(
+                    request.Participants,
+                    cancellationToken
+                );
+
+                if (existing is not null)
+                {
+                    return existing.Id;
+                }
+            }
+
+            var chat = new Domain.Aggregates.Chat(
+                request.IsGroupChat,
+                request.Participants.Select(p => p.ToDomain()).ToList()
+            );
+
+            session.Events.StartStream<Domain.Aggregates.Chat>(chat.Id, chat.Events);
+            await session.SaveChangesAsync(cancellationToken);
+            return chat.Id;
+        }
+    }
+}

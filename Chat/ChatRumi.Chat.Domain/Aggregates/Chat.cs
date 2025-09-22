@@ -4,18 +4,32 @@ using ChatRumi.Kernel;
 
 namespace ChatRumi.Chat.Domain.Aggregates;
 
-public record Conversation : Aggregate
+// ReSharper disable once ClassNeverInstantiated.Global
+public class Chat : Aggregate
 {
     public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.UtcNow;
     public List<Message> Messages { get; set; } = [];
-    public Guid ParticipantId1 { get; set; }
-    public Guid ParticipantId2 { get; set; }
+    public List<Participant> Participants { get; private set; } = [];
 
-    public void Apply(ConversationStartedEvent @event)
+    protected Chat()
+    {
+        
+    }
+    
+    public Chat(bool isGroupChat, List<Participant> participants)
+    {
+        Fire(new ChatStartedEvent
+        {
+            Id = Id,
+            IsGroupChat = isGroupChat,
+            Participants = participants
+        });
+    }
+    
+    public void Apply(ChatStartedEvent @event)
     {
         CreationDate = @event.Timestamp;
-        ParticipantId1 = @event.ParticipantId1;
-        ParticipantId2 = @event.ParticipantId2;
+        Participants = @event.Participants;
     }
 
     public void Apply(MessageSentEvent @event)
@@ -45,7 +59,7 @@ public record Conversation : Aggregate
         }
     }
 
-    public void Apply(MarkConversationReadEvent @event)
+    public void Apply(MarkChatReadEvent @event)
     {
         var messages = Messages.Where(a => @event.MessageIds.Contains(a.Id));
         foreach (var message in messages)
