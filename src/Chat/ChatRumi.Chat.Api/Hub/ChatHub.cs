@@ -1,13 +1,13 @@
 ﻿using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Domain.ValueObject;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatRumi.Chat.Application.Hubs;
+namespace ChatRumi.Chat.Api.Hub;
 
 public class ChatHub(
     IServiceProvider serviceProvider,

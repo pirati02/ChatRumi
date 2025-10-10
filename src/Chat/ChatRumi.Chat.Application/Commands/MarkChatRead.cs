@@ -16,7 +16,7 @@ public sealed class MarkChatRead
 
     public sealed class Handler(
         IDocumentStore store,
-        IHubContext<ChatHub, IChatClient> context,
+        IChatHubContextProxy hubContext,
         AccountConnectionManager connectionManager
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
@@ -53,7 +53,7 @@ public sealed class MarkChatRead
 
             foreach (var (messageId, _, connectionIds) in senders)
             {
-                await context.Clients.Clients(connectionIds).MessageStateUpdated(messageId, MessageStatus.Seen);
+                await hubContext.Clients.Clients(connectionIds).MessageStateUpdated(messageId, MessageStatus.Seen);
             }
 
             return true;

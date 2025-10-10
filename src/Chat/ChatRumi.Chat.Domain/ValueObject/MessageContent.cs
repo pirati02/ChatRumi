@@ -12,11 +12,7 @@ public abstract record MessageContent
 
 public record PlainTextContent : MessageContent;
 
-public record LinkContent : MessageContent
-{
-    [JsonIgnore]
-    public Uri Link => new(Content);
-}
+public record LinkContent : MessageContent;
 
 public record ImageContent : MessageContent
 {

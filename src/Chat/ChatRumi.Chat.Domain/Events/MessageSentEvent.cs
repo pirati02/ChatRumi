@@ -28,9 +28,26 @@ public record MessageSentEvent(
         return new LatestMessage
         {
             Id = Id,
-            Content = Content,
+            Content = GetPlainText(Content),
             ChatId = ChatId,
             Participant = SenderId
+        };
+    }
+
+    private static PlainTextContent GetPlainText(MessageContent messageContent)
+    {
+        return messageContent switch
+        {
+            PlainTextContent content => content,
+            ImageContent => new PlainTextContent
+            {
+                Content = "picture attachment"
+            },
+            LinkContent content => new PlainTextContent
+            {
+                Content = content.Content
+            },
+            _ => throw new Exception("Invalid message content")
         };
     }
 }

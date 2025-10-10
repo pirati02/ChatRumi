@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Options;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
@@ -45,6 +46,7 @@ public static class Dependency
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Application.Application.Assembly));
          
         services.AddSingleton<AccountConnectionManager>();
+        services.AddScoped<IChatHubContextProxy, ChatHubContextProxy>();
         services.AddSignalR().AddJsonProtocol(o => o.PayloadSerializerOptions = jsonOptions);
         services.AddOpenApi();
     }

@@ -1,5 +1,6 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRumi.Chat.Api;
+using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Request;
