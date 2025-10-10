@@ -1,4 +1,5 @@
-﻿using Elastic.Clients.Elasticsearch;
+﻿using ChatRumi.Feed.Application;
+using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,11 +14,15 @@ public static class Dependency
     )
     {
         // services.AddOptions("")
+        var connectionString = configuration.GetConnectionString("FeedContext");
+        var user = configuration.GetSection("Elastic:User").Value;
+        var password = configuration.GetSection("Elastic:Password").Value;
+
         services.AddSingleton(sp =>
         {
-            var settings = new ElasticsearchClientSettings(new Uri("http://localhost:9200"))
-                .Authentication(new BasicAuthentication("elastic", "password"))
-                .DefaultIndex("logs");
+            var settings = new ElasticsearchClientSettings(new Uri(connectionString!))
+                .Authentication(new BasicAuthentication(user!, password!))
+                .DefaultIndex(PostIndexes.Posts);
 
             return new ElasticsearchClient(settings);
         });

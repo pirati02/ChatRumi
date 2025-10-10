@@ -7,7 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.1.10" />
+        <PackageReference Include="ErrorOr" Version="2.0.1" />
         <PackageReference Include="MediatR" Version="12.4.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
     </ItemGroup>
 
     <ItemGroup>

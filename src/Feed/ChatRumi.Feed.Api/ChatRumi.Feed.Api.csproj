@@ -4,6 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>9177f243-ad7b-4c66-bae0-f7d7cb9a789c</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,6 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
       <ProjectReference Include="..\ChatRumi.Feed.Application\ChatRumi.Feed.Application.csproj" />
+      <ProjectReference Include="..\ChatRumi.Feed.Infrastructure\ChatRumi.Feed.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
