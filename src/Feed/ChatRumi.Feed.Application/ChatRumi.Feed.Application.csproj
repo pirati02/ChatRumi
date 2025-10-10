@@ -9,4 +9,8 @@
     <ItemGroup>
         <PackageReference Include="MediatR" Version="12.4.1" />
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ChatRumi.Feed.Domain\ChatRumi.Feed.Domain.csproj" />
+    </ItemGroup>
 </Project>
