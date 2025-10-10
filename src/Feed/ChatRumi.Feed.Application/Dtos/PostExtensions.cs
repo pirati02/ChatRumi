@@ -1,7 +1,6 @@
-﻿using ChatRumi.Feed.Application.Dtos;
-using ChatRumi.Feed.Domain.Aggregates;
+﻿using ChatRumi.Feed.Domain.Aggregates;
 
-namespace ChatRumi.Feed.Application;
+namespace ChatRumi.Feed.Application.Dtos;
 
 public static class PostExtensions
 {
@@ -9,6 +8,7 @@ public static class PostExtensions
     {
         return new PostDocument
         {
+            PostId = post.Id,
             Description = post.Description,
             Title = post.Title,
             Creator = post.Creator,

@@ -37,6 +37,18 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
     },
     {
+      "DownstreamPathTemplate": "/api/feed/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5211
+        }
+      ],
+      "UpstreamPathTemplate": "/feed/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
       "DownstreamPathTemplate": "/hub/chat/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

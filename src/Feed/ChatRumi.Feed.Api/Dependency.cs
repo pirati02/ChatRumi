@@ -3,9 +3,7 @@
 public static class Dependency
 {
     public static void AddApi(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IHostEnvironment environment
+        this IServiceCollection services
     )
     {
         services.AddCors(options =>
@@ -17,7 +15,5 @@ public static class Dependency
                     .AllowAnyMethod();
             });
         });
-        services.AddMediatR(config =>
-            config.RegisterServicesFromAssemblies(Application.Assembly));
     }
 }

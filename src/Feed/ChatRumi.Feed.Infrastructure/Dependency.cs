@@ -13,12 +13,11 @@ public static class Dependency
         IConfiguration configuration
     )
     {
-        // services.AddOptions("")
         var connectionString = configuration.GetConnectionString("FeedContext");
         var user = configuration.GetSection("Elastic:User").Value;
         var password = configuration.GetSection("Elastic:Password").Value;
 
-        services.AddSingleton(sp =>
+        services.AddSingleton(_ =>
         {
             var settings = new ElasticsearchClientSettings(new Uri(connectionString!))
                 .Authentication(new BasicAuthentication(user!, password!))

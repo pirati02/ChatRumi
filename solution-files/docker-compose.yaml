@@ -9,17 +9,17 @@ services:
     networks:
       - backend
 
-  accountservice:
+  account-service:
     build:
       context: .
       dockerfile: Account/ChatRumi.Account.Api/Dockerfile
-    container_name: accountservice
+    container_name: account-service
     ports:
       - "5049:5049"
     environment:
       - ASPNETCORE_URLS=http://+:5049
-      - Consul__ServiceName=accountservice
-      - Consul__ServiceAddress=http://accountservice:5049
+      - Consul__ServiceName=account-service
+      - Consul__ServiceAddress=http://account-service:5049
       - Consul__Host=consul
       - Consul__Port=8500
     depends_on:
@@ -27,17 +27,17 @@ services:
     networks:
       - backend
 
-  chatservice:
+  chat-service:
     build:
       context: .
       dockerfile: Chat/ChatRumi.Chat.Api/Dockerfile
-    container_name: chatservice
+    container_name: chat-service
     ports:
       - "5111:5111"
     environment:
       - ASPNETCORE_URLS=http://+:5111
-      - Consul__ServiceName=chatservice
-      - Consul__ServiceAddress=http://chatservice:5111
+      - Consul__ServiceName=chat-service
+      - Consul__ServiceAddress=http://chat-service:5111
       - Consul__Host=consul
       - Consul__Port=8500
     depends_on:
@@ -45,17 +45,35 @@ services:
     networks:
       - backend
 
-  friendshipservice:
+  friendship-service:
     build:
       context: .
       dockerfile: Friendship/ChatRumi.Friendship.Api/Dockerfile
-    container_name: friendshipservice
+    container_name: friendship-service
     ports:
       - "5031:5031"
     environment:
       - ASPNETCORE_URLS=http://+:5031
-      - Consul__ServiceName=friendshipservice
-      - Consul__ServiceAddress=http://friendshipservice:5031
+      - Consul__ServiceName=friendship-service
+      - Consul__ServiceAddress=http://friendship-service:5031
+      - Consul__Host=consul
+      - Consul__Port=8500
+    depends_on:
+      - consul
+    networks:
+      - backend
+  
+  feed-service:
+    build:
+      context: .
+      dockerfile: Friendship/ChatRumi.Feed.Api/Dockerfile
+    container_name: feed-service
+    ports:
+      - "5031:5031"
+    environment:
+      - ASPNETCORE_URLS=http://+:5211
+      - Consul__ServiceName=feed-service
+      - Consul__ServiceAddress=http://feed-service:5211
       - Consul__Host=consul
       - Consul__Port=8500
     depends_on:
@@ -74,9 +92,10 @@ services:
       - ASPNETCORE_URLS=http://+:7000
     depends_on:
       - consul
-      - accountservice
-      - chatservice
-      - friendshipservice
+      - account-service
+      - chat-service
+      - friendship-service
+      - feed-service
     networks:
       - backend
 

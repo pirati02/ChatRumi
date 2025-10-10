@@ -4,6 +4,7 @@ namespace ChatRumi.Feed.Application.Dtos;
 
 public sealed class PostDocument
 {
+    public Guid PostId { get; set; }
     public Participant Creator { get; set; } = null!;
     public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.UtcNow;
 

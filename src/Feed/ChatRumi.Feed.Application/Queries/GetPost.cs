@@ -1,10 +1,10 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
 using Elastic.Clients.Elasticsearch;
-using MediatR;
 using ErrorOr;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace ChatRumi.Feed.Application;
+namespace ChatRumi.Feed.Application.Queries;
 
 public static class GetPost
 {

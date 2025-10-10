@@ -1,6 +1,8 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRumi.Feed.Api;
 using ChatRumi.Feed.Application;
+using ChatRumi.Feed.Application.Commands;
+using ChatRumi.Feed.Application.Queries;
 using ChatRumi.Feed.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApi(builder.Configuration, builder.Environment);
+builder.Services.AddApi();
 builder.Services.AddApplication();
 builder.Services.AddConsulService(builder.Configuration);
 
@@ -26,14 +28,27 @@ feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
             Results.NotFound
         );
     })
-    .WithName("get-post")
+    .WithName("get-posts")
     .WithOpenApi();
 
+feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetPost.Query(id));
+        return result.Match(
+            Results.Ok,
+            Results.NotFound
+        );
+    })
+    .WithName("get-post")
+    .WithOpenApi();
 
 feedGroup.MapPost("", async ([FromBody] CreatePost.Command command, IMediator mediator) =>
     {
         var result = await mediator.Send(command);
-        return Results.Created($"/api/feed/{result}", result);
+        return result.Match(
+            value => Results.Created($"/api/feed/{value}", value),
+            Results.InternalServerError
+        );
     })
     .WithName("create-post")
     .WithOpenApi();

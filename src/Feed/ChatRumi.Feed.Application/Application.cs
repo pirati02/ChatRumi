@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace ChatRumi.Feed.Api;
+namespace ChatRumi.Feed.Application;
 
 public class Application
 {

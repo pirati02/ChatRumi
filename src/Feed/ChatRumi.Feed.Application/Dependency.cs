@@ -8,5 +8,7 @@ public static class Dependency
         this IServiceCollection services
     )
     {
+        services.AddMediatR(config =>
+            config.RegisterServicesFromAssemblies(Application.Assembly));
     }
 }
