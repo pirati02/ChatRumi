@@ -10,26 +10,36 @@ public class Chat : Aggregate
     public DateTimeOffset CreationDate { get; set; } = DateTimeOffset.UtcNow;
     public List<Message> Messages { get; set; } = [];
     public List<Participant> Participants { get; private set; } = [];
+    public string Name { get; set; } = null!;
+    public Participant Creator { get; private set; } = null!;
+
+    public bool IsGroupChat => Participants.Count > 2;
 
     protected Chat()
     {
-        
     }
-    
-    public Chat(bool isGroupChat, List<Participant> participants)
+
+    public Chat(
+        string chatName,
+        Participant creator,
+        List<Participant> participants
+    )
     {
         Fire(new ChatStartedEvent
         {
             Id = Id,
-            IsGroupChat = isGroupChat,
-            Participants = participants
+            Participants = participants,
+            Creator = creator,
+            ChatName = chatName
         });
     }
-    
+
     public void Apply(ChatStartedEvent @event)
     {
         CreationDate = @event.Timestamp;
         Participants = @event.Participants;
+        Name = @event.ChatName;
+        Creator = @event.Creator;
     }
 
     public void Apply(MessageSentEvent @event)

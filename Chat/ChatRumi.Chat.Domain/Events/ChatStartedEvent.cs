@@ -7,4 +7,6 @@ public record ChatStartedEvent: DomainEvent
 {
     public bool IsGroupChat { get; init; }
     public required List<Participant> Participants { get; init; } = null!;
+    public required string ChatName { get; set; }
+    public required Participant Creator { get; set; }
 };

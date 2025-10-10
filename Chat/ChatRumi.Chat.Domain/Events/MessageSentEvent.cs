@@ -7,7 +7,7 @@ namespace ChatRumi.Chat.Domain.Events;
 public record MessageSentEvent(
     Guid ChatId,
     Participant SenderId,
-    string Content,
+    MessageContent Content,
     Guid? ReplyOf
 ) : DomainEvent
 {
@@ -16,10 +16,7 @@ public record MessageSentEvent(
         return new Message
         {
             Id = Id,
-            Content = new PlainTextContent
-            {
-                Content = Content
-            },
+            Content = Content,
             ChatId = ChatId,
             Participant = SenderId,
             Sent = MessageType.Sent()

@@ -1,4 +1,5 @@
 ﻿using ChatRumi.Chat.Application.Commands;
+using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Domain.ValueObject;
@@ -18,7 +19,7 @@ public class ChatHub(
         {
             accountConnectionManager.AddAccount(accountId, Context.ConnectionId);
         }
-        
+
         return Task.CompletedTask;
     }
 
@@ -28,34 +29,31 @@ public class ChatHub(
         {
             accountConnectionManager.RemoveConnection(accountId, Context.ConnectionId);
         }
-        
+
         return base.OnDisconnectedAsync(exception);
     }
 
     public async Task StartChat(
         ParticipantDto[] participants,
-        bool isGroupChat,
+        ParticipantDto creator,
+        string chatName,
         bool overrideExisting
     )
     {
         var participantIds = participants.Select(p => p.Id).ToArray();
         var connections = accountConnectionManager.GetConnections(participantIds);
-        
+
         await using var scope = serviceProvider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         var chatStartResult = await mediator.Send(
-            new StartChat.Command( 
-                isGroupChat,
-                overrideExisting,
-                participants
-            )
+            new StartChat.Command(overrideExisting, chatName, creator, participants)
         );
 
         if (chatStartResult.IsError)
         {
             return;
         }
- 
+
         await Clients.Clients(connections).ChatStarted(chatStartResult.Value);
     }
 
@@ -77,7 +75,7 @@ public class ChatHub(
         var chat = await mediator.Send(new GetChatById.Query(chatId));
         var participantIds = chat.Value.Participants.Select(p => p.Id).ToArray();
         var connections = accountConnectionManager.GetConnections(participantIds);
-        
+
         await Clients.Clients(connections).MessageSent(result.Value, false);
     }
 
@@ -98,7 +96,7 @@ public class ChatHub(
         }
 
         if (accountConnectionManager.TryGetConnection(message.Sender.Id, out var senderConnectionIds))
-        { 
+        {
             var (id, status) = result.Value;
             await Clients.Clients(senderConnectionIds).MessageStateUpdated(id, status);
         }

@@ -1,4 +1,5 @@
-﻿using ChatRumi.Chat.Application.Dto.Extensions;
+﻿using ChatRumi.Chat.Application.Dto;
+using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
@@ -13,16 +14,11 @@ public sealed class SearchExistingChatByParticipant
 {
     public sealed record Query(
         ParticipantDto[] Participants
-    ) : IRequest<ErrorOr<GetChatResponse>>;
+    ) : IRequest<ErrorOr<ChatResponse?>>;
 
-    public sealed record GetChatResponse(
-        Guid ChatId,
-        MessageResponse[] Messages
-    );
-
-    public sealed class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<GetChatResponse>>
+    public sealed class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<ChatResponse?>>
     {
-        public async Task<ErrorOr<GetChatResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<ChatResponse?>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 
@@ -40,12 +36,7 @@ public sealed class SearchExistingChatByParticipant
                 token: cancellationToken
             );
 
-            return new GetChatResponse(
-                chat!.Id,
-                chat.Messages
-                    .Select(m => m.ToDto())
-                    .ToArray()
-            );
+            return chat?.ToDto();
         }
     }
 }

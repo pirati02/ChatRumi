@@ -1,7 +1,9 @@
-﻿namespace ChatRumi.Chat.Application.Dto.Request;
+﻿using ChatRumi.Chat.Domain.ValueObject;
+
+namespace ChatRumi.Chat.Application.Dto.Request;
 
 public record MessageRequest(
     ParticipantDto Sender,
-    string Content,
+    MessageContent Content,
     Guid? ReplyOf
 );

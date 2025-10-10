@@ -1,4 +1,5 @@
-﻿using ChatRumi.Chat.Application.Dto.Request;
+﻿using ChatRumi.Chat.Application.Dto;
+using ChatRumi.Chat.Application.Dto.Request;
 using Marten;
 
 namespace ChatRumi.Chat.Application.Projections.ExistingChat;

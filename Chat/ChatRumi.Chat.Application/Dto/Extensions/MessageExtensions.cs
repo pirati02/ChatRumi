@@ -11,7 +11,7 @@ public static class MessageExtensions
             message.ChatId,
             message.Id,
             message.LatestStatus(),
-            message.Content.Content,
+            message.Content,
             message.Participant.ToDto(),
             message.ReplyOf?.Id
         );

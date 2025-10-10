@@ -1,4 +1,4 @@
-﻿namespace ChatRumi.Chat.Application.Dto.Request;
+﻿namespace ChatRumi.Chat.Application.Dto;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public record ParticipantDto(

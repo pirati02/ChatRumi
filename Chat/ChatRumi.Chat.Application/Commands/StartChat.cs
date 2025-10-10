@@ -1,4 +1,5 @@
-﻿using ChatRumi.Chat.Application.Dto.Extensions;
+﻿using ChatRumi.Chat.Application.Dto;
+using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
 using ErrorOr;
@@ -11,8 +12,9 @@ namespace ChatRumi.Chat.Application.Commands;
 public sealed class StartChat
 {
     public sealed record Command(
-        bool IsGroupChat,
         bool OverrideExisting,
+        string ChatName,
+        ParticipantDto Creator,
         ParticipantDto[] Participants
     ) : IRequest<ErrorOr<Guid>>;
 
@@ -24,7 +26,7 @@ public sealed class StartChat
         {
             await using var session = store.LightweightSession();
 
-            if (request is { IsGroupChat: true, OverrideExisting: false })
+            if (request is { OverrideExisting: false })
             {
                 var existing = await session.TryGetExistingChat(
                     request.Participants,
@@ -36,9 +38,10 @@ public sealed class StartChat
                     return existing.Id;
                 }
             }
-
+ 
             var chat = new Domain.Aggregates.Chat(
-                request.IsGroupChat,
+                request.ChatName,
+                request.Creator.ToDomain(),
                 request.Participants.Select(p => p.ToDomain()).ToList()
             );
 

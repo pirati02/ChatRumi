@@ -1,13 +1,13 @@
 ﻿using ChatRumi.Chat.Application.Dto.Extensions;
-using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Domain.Aggregates;
+using ChatRumi.Chat.Domain.ValueObject;
 
 namespace ChatRumi.Chat.Application.Dto.Response;
 
 public record LatestMessageResponse(
     Guid ChatId,
     Guid MessageId,
-    string? Content,
+    MessageContent? Content,
     ParticipantDto Sender
 )
 {
