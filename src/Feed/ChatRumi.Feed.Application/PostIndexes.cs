@@ -2,5 +2,5 @@
 
 public static class PostIndexes
 {
-    public const string Posts = "Post";
+    public const string Posts = "posts";
 }

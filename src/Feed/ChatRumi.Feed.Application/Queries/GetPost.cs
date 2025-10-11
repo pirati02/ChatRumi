@@ -1,17 +1,17 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
-using Elastic.Clients.Elasticsearch;
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Nest;
 
 namespace ChatRumi.Feed.Application.Queries;
 
 public static class GetPost
 {
-    public sealed record Query(Guid Id) : IRequest<ErrorOr<PostDocument>>;
+    public sealed record Query(Guid Id) : MediatR.IRequest<ErrorOr<PostDocument>>;
 
     public class Handler(
-        ElasticsearchClient client,
+        IElasticClient client,
         ILogger<Handler> logger
     ) : IRequestHandler<Query, ErrorOr<PostDocument>>
     {
@@ -19,13 +19,13 @@ public static class GetPost
         {
             var response = await client.GetAsync<PostDocument>(request.Id, g => g.Index("posts"), cancellationToken);
 
-            if (response.IsValidResponse)
+            if (response.IsValid)
             {
                 logger.LogInformation("Post was indexed successfully {Title}", response.Source!.Title);
                 return response.Source!;
             }
 
-            logger.LogError("Post index failed. {Error}", response.ElasticsearchServerError?.Error.Reason);
+            logger.LogError("Post index failed. {Error}", response.OriginalException.StackTrace);
             return Error.NotFound("Post not found.");
         }
     }

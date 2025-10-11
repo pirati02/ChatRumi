@@ -8,7 +8,7 @@ public static class PostExtensions
     {
         return new PostDocument
         {
-            PostId = post.Id,
+            Id = post.Id,
             Description = post.Description,
             Title = post.Title,
             Creator = post.Creator,

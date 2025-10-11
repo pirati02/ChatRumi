@@ -1,15 +1,15 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
-using Elastic.Clients.Elasticsearch;
 using MediatR;
+using Nest;
 
 namespace ChatRumi.Feed.Application.Queries;
 
 public static class GetPosts
 {
-    public sealed record Query(int Size = 10) : IRequest<IEnumerable<PostDocument>>;
+    public sealed record Query(int Size = 10) : MediatR.IRequest<IEnumerable<PostDocument>>;
 
     public class Handler(
-        ElasticsearchClient client
+        IElasticClient client
     ) : IRequestHandler<Query, IEnumerable<PostDocument>>
     {
         public async Task<IEnumerable<PostDocument>> Handle(Query request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public static class GetPosts
                     )
                 ), cancellationToken);
 
-            return response.IsValidResponse ? response.Documents : [];
+            return response.IsValid ? response.Documents : [];
         }
     }
 }

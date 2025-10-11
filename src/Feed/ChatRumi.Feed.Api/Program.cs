@@ -28,18 +28,15 @@ feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
             Results.NotFound
         );
     })
-    .WithName("get-posts")
+    .WithName("get-post")
     .WithOpenApi();
 
-feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
+feedGroup.MapGet("", async ( IMediator mediator) =>
     {
-        var result = await mediator.Send(new GetPost.Query(id));
-        return result.Match(
-            Results.Ok,
-            Results.NotFound
-        );
+        var result = await mediator.Send(new GetPosts.Query());
+        return Results.Ok(result);
     })
-    .WithName("get-post")
+    .WithName("get-posts")
     .WithOpenApi();
 
 feedGroup.MapPost("", async ([FromBody] CreatePost.Command command, IMediator mediator) =>
