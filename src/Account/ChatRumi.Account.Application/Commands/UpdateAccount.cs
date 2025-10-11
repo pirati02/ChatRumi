@@ -76,9 +76,9 @@ public static class UpdateAccount
                 account.Id.ToString(),
                 new AccountModified(
                     account.Id,
-                    account.UserName,
-                    account.FirstName,
-                    account.LastName
+                    @event.UserName,
+                    @event.FirstName,
+                    @event.LastName
                 ),
                 cancellationToken
             );

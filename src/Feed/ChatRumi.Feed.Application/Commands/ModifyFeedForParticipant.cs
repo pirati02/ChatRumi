@@ -1,4 +1,5 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
+using ChatRumi.Feed.Domain.ValueObject;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -22,32 +23,45 @@ public static class ModifyFeedForParticipant
     {
         public async Task Handle(Command request, CancellationToken cancellationToken)
         {
-            var response = await client.SearchAsync<PostDocument>(s => s
-                .Index("posts")
-                .Query(q => q
-                    .Term(t => t.Field(f => f.Creator.Id).Value(request.ParticipantId.ToString()))
-                ), cancellationToken);
+            var searchResponse = await client.SearchAsync<PostDocument>(s => s
+                    .Index(PostIndexes.Posts)
+                    .Query(q => q.Match(t => t.Field(f => f.Creator.Id).Query(request.ParticipantId.ToString())))
+                    .Size(1000),
+                cancellationToken);
 
-            var documents = response.Documents;
-
-            foreach (var document in documents)
+            if (!searchResponse.IsValid || searchResponse.Documents.Count == 0)
             {
-                document.Creator = document.Creator with
-                {
-                    Id = request.ParticipantId,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    NickName = request.UserName
-                };
-                var response1 = await client.UpdateAsync<PostDocument>(
-                    id: document.Id,
-                    selector: u => u
-                        .Index("posts")
-                        .Doc(document),
-                    ct: cancellationToken
-                );
+                logger.LogInformation("No posts found for participant {Id}", request.ParticipantId);
+                return;
+            }
+            var documents = searchResponse.Documents.ToList();
+            logger.LogInformation("Found {Count} posts for participant {Id}", documents.Count, request.ParticipantId);
+ 
+            var bulkDescriptor = new BulkDescriptor();
+            foreach (var doc in documents)
+            {
+                doc.Creator = new Participant { Id = request.ParticipantId, FirstName = request.FirstName, LastName = request.LastName, NickName = request.UserName };
 
-                await Task.Delay(1000, cancellationToken);
+                bulkDescriptor.Update<PostDocument>(u => u
+                    .Index(PostIndexes.Posts)
+                    .Id(doc.Id)
+                    .Doc(doc)
+                );
+            }
+ 
+            var bulkResponse = await client.BulkAsync(bulkDescriptor, cancellationToken);
+
+            if (bulkResponse.Errors)
+            {
+                foreach (var item in bulkResponse.ItemsWithErrors)
+                {
+                    logger.LogError("Failed to update document {Id}: {Error}", item.Id, item.Error.Reason);
+                }
+            }
+            else
+            {
+                logger.LogInformation("Successfully updated {Count} posts for participant {Id}",
+                    documents.Count, request.ParticipantId);
             }
         }
     }

@@ -17,7 +17,7 @@ public static class GetPost
     {
         public async Task<ErrorOr<PostDocument>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var response = await client.GetAsync<PostDocument>(request.Id, g => g.Index("posts"), cancellationToken);
+            var response = await client.GetAsync<PostDocument>(request.Id, g => g.Index(PostIndexes.Posts), cancellationToken);
 
             if (response.IsValid)
             {
