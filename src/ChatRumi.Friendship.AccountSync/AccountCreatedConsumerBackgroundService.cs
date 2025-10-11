@@ -5,7 +5,7 @@ using ChatRumi.Friendship.Application.Services;
 using Confluent.Kafka;
 using Microsoft.Extensions.Options;
 
-namespace ChatRumi.Friendship.Api;
+namespace ChatRumi.Friendship.AccountSync;
 
 public class AccountCreatedConsumerBackgroundService(
     ILogger<AccountCreatedConsumerBackgroundService> logger,

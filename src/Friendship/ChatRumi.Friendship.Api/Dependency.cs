@@ -1,7 +1,4 @@
 ﻿using ChatRum.InterCommunication;
-using ChatRumi.Friendship.Application;
-using Microsoft.Extensions.Options;
-using Neo4j.Driver;
 
 namespace ChatRumi.Friendship.Api;
 
@@ -19,15 +16,6 @@ public static class Dependency
                     .AllowAnyMethod();
             });
         });
-        services.AddOptions<KafkaOptions>().BindConfiguration(KafkaOptions.Name);
-        services.AddOptions<Neo4jOptions>().BindConfiguration(Neo4jOptions.Name);
-        services.AddSingleton<IDriver>(sp =>
-        {
-            var options = sp.GetRequiredService<IOptions<Neo4jOptions>>().Value;
-            return GraphDatabase.Driver(options.Neo4jConnection,  AuthTokens.Basic(options.Neo4jUser, options.Neo4jPassword));
-        });
-
-        services.AddHostedService<AccountCreatedConsumerBackgroundService>();
         
         return services;
     }

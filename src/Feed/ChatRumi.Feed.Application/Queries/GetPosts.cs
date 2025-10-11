@@ -25,7 +25,7 @@ public static class GetPosts
                         )
                     )
                 ), cancellationToken);
-
+ 
             return response.IsValid ? response.Documents : [];
         }
     }

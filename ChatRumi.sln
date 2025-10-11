@@ -52,6 +52,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Feed.Infrastructur
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Feed.Api", "src\Feed\ChatRumi.Feed.Api\ChatRumi.Feed.Api.csproj", "{72282AEC-6044-47BC-8BA8-9B2422264D9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Feed.AccountSync", "src\Feed\ChatRumi.Feed.AccountSync\ChatRumi.Feed.AccountSync.csproj", "{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.AccountSync", "src\ChatRumi.Friendship.AccountSync\ChatRumi.Friendship.AccountSync.csproj", "{E4A8F09A-089D-40C2-8C85-A63185A148C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +83,8 @@ Global
 		{56EE4B8D-4E96-4149-945A-99624D009076} = {A692D263-D67F-46A4-B0F2-7A69834B109F}
 		{9BC22CA9-DA1D-47CB-B655-7C349D53AFC8} = {A692D263-D67F-46A4-B0F2-7A69834B109F}
 		{72282AEC-6044-47BC-8BA8-9B2422264D9F} = {A692D263-D67F-46A4-B0F2-7A69834B109F}
+		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22} = {A692D263-D67F-46A4-B0F2-7A69834B109F}
+		{E4A8F09A-089D-40C2-8C85-A63185A148C8} = {81582E2B-2951-45D2-A0C7-B2257AB7ABB7}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{74A3CF34-CB25-4EC3-B0D3-90F223DB6152}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -149,5 +155,13 @@ Global
 		{72282AEC-6044-47BC-8BA8-9B2422264D9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72282AEC-6044-47BC-8BA8-9B2422264D9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72282AEC-6044-47BC-8BA8-9B2422264D9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

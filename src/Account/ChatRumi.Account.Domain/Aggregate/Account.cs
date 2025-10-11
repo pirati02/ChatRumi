@@ -12,7 +12,7 @@ public class Account : Kernel.Aggregate
     public required string PhoneNumber { get; set; }
     public required string CountryCode { get; set; }
     
-    public bool IsVerified { get; set; } = false;
+    public bool IsVerified { get; private set; } = false;
     public DateTimeOffset VerifiedOn { get; set; }
     public bool MfaEnabled { get; set; } = false;
     
@@ -36,5 +36,12 @@ public class Account : Kernel.Aggregate
     {
         IsVerified = true;
         VerifiedOn = DateTimeOffset.UtcNow;
+    }
+
+    public void Apply(AccountModifiedEvent @event)
+    {
+        UserName = @event.UserName;
+        FirstName = @event.FirstName;
+        LastName = @event.LastName;
     }
 }

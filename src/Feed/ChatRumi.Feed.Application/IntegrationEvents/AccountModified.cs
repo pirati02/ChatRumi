@@ -1,0 +1,3 @@
+﻿namespace ChatRumi.Feed.Application.IntegrationEvents;
+
+public record AccountModified(Guid AccountId, string UserName, string FirstName, string LastName);

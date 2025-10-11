@@ -28,6 +28,21 @@ accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMedia
     .WithName("create-account")
     .WithOpenApi();
 
+accountGroup.MapPut("{accountId:guid}", async ([FromRoute] Guid accountId, [FromBody] UpdateAccount.Command command, IMediator mediator) =>
+    {
+        command = command with
+        {
+            Id = accountId
+        };
+        var result = await mediator.Send(command);
+        return result.Match(
+            value => Results.Created(value.ToString(), value.ToString()),
+            Results.BadRequest
+        );
+    })
+    .WithName("update-account")
+    .WithOpenApi();
+
 accountGroup.MapPut("activate", async ([FromBody] VerifyAccount.Command request, IMediator mediator) =>
     {
         var result = await mediator.Send(request);

@@ -31,6 +31,15 @@ public class AccountProjectionTransform : SingleStreamProjection<AccountProjecti
             account.PhoneNumber = @event.PhoneNumber;
             account.CountryCode = @event.CountryCode;
         });
+        
+        ProjectEvent<AccountModifiedEvent>((account, @event) =>
+        {
+            account.Id = @event.AccountId;
+            account.UserName = @event.UserName;
+            account.FirstName = @event.FirstName;
+            account.LastName = @event.LastName;
+        });
+        
         ProjectEvent<VerifyAccountEvent>((account, @event) =>
         {
             account.Id = @event.AccountId;
