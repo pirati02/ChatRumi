@@ -54,7 +54,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Feed.Api", "src\Fe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Feed.AccountSync", "src\Feed\ChatRumi.Feed.AccountSync\ChatRumi.Feed.AccountSync.csproj", "{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.AccountSync", "src\ChatRumi.Friendship.AccountSync\ChatRumi.Friendship.AccountSync.csproj", "{E4A8F09A-089D-40C2-8C85-A63185A148C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Friendship.AccountSync", "src\Friendship\ChatRumi.Friendship.AccountSync\ChatRumi.Friendship.AccountSync.csproj", "{607ABFC5-A3BA-4DCF-B21D-32D385C6E211}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Chat.AccountSync", "src\Chat\ChatRumi.Chat.AccountSync\ChatRumi.Chat.AccountSync.csproj", "{D18E0820-E57D-475B-925C-18DB2E8A64FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Chat.Infrastructure", "src\Chat\ChatRumi.Chat.Infrastructure\ChatRumi.Chat.Infrastructure.csproj", "{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,7 +88,9 @@ Global
 		{9BC22CA9-DA1D-47CB-B655-7C349D53AFC8} = {A692D263-D67F-46A4-B0F2-7A69834B109F}
 		{72282AEC-6044-47BC-8BA8-9B2422264D9F} = {A692D263-D67F-46A4-B0F2-7A69834B109F}
 		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22} = {A692D263-D67F-46A4-B0F2-7A69834B109F}
-		{E4A8F09A-089D-40C2-8C85-A63185A148C8} = {81582E2B-2951-45D2-A0C7-B2257AB7ABB7}
+		{607ABFC5-A3BA-4DCF-B21D-32D385C6E211} = {81582E2B-2951-45D2-A0C7-B2257AB7ABB7}
+		{D18E0820-E57D-475B-925C-18DB2E8A64FC} = {E1341AA9-674B-47B7-B724-03CB697FC365}
+		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D} = {E1341AA9-674B-47B7-B724-03CB697FC365}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{74A3CF34-CB25-4EC3-B0D3-90F223DB6152}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -159,9 +165,17 @@ Global
 		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60128C3E-364E-4D1B-ACA7-DA0272B2CC22}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4A8F09A-089D-40C2-8C85-A63185A148C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{607ABFC5-A3BA-4DCF-B21D-32D385C6E211}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{607ABFC5-A3BA-4DCF-B21D-32D385C6E211}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{607ABFC5-A3BA-4DCF-B21D-32D385C6E211}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{607ABFC5-A3BA-4DCF-B21D-32D385C6E211}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D18E0820-E57D-475B-925C-18DB2E8A64FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D18E0820-E57D-475B-925C-18DB2E8A64FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D18E0820-E57D-475B-925C-18DB2E8A64FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D18E0820-E57D-475B-925C-18DB2E8A64FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

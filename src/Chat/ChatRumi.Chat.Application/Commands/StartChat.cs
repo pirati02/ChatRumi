@@ -9,7 +9,7 @@ using MediatR;
 namespace ChatRumi.Chat.Application.Commands;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed class StartChat
+public static class StartChat
 {
     public sealed record Command(
         bool OverrideExisting,

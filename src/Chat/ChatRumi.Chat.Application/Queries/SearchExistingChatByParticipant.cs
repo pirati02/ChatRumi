@@ -10,7 +10,7 @@ using Marten;
 namespace ChatRumi.Chat.Application.Queries;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed class SearchExistingChatByParticipant
+public static class SearchExistingChatByParticipant
 {
     public sealed record Query(
         ParticipantDto[] Participants

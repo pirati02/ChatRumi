@@ -1,4 +1,4 @@
-﻿namespace ChatRumi.Chat.Application.Options;
+﻿namespace ChatRumi.Chat.Infrastructure.Options;
 
 public class RedisOptions
 {

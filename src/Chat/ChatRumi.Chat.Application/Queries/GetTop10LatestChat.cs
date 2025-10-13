@@ -8,7 +8,7 @@ using Marten;
 namespace ChatRumi.Chat.Application.Queries;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed class GetTop10LatestChat
+public static class GetTop10LatestChat
 {
     public sealed record Query(Guid ParticipantId)
         : IRequest<ErrorOr<LatestChatResponse[]>>;

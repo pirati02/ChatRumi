@@ -7,12 +7,12 @@ using MediatR;
 namespace ChatRumi.Chat.Application.Queries;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed class GetChatById
+public static class GetChatById
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     public record Query(Guid ChatId) : IRequest<ErrorOr<ChatResponse>>;
 
-    public class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<ChatResponse>>
+    public sealed class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<ChatResponse>>
     {
         public async Task<ErrorOr<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
         {

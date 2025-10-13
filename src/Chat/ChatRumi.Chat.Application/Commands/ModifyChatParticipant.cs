@@ -1,0 +1,48 @@
+﻿using ChatRumi.Chat.Application.Projections.ExistingChat;
+using ChatRumi.Chat.Domain.Events;
+using Marten;
+using MediatR;
+using Microsoft.Extensions.Logging;
+
+namespace ChatRumi.Chat.Application.Commands;
+
+public static class ModifyChatParticipant
+{
+    public sealed record Command(
+        Guid ParticipantId,
+        string UserName,
+        string FirstName,
+        string LastName
+    ) : IRequest;
+
+    public sealed class Handler(
+        IDocumentStore store,
+        ILogger<Handler> logger
+    ) : IRequestHandler<Command>
+    {
+        public async Task Handle(Command request, CancellationToken cancellationToken)
+        {
+            await using var session = store.LightweightSession();
+
+            var participantHash = string.Join("|", [request.ParticipantId]);
+
+            var chatIds = await session.Query<ExistingChatProjection>()
+                .Where(p => p.ParticipantsHash.Contains(participantHash))
+                .Select(a => a.Id)
+                .ToListAsync(token: cancellationToken);
+
+            foreach (var chatId in chatIds.Chunk(100).SelectMany(a => a))
+            {
+                var chats = session.Events.Append(
+                    chatId,
+                    new ParticipantModifiedEvent(
+                        request.ParticipantId,
+                        request.FirstName,
+                        request.LastName,
+                        request.UserName
+                    )
+                );
+            }
+        }
+    }
+}

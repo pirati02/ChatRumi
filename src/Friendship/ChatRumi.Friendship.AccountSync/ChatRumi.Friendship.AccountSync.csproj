@@ -8,8 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
-      <ProjectReference Include="..\Friendship\ChatRumi.Friendship.Application\ChatRumi.Friendship.Application.csproj" />
+      <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
+      <ProjectReference Include="..\ChatRumi.Friendship.Application\ChatRumi.Friendship.Application.csproj" />
     </ItemGroup>
-
 </Project>

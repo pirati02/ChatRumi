@@ -17,7 +17,8 @@ public class KafkaProducer : IDispatcher
     {
         var config = new ProducerConfig
         {
-            BootstrapServers = options.Value.ConnectionString
+            BootstrapServers = options.Value.ConnectionString,
+            
         };
 
         _producer = new ProducerBuilder<string, string>(config).Build();

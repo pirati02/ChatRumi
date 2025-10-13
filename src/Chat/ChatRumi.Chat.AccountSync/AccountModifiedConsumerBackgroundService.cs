@@ -1,14 +1,15 @@
 ﻿using System.Text.Json;
 using ChatRum.InterCommunication;
-using ChatRumi.Friendship.Application.IntegrationEvents;
-using ChatRumi.Friendship.Application.Services;
+using ChatRumi.Chat.Application.Commands;
+using ChatRumi.Chat.Application.IntegrationEvents;
 using Confluent.Kafka;
+using MediatR;
 using Microsoft.Extensions.Options;
 
-namespace ChatRumi.Friendship.AccountSync;
+namespace ChatRumi.Chat.AccountSync;
 
-public class AccountCreatedConsumerBackgroundService(
-    ILogger<AccountCreatedConsumerBackgroundService> logger,
+public class AccountModifiedConsumerBackgroundService(
+    ILogger<AccountModifiedConsumerBackgroundService> logger,
     IOptions<KafkaOptions> options,
     IServiceProvider serviceProvider
 ) : BackgroundService
@@ -23,17 +24,17 @@ public class AccountCreatedConsumerBackgroundService(
         return Task.Run(async () =>
         {
             await using var scope = serviceProvider.CreateAsyncScope();
-            var peerConnectionManager = scope.ServiceProvider.GetRequiredService<IPeerConnectionManager>();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
             var consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = options.Value.ConnectionString,
-                GroupId = "webapi-consumer-group",
+                GroupId = "chat-service-consumer-group",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
             using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
-            consumer.Subscribe(Topics.AccountCreatedTopic);
+            consumer.Subscribe(Topics.AccountUpdatedTopic);
 
             logger.LogInformation("Kafka Consumer started...");
 
@@ -45,13 +46,19 @@ public class AccountCreatedConsumerBackgroundService(
 
                     if (!string.IsNullOrWhiteSpace(cr.Message.Value))
                     {
-                        var @event = JsonSerializer.Deserialize<AccountCreated>(cr.Message.Value, SerializerOptions);
+                        var @event = JsonSerializer.Deserialize<AccountModified>(cr.Message.Value, SerializerOptions);
                         if (@event is null)
                         {
                             return;
                         }
 
-                        await peerConnectionManager.CreatePeerAsync(@event.AccountId, @event.UserName, DateTime.UtcNow);
+                        await mediator.Send(
+                            new ModifyChatParticipant.Command(
+                                @event.AccountId,
+                                @event.UserName,
+                                @event.FirstName,
+                                @event.LastName
+                            ), stoppingToken);
                     }
 
                     logger.LogInformation("Consumed message: Key = {Key}, Value = {Value}", cr.Message.Key,

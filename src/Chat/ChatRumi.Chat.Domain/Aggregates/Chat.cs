@@ -34,6 +34,22 @@ public class Chat : Aggregate
         });
     }
 
+    public void Apply(ParticipantModifiedEvent @event)
+    {
+        var existing = Participants.FirstOrDefault(p => p.Id == @event.ParticipantId);
+        if (existing is null)
+            return;
+        
+        var updated = existing with
+        {
+            FirstName = @event.FirstName,
+            LastName = @event.LastName,
+            NickName = @event.UserName
+        };
+        
+        ReplaceParticipant(existing, updated);
+    }
+
     public void Apply(ChatStartedEvent @event)
     {
         CreationDate = @event.Timestamp;
@@ -42,20 +58,31 @@ public class Chat : Aggregate
         Creator = @event.Creator;
     }
 
+    public void Apply(MarkChatReadEvent @event)
+    {
+        var messages = Messages.Where(a => @event.MessageIds.Contains(a.Id));
+        foreach (var message in messages)
+        {
+            message.Delivered = MessageType.Delivered();
+            message.Seen = MessageType.Seen();
+        }
+    }
+
     public void Apply(MessageSentEvent @event)
     {
         Messages.Add(@event.AsMessage());
     }
-
-    public void Apply(MessageStatusChangeEvent @event)
+      
+    private void ReplaceParticipant(Participant oldParticipant, Participant updated)
     {
-        var message = Messages.FirstOrDefault(m => m.Id == @event.MessageId);
-        if (message is null)
-        {
-            return;
-        }
+        var index = Participants.IndexOf(oldParticipant);
+        if (index < 0) return;
+        Participants[index] = updated;
+    }
 
-        switch (@event.Status)
+    private static void UpdateMessageStatus(Message message, MessageStatus status)
+    {
+        switch (status)
         {
             case MessageStatus.Sent:
                 message.Sent = MessageType.Sent();
@@ -66,16 +93,6 @@ public class Chat : Aggregate
             case MessageStatus.Seen:
                 message.Seen = MessageType.Seen();
                 break;
-        }
-    }
-
-    public void Apply(MarkChatReadEvent @event)
-    {
-        var messages = Messages.Where(a => @event.MessageIds.Contains(a.Id));
-        foreach (var message in messages)
-        {
-            message.Delivered = MessageType.Delivered();
-            message.Seen = MessageType.Seen();
         }
     }
 }

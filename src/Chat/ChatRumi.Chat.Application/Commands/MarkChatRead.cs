@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace ChatRumi.Chat.Application.Commands;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed class MarkChatRead
+public static class MarkChatRead
 {
     public sealed record Command(Guid ChatId, Guid[] MessageIds) : IRequest<ErrorOr<bool>>;
 

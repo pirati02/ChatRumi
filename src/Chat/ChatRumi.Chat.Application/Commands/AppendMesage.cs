@@ -10,7 +10,7 @@ using MediatR;
 namespace ChatRumi.Chat.Application.Commands;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed class AppendMessage
+public static class AppendMessage
 {
     public sealed record Command(Guid ChatId, MessageRequest Request) : IRequest<ErrorOr<MessageResponse>>;
 

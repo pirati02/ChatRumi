@@ -1,17 +1,21 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRumi.Chat.Api;
 using ChatRumi.Chat.Api.Hub;
+using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
+using ChatRumi.Chat.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApi(builder.Configuration, builder.Environment);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+builder.Services.AddApplication();
+builder.Services.AddApi();
 builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();

@@ -13,8 +13,8 @@ public static class Dependency
     )
     {
         var connectionString = configuration.GetConnectionString("FeedContext");
-        var user = configuration.GetSection("Elastic:User").Value;
-        var password = configuration.GetSection("Elastic:Password").Value;
+        // var user = configuration.GetSection("Elastic:User").Value;
+        // var password = configuration.GetSection("Elastic:Password").Value;
 
         services.AddSingleton<IElasticClient>(_ =>
         {

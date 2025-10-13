@@ -34,21 +34,27 @@ public static class ModifyFeedForParticipant
                 logger.LogInformation("No posts found for participant {Id}", request.ParticipantId);
                 return;
             }
+
             var documents = searchResponse.Documents.ToList();
             logger.LogInformation("Found {Count} posts for participant {Id}", documents.Count, request.ParticipantId);
- 
+
             var bulkDescriptor = new BulkDescriptor();
             foreach (var doc in documents)
             {
-                doc.Creator = new Participant { Id = request.ParticipantId, FirstName = request.FirstName, LastName = request.LastName, NickName = request.UserName };
-
                 bulkDescriptor.Update<PostDocument>(u => u
                     .Index(PostIndexes.Posts)
                     .Id(doc.Id)
-                    .Doc(doc)
+                    .Doc(
+                        doc.ModifyCreator(
+                            request.ParticipantId,
+                            request.FirstName,
+                            request.LastName,
+                            request.UserName
+                        )
+                    )
                 );
             }
- 
+
             var bulkResponse = await client.BulkAsync(bulkDescriptor, cancellationToken);
 
             if (bulkResponse.Errors)
