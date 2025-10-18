@@ -7,6 +7,7 @@ namespace ChatRumi.Friendship.Application.Services;
 public interface IPeerConnectionManager
 {
     Task CreatePeerAsync(Guid peerId, string userName, DateTime createdDate);
+    Task UpdatePeerAsync(Guid peerId, string userName, DateTime modifiedDate);
     Task SendFriendRequestAsync(Guid peerId1, Guid peerId2);
     Task AcceptFriendRequestAsync(Guid peerId1, Guid peerId2);
     Task UnfriendAsync(Guid peerId, Guid targetPeerId);
@@ -40,6 +41,28 @@ public class PeerConnectionManager : IPeerConnectionManager
         await _session.RunAsync(query, parameters);
     }
 
+    public async Task UpdatePeerAsync(Guid peerId, string userName, DateTime modifiedDate)
+    {
+        const string query = """
+                                 MERGE (a:Account {peerId: $peerId})
+                                 ON CREATE SET 
+                                     a.userName = $userName,
+                                     a.createdDate = $modifiedDate
+                                 ON MATCH SET 
+                                     a.userName = $userName,
+                                     a.modifiedDate = $modifiedDate
+                             """;
+
+        var parameters = new
+        {
+            peerId = peerId.ToString(),
+            userName,
+            modifiedDate
+        };
+
+        await _session.ExecuteWriteAsync(async tx => { await tx.RunAsync(query, parameters); });
+    }
+    
     public async Task UnfriendAsync(Guid peerId, Guid targetPeerId)
     {
         // Remove the FRIENDS relationship in both directions

@@ -7,8 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace ChatRumi.Friendship.AccountSync;
 
-public class AccountCreatedConsumerBackgroundService(
-    ILogger<AccountCreatedConsumerBackgroundService> logger,
+public class AccountModifiedConsumerBackgroundService(
+    ILogger<AccountModifiedConsumerBackgroundService> logger,
     IOptions<KafkaOptions> options,
     IServiceProvider serviceProvider
 ) : BackgroundService
@@ -28,12 +28,12 @@ public class AccountCreatedConsumerBackgroundService(
             var consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = options.Value.ConnectionString,
-                GroupId = "account-create-service-consumer-group",
+                GroupId = "account-update-service-consumer-group",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
             using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
-            consumer.Subscribe(Topics.AccountCreatedTopic);
+            consumer.Subscribe(Topics.AccountUpdatedTopic);
 
             logger.LogInformation("Kafka Consumer started...");
 
@@ -45,13 +45,13 @@ public class AccountCreatedConsumerBackgroundService(
 
                     if (!string.IsNullOrWhiteSpace(cr.Message.Value))
                     {
-                        var @event = JsonSerializer.Deserialize<AccountCreated>(cr.Message.Value, SerializerOptions);
+                        var @event = JsonSerializer.Deserialize<AccountModified>(cr.Message.Value, SerializerOptions);
                         if (@event is null)
                         {
                             return;
                         }
 
-                        await peerConnectionManager.CreatePeerAsync(@event.AccountId, @event.UserName, DateTime.UtcNow);
+                        await peerConnectionManager.UpdatePeerAsync(@event.AccountId, @event.UserName, DateTime.UtcNow);
                     }
 
                     logger.LogInformation("Consumed message: Key = {Key}, Value = {Value}", cr.Message.Key,
