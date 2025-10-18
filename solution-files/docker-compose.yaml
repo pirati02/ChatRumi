@@ -5,10 +5,72 @@ services:
     image: hashicorp/consul:1.16.2
     container_name: consul
     ports:
-      - "8500:8500"   # Consul UI / HTTP API
+      - "8500:8500"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accountdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - backend
 
+  neo4j:
+    image: neo4j:5
+    container_name: neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/test123
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - backend
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - backend
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - backend
+
+  # ────────────────────────────────────────────────
+  # Account
+  # ────────────────────────────────────────────────
   account-service:
     build:
       context: .
@@ -18,15 +80,39 @@ services:
       - "5049:5049"
     environment:
       - ASPNETCORE_URLS=http://+:5049
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=accountdb;Username=postgres;Password=postgres
       - Consul__ServiceName=account-service
       - Consul__ServiceAddress=http://account-service:5049
       - Consul__Host=consul
       - Consul__Port=8500
     depends_on:
-      - consul
+      consul:
+        condition: service_healthy
+        - postgres
     networks:
       - backend
 
+  account-sync:
+    build:
+      context: .
+      dockerfile: Account/ChatRumi.AccountSync/Dockerfile
+    container_name: account-sync
+    environment:
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=accountdb;Username=postgres;Password=postgres
+      - Consul__ServiceName=account-sync
+      - Consul__ServiceAddress=http://account-sync
+      - Consul__Host=consul
+      - Consul__Port=8500
+    depends_on:
+      consul:
+        condition: service_healthy
+        - postgres
+    networks:
+      - backend
+
+  # ────────────────────────────────────────────────
+  # Chat
+  # ────────────────────────────────────────────────
   chat-service:
     build:
       context: .
@@ -36,15 +122,39 @@ services:
       - "5111:5111"
     environment:
       - ASPNETCORE_URLS=http://+:5111
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=chatdb;Username=postgres;Password=postgres
       - Consul__ServiceName=chat-service
       - Consul__ServiceAddress=http://chat-service:5111
       - Consul__Host=consul
       - Consul__Port=8500
     depends_on:
-      - consul
+      consul:
+        condition: service_healthy
+        - postgres
     networks:
       - backend
 
+  chat-sync:
+    build:
+      context: .
+      dockerfile: Chat/ChatRumi.Chat.AccountSync/Dockerfile
+    container_name: chat-sync
+    environment:
+      - ConnectionStrings__Default=Host=postgres;Port=5432;Database=chatdb;Username=postgres;Password=postgres
+      - Consul__ServiceName=chat-sync
+      - Consul__ServiceAddress=http://chat-sync
+      - Consul__Host=consul
+      - Consul__Port=8500
+    depends_on:
+      consul:
+        condition: service_healthy
+        - postgres
+    networks:
+      - backend
+
+  # ────────────────────────────────────────────────
+  # Friendship
+  # ────────────────────────────────────────────────
   friendship-service:
     build:
       context: .
@@ -54,33 +164,85 @@ services:
       - "5031:5031"
     environment:
       - ASPNETCORE_URLS=http://+:5031
+      - Neo4j__Uri=bolt://neo4j:7687
+      - Neo4j__User=neo4j
+      - Neo4j__Password=test123
       - Consul__ServiceName=friendship-service
       - Consul__ServiceAddress=http://friendship-service:5031
       - Consul__Host=consul
       - Consul__Port=8500
     depends_on:
-      - consul
+      consul:
+        condition: service_healthy
+        - neo4j
     networks:
       - backend
-  
+
+  friendship-sync:
+    build:
+      context: .
+      dockerfile: Friendship/ChatRumi.Friendship.AccountSync/Dockerfile
+    container_name: friendship-sync
+    environment:
+      - Neo4j__Uri=bolt://neo4j:7687
+      - Neo4j__User=neo4j
+      - Neo4j__Password=test123
+      - Consul__ServiceName=friendship-sync
+      - Consul__ServiceAddress=http://friendship-sync
+      - Consul__Host=consul
+      - Consul__Port=8500
+    depends_on:
+      consul:
+        condition: service_healthy
+        - neo4j
+    networks:
+      - backend
+
+  # ────────────────────────────────────────────────
+  # Feed
+  # ────────────────────────────────────────────────
   feed-service:
     build:
       context: .
-      dockerfile: Friendship/ChatRumi.Feed.Api/Dockerfile
+      dockerfile: Feed/ChatRumi.Feed.Api/Dockerfile
     container_name: feed-service
     ports:
-      - "5031:5031"
+      - "5211:5211"
     environment:
       - ASPNETCORE_URLS=http://+:5211
+      - Elastic__Url=http://elasticsearch:9200
       - Consul__ServiceName=feed-service
       - Consul__ServiceAddress=http://feed-service:5211
       - Consul__Host=consul
       - Consul__Port=8500
     depends_on:
-      - consul
+      consul:
+        condition: service_healthy
+        - elasticsearch
     networks:
       - backend
 
+  feed-sync:
+    build:
+      context: .
+      dockerfile: Feed/ChatRumi.Feed.AccountSync/Dockerfile
+    container_name: feed-sync
+    environment:
+      - Elastic__Url=http://elasticsearch:9200
+      - Consul__ServiceName=feed-sync
+      - Consul__ServiceAddress=http://feed-sync
+      - Consul__Host=consul
+      - Consul__Port=8500
+    depends_on:
+      consul:
+        condition: service_healthy
+        - elasticsearch
+    networks:
+      - backend
+
+  # ────────────────────────────────────────────────
+  # Gateway
+  # ────────────────────────────────────────────────
   gateway:
     build:
       context: .
@@ -90,6 +252,8 @@ services:
       - "7000:7000"
     environment:
       - ASPNETCORE_URLS=http://+:7000
+      - Consul__Host=consul
+      - Consul__Port=8500
     depends_on:
       - consul
       - account-service
@@ -98,6 +262,11 @@ services:
       - feed-service
     networks:
       - backend
+
+volumes:
+  pgdata:
+  neo4j_data:
+  es_data:
 
 networks:
   backend:

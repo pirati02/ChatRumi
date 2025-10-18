@@ -26,9 +26,8 @@ public static class CreatePost
             var post = Post.Create(request.Creator, request.Title, request.Description, [])
                 .ToDocument();
  
-            var response = await client.IndexAsync(
+            var response = await client.CreateDocumentAsync(
                 post,
-                index => index.Index(PostIndexes.Posts),
                 cancellationToken
             );
 
