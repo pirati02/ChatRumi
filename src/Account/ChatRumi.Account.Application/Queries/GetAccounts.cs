@@ -4,9 +4,9 @@ using MediatR;
 
 namespace ChatRumi.Account.Application.Queries;
 
-public class GetAccounts
+public static class GetAccounts
 {
-    public record Query() : IRequest<IEnumerable<AccountResponse>>;
+    public record Query : IRequest<IEnumerable<AccountResponse>>;
 
     public class Handler(
         IDocumentStore store

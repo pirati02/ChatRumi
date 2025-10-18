@@ -1,11 +1,8 @@
 ﻿using ChatRum.InterCommunication;
 using ChatRumi.Account.Application.IntegrationEvents;
-using ChatRumi.Account.Application.Projections;
-using ChatRumi.Account.Application.Services;
 using ChatRumi.Account.Domain.Events;
 using FluentValidation;
 using Marten;
-using MassTransit;
 using MediatR;
 using ErrorOr;
 

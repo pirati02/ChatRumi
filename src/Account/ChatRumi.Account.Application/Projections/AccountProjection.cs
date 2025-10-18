@@ -3,6 +3,7 @@ using Marten.Events.Aggregation;
 
 namespace ChatRumi.Account.Application.Projections;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public sealed record AccountProjection
 {
     public Guid Id { get; set; } // Same ID as the event stream

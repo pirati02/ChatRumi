@@ -3,12 +3,12 @@ using System.Text;
 
 namespace ChatRumi.Account.Application.Services;
 
-public class PasswordHasher
+public static class PasswordHasher
 {
     public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
         using var hmac = new HMACSHA512();
-        passwordSalt = hmac.Key; // Unique salt per user
+        passwordSalt = hmac.Key;
         passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
     }
 

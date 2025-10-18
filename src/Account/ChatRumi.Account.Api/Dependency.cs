@@ -33,7 +33,7 @@ public static class Dependency
         });
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<VerifyAccount.EventHandler>();
+            x.AddConsumer<VerifyAccount.Handler>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -46,7 +46,7 @@ public static class Dependency
                 cfg.ReceiveEndpoint("verify-account-event-queue",
                     e =>
                     {
-                        e.ConfigureConsumer<VerifyAccount.EventHandler>(
+                        e.ConfigureConsumer<VerifyAccount.Handler>(
                             context);
                     });
             });

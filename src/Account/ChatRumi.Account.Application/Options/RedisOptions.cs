@@ -1,6 +1,6 @@
 ﻿namespace ChatRumi.Account.Application.Options;
 
-public class RedisOptions
+public record RedisOptions
 {
     public const string Name = nameof(RedisOptions);
     public required string Host { get; set; }

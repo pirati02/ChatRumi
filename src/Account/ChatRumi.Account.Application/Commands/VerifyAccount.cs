@@ -10,7 +10,7 @@ using StackExchange.Redis;
 
 namespace ChatRumi.Account.Application.Commands;
 
-public sealed class VerifyAccount
+public static class VerifyAccount
 {
     public sealed record Command(string Code, Guid AccountId) : IRequest<ErrorOr<bool>>;
 

@@ -5,7 +5,7 @@ using MediatR;
 
 namespace ChatRumi.Account.Application.Queries;
 
-public class GetAccount
+public static class GetAccount
 {
     public record Query(Guid AccountId) : IRequest<ErrorOr<AccountResponse>>;
 

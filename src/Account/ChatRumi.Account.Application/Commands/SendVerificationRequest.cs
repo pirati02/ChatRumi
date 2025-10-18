@@ -6,7 +6,7 @@ using MediatR;
 
 namespace ChatRumi.Account.Application.Commands;
 
-public sealed class SendVerificationRequest
+public static class SendVerificationRequest
 {
     public sealed record Command(Guid AccountId) : IRequest<ErrorOr<bool>>;
 

@@ -1,6 +1,6 @@
 ﻿namespace ChatRumi.Account.Application.Services.Sms;
 
-public class OtpGenerate
+public static class OtpGenerate
 {
     public static string New()
     {

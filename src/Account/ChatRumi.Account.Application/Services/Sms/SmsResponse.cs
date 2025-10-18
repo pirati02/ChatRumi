@@ -1,9 +1,9 @@
 ﻿namespace ChatRumi.Account.Application.Services.Sms;
 
-public class SmsResponse
+public sealed record SmsResponse
 {
-    public bool Success { get; set; }
-    public required string Message { get; set; }
-    public object? Output { get; set; }
-    public required int ErrorCode { get; set; }
+    public bool Success { get; init; }
+    public required string Message { get; init; }
+    public object? Output { get; init; }
+    public required int ErrorCode { get; init; }
 }

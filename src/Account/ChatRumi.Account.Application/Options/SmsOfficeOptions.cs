@@ -1,6 +1,6 @@
 ﻿namespace ChatRumi.Account.Application.Options;
 
-public class SmsOfficeOptions
+public record SmsOfficeOptions
 {
     public const string Name = nameof(SmsOfficeOptions);
     public required string ApiKey { get; set; }
