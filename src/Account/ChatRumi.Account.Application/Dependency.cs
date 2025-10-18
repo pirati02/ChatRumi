@@ -1,6 +1,7 @@
 ﻿using ChatRum.InterCommunication;
 using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Services.Sms;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -10,6 +11,10 @@ public static class Dependency
 {
     public static void AddApplication(this IServiceCollection services)
     {
+        services.AddMediatR(config =>
+            config.RegisterServicesFromAssemblies(Application.Assembly));
+        services.AddValidatorsFromAssembly(Application.Assembly);
+
         services.AddOptions<SmsOfficeOptions>().BindConfiguration(SmsOfficeOptions.Name);
         services.AddOptions<RedisOptions>().BindConfiguration(RedisOptions.Name);
         services.AddOptions<KafkaOptions>().BindConfiguration(KafkaOptions.Name);

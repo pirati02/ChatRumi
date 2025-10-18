@@ -5,5 +5,5 @@ namespace ChatRumi.Chat.AccountSync;
 
 public class ChatHubContextProxy : IChatHubContextProxy
 {
-    public IHubClients<IChatClient> Clients => null;
+    public IHubClients<IChatClient> Clients => null!;
 }

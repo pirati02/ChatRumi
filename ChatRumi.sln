@@ -60,6 +60,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Chat.AccountSync",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Chat.Infrastructure", "src\Chat\ChatRumi.Chat.Infrastructure\ChatRumi.Chat.Infrastructure.csproj", "{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRumi.Account.Infrastructure", "src\Account\ChatRumi.Account.Infrastructure\ChatRumi.Account.Infrastructure.csproj", "{37F1A0FE-87C7-4B61-A1D0-A030BE0F538F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,7 @@ Global
 		{607ABFC5-A3BA-4DCF-B21D-32D385C6E211} = {81582E2B-2951-45D2-A0C7-B2257AB7ABB7}
 		{D18E0820-E57D-475B-925C-18DB2E8A64FC} = {E1341AA9-674B-47B7-B724-03CB697FC365}
 		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D} = {E1341AA9-674B-47B7-B724-03CB697FC365}
+		{37F1A0FE-87C7-4B61-A1D0-A030BE0F538F} = {6872896C-EA4B-435C-A0B6-6FACEB0337C4}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{74A3CF34-CB25-4EC3-B0D3-90F223DB6152}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -177,5 +180,9 @@ Global
 		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF69D39F-2EEC-4030-B378-93EFD2ECC98D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37F1A0FE-87C7-4B61-A1D0-A030BE0F538F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37F1A0FE-87C7-4B61-A1D0-A030BE0F538F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37F1A0FE-87C7-4B61-A1D0-A030BE0F538F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37F1A0FE-87C7-4B61-A1D0-A030BE0F538F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

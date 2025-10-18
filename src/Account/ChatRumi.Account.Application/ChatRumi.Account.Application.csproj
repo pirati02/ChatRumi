@@ -7,18 +7,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ErrorOr" Version="2.0.1" />
-      <PackageReference Include="FluentValidation" Version="11.11.0" />
-      <PackageReference Include="Marten" Version="7.38.1" />
-      <PackageReference Include="MassTransit" Version="8.3.6" />
-      <PackageReference Include="MediatR" Version="12.4.1" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2" />
-      <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+        <PackageReference Include="ErrorOr" Version="2.0.1"/>
+        <PackageReference Include="FluentValidation" Version="11.11.0"/>
+        <PackageReference Include="Marten" Version="7.38.1"/>
+        <PackageReference Include="MassTransit" Version="8.3.6"/>
+        <PackageReference Include="MediatR" Version="12.4.1"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.2"/>
+        <PackageReference Include="StackExchange.Redis" Version="2.8.24"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
-      <ProjectReference Include="..\ChatRumi.Account.Domain\ChatRumi.Account.Domain.csproj" />
+        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Account.Domain\ChatRumi.Account.Domain.csproj"/>
     </ItemGroup>
 
 </Project>

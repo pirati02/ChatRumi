@@ -10,7 +10,6 @@
 
     <ItemGroup>
         <PackageReference Include="Consul" Version="1.7.14.6" />
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
         <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.6" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.12" />
@@ -20,6 +19,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj" />
       <ProjectReference Include="..\ChatRumi.Account.Application\ChatRumi.Account.Application.csproj" />
+      <ProjectReference Include="..\ChatRumi.Account.Infrastructure\ChatRumi.Account.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

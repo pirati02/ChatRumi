@@ -33,7 +33,7 @@ public static class ModifyChatParticipant
 
             foreach (var chatId in chatIds.Chunk(100).SelectMany(a => a))
             {
-                var chats = session.Events.Append(
+               session.Events.Append(
                     chatId,
                     new ParticipantModifiedEvent(
                         request.ParticipantId,
@@ -42,7 +42,10 @@ public static class ModifyChatParticipant
                         request.UserName
                     )
                 );
+                logger.LogInformation("Successfully updated {Chat} for participant {Id}", chatId, request.ParticipantId);
             }
+
+            await session.SaveChangesAsync(cancellationToken);
         }
     }
 }

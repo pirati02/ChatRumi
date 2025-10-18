@@ -3,13 +3,15 @@ using ChatRumi.Account.Api;
 using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
 using ChatRumi.Account.Application.Queries;
+using ChatRumi.Account.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using IMediator = MediatR.IMediator;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApi(builder.Configuration, builder.Environment);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
+builder.Services.AddApi(builder.Configuration, builder.Environment);
 builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();

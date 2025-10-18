@@ -31,29 +31,6 @@ public static class Dependency
                     .AllowAnyMethod();
             });
         });
-        services.AddMediatR(config =>
-            config.RegisterServicesFromAssemblies(Application.Application.Assembly));
-        services.AddValidatorsFromAssembly(Application.Application.Assembly);
-
-        DbInitializer.Initialize(configuration.GetConnectionString("Marten")!);
-        services.AddMarten(options =>
-        {
-            options.Connection(configuration.GetConnectionString("Marten")!);
-            options.UseSystemTextJsonForSerialization();
-            if (environment.IsDevelopment())
-            {
-                options.AutoCreateSchemaObjects = AutoCreate.All;
-            }
-
-            options.Projections.Add<AccountProjectionTransform>(ProjectionLifecycle.Inline);
-            options.Projections.LiveStreamAggregation<Domain.Aggregate.Account>();
-            options.Schema.For<AccountProjection>()
-                .UniqueIndex(x => x.UserName)
-                .UniqueIndex(x => x.Email);
-
-            options.Events.StreamIdentity = StreamIdentity.AsGuid;
-        }).AddAsyncDaemon(DaemonMode.Solo);
-
         services.AddMassTransit(x =>
         {
             x.AddConsumer<VerifyAccount.EventHandler>();
@@ -72,16 +49,6 @@ public static class Dependency
                         e.ConfigureConsumer<VerifyAccount.EventHandler>(
                             context);
                     });
-            });
-        });
-        services.AddScoped<IConnectionMultiplexer>(sp =>
-        {
-            var options = sp.GetRequiredService<IOptions<RedisOptions>>().Value;
-            return ConnectionMultiplexer.Connect(new ConfigurationOptions
-            {
-                EndPoints = { { options.Host, options.Port } },
-                User = options.User,
-                Password = options.Password
             });
         });
     }

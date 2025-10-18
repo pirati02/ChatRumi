@@ -16,9 +16,5 @@
       <ProjectReference Include="..\ChatRumi.Feed.Application\ChatRumi.Feed.Application.csproj" />
       <ProjectReference Include="..\ChatRumi.Feed.Infrastructure\ChatRumi.Feed.Infrastructure.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="MediatR" Version="12.4.1" />
-    </ItemGroup>
-
+ 
 </Project>
