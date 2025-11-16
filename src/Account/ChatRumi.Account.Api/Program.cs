@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
-builder.Services.AddApi(builder.Configuration, builder.Environment);
+builder.Services.AddPresentation(builder.Configuration);
 builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();
