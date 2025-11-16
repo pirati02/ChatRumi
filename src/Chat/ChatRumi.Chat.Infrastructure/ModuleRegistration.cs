@@ -1,16 +1,15 @@
 ﻿using System.Text.Json;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
-using ChatRumi.Chat.Application.Projections.LatestChat;
 using ChatRumi.Chat.Infrastructure.Options;
 using ChatRumi.Infrastructure;
-using Marten.Events;
+using JasperFx;
+using JasperFx.Events;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
 using Marten;
-using Marten.Events.Daemon.Resiliency;
-using Marten.Events.Projections;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using Weasel.Core;
 
 namespace ChatRumi.Chat.Infrastructure;
 
@@ -18,17 +17,21 @@ public static class ModuleRegistration
 {
     extension(IServiceCollection services)
     {
-        public void AddInfrastructure(IConfiguration configuration,
-            IWebHostEnvironment environment)
+        public void AddInfrastructure(
+            IConfiguration configuration,
+            IWebHostEnvironment environment
+        )
         {
             DbInitializer.Initialize(configuration.GetConnectionString("Marten")!);
             services.AddMarten(configuration, environment, DefaultJsonContentOptions.CreateJsonOptions());
             services.AddRedis();
         }
 
-        private void AddMarten(IConfiguration configuration,
+        private void AddMarten(
+            IConfiguration configuration,
             IHostEnvironment environment,
-            JsonSerializerOptions jsonOptions)
+            JsonSerializerOptions jsonOptions
+        )
         {
             services.AddMarten(options =>
                 {
@@ -44,7 +47,7 @@ public static class ModuleRegistration
                     options.Projections.LiveStreamAggregation<Domain.Aggregates.Chat>();
                     options.Projections.Add<ExistingChatProjectionTransform>(ProjectionLifecycle.Inline);
                     options.Schema.For<ExistingChatProjection>();
-            
+
                     options.Events.StreamIdentity = StreamIdentity.AsGuid;
                 })
                 .AddAsyncDaemon(DaemonMode.Solo);

@@ -18,9 +18,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Marten" Version="7.38.1" />
+        <PackageReference Include="Marten" Version="8.15.4" />
       <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
-      <PackageReference Include="Weasel.Core" Version="7.14.0" />
+      <PackageReference Include="Weasel.Core" Version="8.3.0" />
     </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using Marten.Events.Aggregation;
 
 namespace ChatRumi.Chat.Application.Projections.ExistingChat;
 
-public class ExistingChatProjectionTransform : SingleStreamProjection<ExistingChatProjection>
+public class ExistingChatProjectionTransform : SingleStreamProjection<ExistingChatProjection, Guid>
 {
     public ExistingChatProjectionTransform()
     {
