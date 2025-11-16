@@ -8,7 +8,7 @@ using Consul;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddApi()
+builder.Services.AddPresentation()
     .AddApplication();
 builder.Services.AddConsulService(builder.Configuration);
 

@@ -5,15 +5,18 @@ namespace ChatRumi.Chat.Application.Dto.Extensions;
 
 public static class MessageExtensions
 {
-    public static MessageResponse ToDto(this Message message)
+    extension(Message message)
     {
-        return new MessageResponse(
-            message.ChatId,
-            message.Id,
-            message.LatestStatus(),
-            message.Content,
-            message.Participant.ToDto(),
-            message.ReplyOf?.Id
-        );
+        public MessageResponse ToDto()
+        {
+            return new MessageResponse(
+                message.ChatId,
+                message.Id,
+                message.LatestStatus(),
+                message.Content,
+                message.Participant.ToDto(),
+                message.ReplyOf?.Id
+            );
+        }
     }
 }

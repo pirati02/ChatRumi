@@ -14,7 +14,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 await PostIndexer.IndexPost(builder.Services.BuildServiceProvider());
 
-builder.Services.AddApi();
+builder.Services.AddPresentation();
 builder.Services.AddApplication();
 builder.Services.AddConsulService(builder.Configuration);
 
