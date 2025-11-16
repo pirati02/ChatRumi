@@ -7,15 +7,15 @@
         <UserSecretsId>ea666dcd-562a-4d31-8e78-23838078278f</UserSecretsId>
     </PropertyGroup>
 
-    <ItemGroup> 
-        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" /> 
+    <ItemGroup>
+        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
         <ProjectReference Include="..\ChatRumi.Chat.Application\ChatRumi.Chat.Application.csproj"/>
-        <ProjectReference Include="..\ChatRumi.Chat.Infrastructure\ChatRumi.Chat.Infrastructure.csproj" />
+        <ProjectReference Include="..\ChatRumi.Chat.Infrastructure\ChatRumi.Chat.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MediatR" Version="12.4.1"/>
-        <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
+        <PackageReference Include="MediatR"/>
+        <PackageReference Include="StackExchange.Redis"/>
     </ItemGroup>
 
 </Project>

@@ -7,14 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ChatRumi.Feed.Application\ChatRumi.Feed.Application.csproj" />
-      <ProjectReference Include="..\ChatRumi.Feed.Domain\ChatRumi.Feed.Domain.csproj" />
+        <ProjectReference Include="..\ChatRumi.Feed.Application\ChatRumi.Feed.Application.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Feed.Domain\ChatRumi.Feed.Domain.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.1" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+        <PackageReference Include="Elastic.Clients.Elasticsearch"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
     </ItemGroup>
 
 </Project>

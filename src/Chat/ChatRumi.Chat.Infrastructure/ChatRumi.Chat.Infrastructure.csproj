@@ -8,19 +8,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="Properties\launchSettings.json" />
+        <None Remove="Properties\launchSettings.json"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj" />
-      <ProjectReference Include="..\ChatRumi.Chat.Application\ChatRumi.Chat.Application.csproj" />
-      <ProjectReference Include="..\ChatRumi.Chat.Domain\ChatRumi.Chat.Domain.csproj" />
+        <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Chat.Application\ChatRumi.Chat.Application.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Chat.Domain\ChatRumi.Chat.Domain.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Marten" Version="8.15.4" />
-      <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
-      <PackageReference Include="Weasel.Core" Version="8.3.0" />
+        <PackageReference Include="Marten"/>
+        <PackageReference Include="StackExchange.Redis"/>
+        <PackageReference Include="Weasel.Core"/>
     </ItemGroup>
 
 </Project>

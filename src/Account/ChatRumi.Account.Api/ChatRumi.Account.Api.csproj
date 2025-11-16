@@ -5,27 +5,27 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-      <UserSecretsId>f29894b6-d15f-4194-b82c-4f4c2b61aeef</UserSecretsId>
-  </PropertyGroup>
+        <UserSecretsId>f29894b6-d15f-4194-b82c-4f4c2b61aeef</UserSecretsId>
+    </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Consul" Version="1.7.14.9" />
-        <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1" />
-        <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.5" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-        <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
+        <PackageReference Include="Consul"/>
+        <PackageReference Include="MassTransit.Extensions.DependencyInjection"/>
+        <PackageReference Include="MassTransit.RabbitMQ"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
+        <PackageReference Include="StackExchange.Redis"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj" />
-      <ProjectReference Include="..\ChatRumi.Account.Application\ChatRumi.Account.Application.csproj" />
-      <ProjectReference Include="..\ChatRumi.Account.Infrastructure\ChatRumi.Account.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Account.Application\ChatRumi.Account.Application.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Account.Infrastructure\ChatRumi.Account.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <Content Include="..\..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
-    
+
 </Project>

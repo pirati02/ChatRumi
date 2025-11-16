@@ -9,22 +9,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Consul" Version="1.7.14.9" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-        <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
+        <PackageReference Include="Consul"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
+        <PackageReference Include="StackExchange.Redis"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
-      <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj" />
-      <ProjectReference Include="..\ChatRumi.Chat.Application\ChatRumi.Chat.Application.csproj" />
-      <ProjectReference Include="..\ChatRumi.Chat.Infrastructure\ChatRumi.Chat.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
+        <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Chat.Application\ChatRumi.Chat.Application.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Chat.Infrastructure\ChatRumi.Chat.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <Content Include="..\..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
 </Project>

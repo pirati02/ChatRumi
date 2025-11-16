@@ -9,21 +9,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Confluent.Kafka" Version="2.12.0" />
-        <PackageReference Include="Consul" Version="1.7.14.9" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-        <PackageReference Include="Neo4j.Driver" Version="5.28.3" />
+        <PackageReference Include="Confluent.Kafka"/>
+        <PackageReference Include="Consul"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
+        <PackageReference Include="Neo4j.Driver"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
-      <ProjectReference Include="..\ChatRumi.Friendship.Application\ChatRumi.Friendship.Application.csproj" />
+        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
+        <ProjectReference Include="..\ChatRumi.Friendship.Application\ChatRumi.Friendship.Application.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <Content Include="..\..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
 </Project>
