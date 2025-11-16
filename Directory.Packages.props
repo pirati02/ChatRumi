@@ -1,49 +1,49 @@
 <Project>
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-  </PropertyGroup>
+	<PropertyGroup>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Consul" Version="1.7.14.9" />
+	<ItemGroup>
+		<PackageVersion  Include="Consul" Version="1.7.14.9" />
 
-    <!-- MassTransit 8.x -->
-    <PackageReference Include="MassTransit" Version="8.5.5" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.5" />
+		<!-- MassTransit 8.x -->
+		<PackageVersion Include="MassTransit" Version="8.5.5" />
+		<PackageVersion  Include="MassTransit.RabbitMQ" Version="8.5.5" />
 
-    <!-- Marten + Weasel -->
-    <PackageReference Include="Marten" Version="8.15.4" />
-    <PackageReference Include="Weasel.Core" Version="8.3.0" />
+		<!-- Marten + Weasel -->
+		<PackageVersion Include="Marten" Version="8.15.4" />
+		<PackageVersion Include="Weasel.Core" Version="8.3.0" />
 
-    <!-- Core utilities -->
-    <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
-    <PackageReference Include="ErrorOr" Version="2.0.1"/>
-    <PackageReference Include="FluentValidation" Version="12.1.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
-    <PackageReference Include="MediatR" Version="12.4.1"/>
+		<!-- Core utilities -->
+		<PackageVersion Include="StackExchange.Redis" Version="2.9.32" />
+		<PackageVersion Include="ErrorOr" Version="2.0.1"/>
+		<PackageVersion Include="FluentValidation" Version="12.1.0" />
+		<PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+		<PackageVersion Include="MediatR" Version="12.4.1"/>
 
-    <!-- Microsoft Extensions -->
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+		<!-- Microsoft Extensions -->
+		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
 
-    <!-- Elasticsearch -->
-    <PackageReference Include="NEST" Version="7.17.5" />
-    <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.1" />
+		<!-- Elasticsearch -->
+		<PackageVersion Include="NEST" Version="7.17.5" />
+		<PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.2.1" />
 
-    <!-- Messaging / Streaming -->
-    <PackageReference Include="Confluent.Kafka" Version="2.12.0" />
+		<!-- Messaging / Streaming -->
+		<PackageVersion Include="Confluent.Kafka" Version="2.12.0" />
 
-    <!-- Databases -->
-    <PackageReference Include="Neo4j.Driver" Version="5.28.3" />
-    <PackageReference Include="Npgsql" Version="9.0.4" />
+		<!-- Databases -->
+		<PackageVersion Include="Neo4j.Driver" Version="5.28.3" />
+		<PackageVersion Include="Npgsql" Version="9.0.4" />
 
-    <!-- Gateway -->
-    <PackageReference Include="Ocelot" Version="24.0.1" />
-    <PackageReference Include="Ocelot.Provider.Consul" Version="24.0.0" />
-  </ItemGroup>
+		<!-- Gateway -->
+		<PackageVersion Include="Ocelot" Version="24.0.1" />
+		<PackageVersion Include="Ocelot.Provider.Consul" Version="24.0.0" />
+	</ItemGroup>
 </Project>

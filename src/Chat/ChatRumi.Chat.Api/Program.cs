@@ -4,12 +4,10 @@ using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto;
-using ChatRumi.Chat.Application.Dto.Request;
-using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Infrastructure;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using IMediator = MediatR.IMediator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +17,7 @@ builder.Services.AddPresentation();
 builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
+ 
 app.UseRouting();
 app.UseCors("CorsPolicy");
 

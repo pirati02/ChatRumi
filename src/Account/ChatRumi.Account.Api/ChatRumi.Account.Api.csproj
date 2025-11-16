@@ -10,10 +10,10 @@
 
     <ItemGroup>
         <PackageReference Include="Consul"/>
-        <PackageReference Include="MassTransit.Extensions.DependencyInjection"/>
         <PackageReference Include="MassTransit.RabbitMQ"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
         <PackageReference Include="StackExchange.Redis"/>
+        <PackageReference Include="Weasel.Core"/>
     </ItemGroup>
 
     <ItemGroup>

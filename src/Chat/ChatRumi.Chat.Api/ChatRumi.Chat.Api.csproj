@@ -12,6 +12,7 @@
         <PackageReference Include="Consul"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
         <PackageReference Include="StackExchange.Redis"/>
+        <PackageReference Include="MediatR"/>
     </ItemGroup>
 
     <ItemGroup>

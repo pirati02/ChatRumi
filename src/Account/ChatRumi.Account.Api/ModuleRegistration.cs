@@ -1,16 +1,5 @@
-﻿using ChatRumi.Account.Application.Options;
-using ChatRumi.Account.Application.Projections;
-using ChatRumi.Account.Application.Events;
-using ChatRumi.Infrastructure;
-using FluentValidation;
-using Marten;
-using Marten.Events;
-using Marten.Events.Daemon.Resiliency;
-using Marten.Events.Projections;
+﻿using ChatRumi.Account.Application.Events;
 using MassTransit;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using Weasel.Core;
 
 namespace ChatRumi.Account.Api;
 

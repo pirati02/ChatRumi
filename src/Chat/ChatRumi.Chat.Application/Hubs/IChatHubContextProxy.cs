@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using ChatRumi.Chat.Domain.ValueObject;
 
 namespace ChatRumi.Chat.Application.Hubs;
 
 public interface IChatHubContextProxy
 {
-    IHubClients<IChatClient> Clients { get; }
+    Task MessageStateUpdated(IEnumerable<string> connectionIds, Guid messageId, MessageStatus messageStatus);
 }

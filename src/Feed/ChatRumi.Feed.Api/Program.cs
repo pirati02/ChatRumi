@@ -32,16 +32,14 @@ feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
             Results.NotFound
         );
     })
-    .WithName("get-post")
-    .WithOpenApi();
+    .WithName("get-post");
 
 feedGroup.MapGet("shuffled/{creatorId:guid}", async ([FromRoute] Guid creatorId, [FromQuery] int limit, IMediator mediator) =>
     {
         var result = await mediator.Send(new GetPosts.Query(creatorId, limit));
         return Results.Ok(result);
     })
-    .WithName("get-posts")
-    .WithOpenApi();
+    .WithName("get-posts");
 
 feedGroup.MapPost("", async ([FromBody] CreatePost.Command command, IMediator mediator) =>
     {
@@ -51,8 +49,7 @@ feedGroup.MapPost("", async ([FromBody] CreatePost.Command command, IMediator me
             Results.InternalServerError
         );
     })
-    .WithName("create-post")
-    .WithOpenApi();
+    .WithName("create-post");
 
 feedGroup.MapGet("/health", () => Results.Ok("Healthy ✅"))
     .WithName("feed-health");

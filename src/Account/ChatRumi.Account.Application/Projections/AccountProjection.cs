@@ -18,7 +18,7 @@ public sealed record AccountProjection
     public DateTimeOffset VerifiedOn { get; set; }
 }
 
-public class AccountProjectionTransform : SingleStreamProjection<AccountProjection>
+public class AccountProjectionTransform : SingleStreamProjection<AccountProjection, Guid>
 {
     public AccountProjectionTransform()
     {

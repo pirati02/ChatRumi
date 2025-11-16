@@ -27,8 +27,7 @@ accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMedia
             Results.BadRequest
         );
     })
-    .WithName("create-account")
-    .WithOpenApi();
+    .WithName("create-account");
 
 accountGroup.MapPut("{accountId:guid}", async ([FromRoute] Guid accountId, [FromBody] UpdateAccount.Command command, IMediator mediator) =>
     {
@@ -42,8 +41,7 @@ accountGroup.MapPut("{accountId:guid}", async ([FromRoute] Guid accountId, [From
             Results.BadRequest
         );
     })
-    .WithName("update-account")
-    .WithOpenApi();
+    .WithName("update-account");
 
 accountGroup.MapPut("activate", async ([FromBody] VerifyAccount.Command request, IMediator mediator) =>
     {
@@ -53,8 +51,7 @@ accountGroup.MapPut("activate", async ([FromBody] VerifyAccount.Command request,
             Results.NotFound
         );
     })
-    .WithName("activate-account")
-    .WithOpenApi();
+    .WithName("activate-account");
 
 accountGroup.MapPatch("{accountId:guid}/resend-code", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
@@ -64,8 +61,7 @@ accountGroup.MapPatch("{accountId:guid}/resend-code", async ([FromRoute] Guid ac
             Results.NotFound
         );
     })
-    .WithName("verify-account")
-    .WithOpenApi();
+    .WithName("verify-account");
 
 accountGroup.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
@@ -75,16 +71,14 @@ accountGroup.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMedi
             Results.NotFound
         );
     })
-    .WithName("get-account")
-    .WithOpenApi();
+    .WithName("get-account");
 
 accountGroup.MapGet("", async (IMediator mediator) =>
     {
         var result = await mediator.Send(new GetAccounts.Query());
         return Results.Ok(result);
     })
-    .WithName("get-accounts")
-    .WithOpenApi();
+    .WithName("get-accounts");
 
 accountGroup.MapGet("/health", () => Results.Ok("Healthy ✅"))
     .WithName("account-health");

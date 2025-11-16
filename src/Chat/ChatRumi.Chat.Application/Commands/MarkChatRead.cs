@@ -1,11 +1,9 @@
 ﻿using ChatRumi.Chat.Application.Hubs;
-using ChatRumi.Chat.Domain.Aggregates;
 using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
 using ErrorOr;
 using Marten;
 using MediatR;
-using Microsoft.AspNetCore.SignalR;
 
 namespace ChatRumi.Chat.Application.Commands;
 
@@ -53,7 +51,7 @@ public static class MarkChatRead
 
             foreach (var (messageId, _, connectionIds) in senders)
             {
-                await hubContext.Clients.Clients(connectionIds).MessageStateUpdated(messageId, MessageStatus.Seen);
+                await hubContext.MessageStateUpdated(connectionIds, messageId, MessageStatus.Seen);
             }
 
             return true;

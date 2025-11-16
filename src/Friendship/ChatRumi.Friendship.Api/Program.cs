@@ -26,20 +26,17 @@ var friendship = app.MapGroup("/api/friendship");
 friendship.MapGet("{peerId:guid}",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetFriendsAsync(peerId)))
-    .WithName("friends")
-    .WithOpenApi();
+    .WithName("friends");
 
 friendship.MapGet("{peerId:guid}/received-requests",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetFriendRequestsAsync(peerId)))
-    .WithName("received-requests")
-    .WithOpenApi();
+    .WithName("received-requests");
 
 friendship.MapGet("{peerId:guid}/sent-requests",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
         Results.Ok(await connectionManager.GetRequestsISent(peerId)))
-    .WithName("sent-requests")
-    .WithOpenApi();
+    .WithName("sent-requests");
 
 friendship.MapPut("{peerId:guid}/request", async (
         Guid peerId,
@@ -50,8 +47,7 @@ friendship.MapPut("{peerId:guid}/request", async (
         await connectionManager.SendFriendRequestAsync(peerId, request.PeerId);
         return Results.Accepted();
     })
-    .WithName("invite-friend")
-    .WithOpenApi();
+    .WithName("invite-friend");
 
 friendship.MapPut("{peerId:guid}/accept", async (
         Guid peerId,
@@ -62,8 +58,7 @@ friendship.MapPut("{peerId:guid}/accept", async (
         await connectionManager.AcceptFriendRequestAsync(peerId, request.PeerId);
         return Results.Accepted();
     })
-    .WithName("accept-friend")
-    .WithOpenApi();
+    .WithName("accept-friend");
 
 
 friendship.MapDelete("{peerId:guid}/unfriend", async (
@@ -75,8 +70,7 @@ friendship.MapDelete("{peerId:guid}/unfriend", async (
         await connectionManager.UnfriendAsync(peerId, request.PeerId);
         return Results.Accepted();
     })
-    .WithName("unfriend")
-    .WithOpenApi();
+    .WithName("unfriend");
 
 friendship.MapGet("/health", () => Results.Ok("Healthy ✅"));
 

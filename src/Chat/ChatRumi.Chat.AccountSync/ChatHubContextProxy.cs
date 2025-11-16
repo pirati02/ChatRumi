@@ -1,9 +1,13 @@
 ﻿using ChatRumi.Chat.Application.Hubs;
-using Microsoft.AspNetCore.SignalR;
+using ChatRumi.Chat.Domain.ValueObject;
 
 namespace ChatRumi.Chat.AccountSync;
 
 public class ChatHubContextProxy : IChatHubContextProxy
 {
-    public IHubClients<IChatClient> Clients => null!;
+    public Task MessageStateUpdated(IEnumerable<string> connectionIds, Guid messageId, MessageStatus messageStatus)
+    {
+        //throw new NotImplementedException();
+        return Task.CompletedTask;
+    }
 }
