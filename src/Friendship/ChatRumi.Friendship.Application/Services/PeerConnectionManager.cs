@@ -6,11 +6,11 @@ namespace ChatRumi.Friendship.Application.Services;
 
 public interface IPeerConnectionManager
 {
-    Task CreatePeerAsync(Guid peerId, string userName, DateTime createdDate);
-    Task UpdatePeerAsync(Guid peerId, string userName, DateTime modifiedDate);
-    Task SendFriendRequestAsync(Guid peerId1, Guid peerId2);
-    Task AcceptFriendRequestAsync(Guid peerId1, Guid peerId2);
-    Task UnfriendAsync(Guid peerId, Guid targetPeerId);
+    Task CreatePeerAsync(PeerDto peer);
+    Task UpdatePeerAsync(PeerDto peer);
+    Task SendFriendRequestAsync(PeerDto peer1, PeerDto peer2);
+    Task AcceptFriendRequestAsync(PeerDto peer1, PeerDto peer2);
+    Task UnfriendAsync(PeerDto peer, PeerDto targetPeer);
     Task<PeerResponse[]> GetFriendsAsync(Guid peerId);
     Task<PeerResponse[]> GetFriendRequestsAsync(Guid peerId);
     Task<PeerResponse[]> GetRequestsISent(Guid peerId);
@@ -28,20 +28,25 @@ public class PeerConnectionManager : IPeerConnectionManager
         _session = driver.AsyncSession(builder => builder.WithDatabase(options.Value.Neo4jDatabase));
     }
 
-    public async Task CreatePeerAsync(Guid peerId, string userName, DateTime createdDate)
+    public async Task CreatePeerAsync(PeerDto peer)
     {
-        if (await PeerExistsAsync(peerId))
+        if (await PeerExistsAsync(peer.PeerId))
         {
             return;
         }
 
         const string query = "CREATE (a:Account {peerId: $peerId, userName: $userName, createdDate: $createdDate})";
-        var parameters = new { peerId = peerId.ToString(), userName, createdDate };
+        var parameters = new
+        {
+            peerId = peer.PeerId.ToString(),
+            userName = peer.UserName,
+            createdDate = DateTime.UtcNow
+        };
 
         await _session.RunAsync(query, parameters);
     }
 
-    public async Task UpdatePeerAsync(Guid peerId, string userName, DateTime modifiedDate)
+    public async Task UpdatePeerAsync(PeerDto peer)
     {
         const string query = """
                                  MERGE (a:Account {peerId: $peerId})
@@ -55,60 +60,94 @@ public class PeerConnectionManager : IPeerConnectionManager
 
         var parameters = new
         {
-            peerId = peerId.ToString(),
-            userName,
-            modifiedDate
+            peerId = peer.PeerId.ToString(),
+            userName = peer.UserName,
+            modifiedDate = DateTime.UtcNow
         };
 
         await _session.ExecuteWriteAsync(async tx => { await tx.RunAsync(query, parameters); });
     }
     
-    public async Task UnfriendAsync(Guid peerId, Guid targetPeerId)
+    public async Task UnfriendAsync(PeerDto peer, PeerDto targetPeer)
     {
-        // Remove the FRIENDS relationship in both directions
-        const string query = """
-                              MATCH (a:Account {peerId: $peerId})-[r:FRIENDS_WITH]-(b:Account {peerId: $targetPeerId})
-                              DELETE r
-                             """;
-
-        var parameters = new
+        await _session.ExecuteWriteAsync(async tx =>
         {
-            peerId = peerId.ToString(),
-            targetPeerId = targetPeerId.ToString()
-        };
+            // Remove the FRIENDS_WITH relationship in both directions
+            const string query = """
+                                  MATCH (a:Account {peerId: $peerId})-[r:FRIENDS_WITH]-(b:Account {peerId: $targetPeerId})
+                                  DELETE r
+                                 """;
 
-        await _session.RunAsync(query, parameters);
+            var parameters = new
+            {
+                peerId = peer.PeerId.ToString(),
+                targetPeerId = targetPeer.PeerId.ToString()
+            };
+
+            var cursor = await tx.RunAsync(query, parameters);
+            await cursor.ConsumeAsync();
+            return true;
+        });
     }
 
-    public async Task SendFriendRequestAsync(Guid peerId1, Guid peerId2)
+    public async Task SendFriendRequestAsync(PeerDto peer1, PeerDto peer2)
     {
-        const string query = """
-                               MATCH (a1:Account {peerId: $peerId1}), (a2:Account {peerId: $peerId2})
-                               MERGE (a1)-[r:FRIEND_REQUEST]->(a2)
-                               ON CREATE SET r.sentAt = datetime()
-                             """;
-
-        var parameters = new
+        await _session.ExecuteWriteAsync(async tx =>
         {
-            peerId1 = peerId1.ToString(),
-            peerId2 = peerId2.ToString()
-        };
+            const string ensurePeersQuery = """
+                MERGE (a1:Account {peerId: $peerId1})
+                ON CREATE SET a1.userName = $userName1, a1.createdDate = $createdDate1
+                MERGE (a2:Account {peerId: $peerId2})
+                ON CREATE SET a2.userName = $userName2, a2.createdDate = $createdDate2
+            """;
 
-        await _session.ExecuteWriteAsync(async tx => { await tx.RunAsync(query, parameters); });
+            var ensureParams = new
+            {
+                peerId1 = peer1.PeerId.ToString(),
+                userName1 = peer1.UserName,
+                createdDate1 = DateTime.UtcNow,
+                peerId2 = peer2.PeerId.ToString(),
+                userName2 = peer2.UserName,
+                createdDate2 = DateTime.UtcNow
+            };
+
+            await tx.RunAsync(ensurePeersQuery, ensureParams);
+
+            const string requestQuery = """
+                MATCH (a1:Account {peerId: $peerId1}), (a2:Account {peerId: $peerId2})
+                MERGE (a1)-[r:FRIEND_REQUEST]->(a2)
+                ON CREATE SET r.createdDate = datetime()
+            """;
+
+            var requestParams = new
+            {
+                peerId1 = peer1.PeerId.ToString(),
+                peerId2 = peer2.PeerId.ToString()
+            };
+
+            var cursor = await tx.RunAsync(requestQuery, requestParams);
+            await cursor.ConsumeAsync();
+            return true;
+        });
     }
 
-    public async Task AcceptFriendRequestAsync(Guid peerId2, Guid peerId1)
+    public async Task AcceptFriendRequestAsync(PeerDto peer1, PeerDto peer2)
     {
-        const string query = """
-                                 MATCH (a1:Account {peerId: $peerId1})-[r:FRIEND_REQUEST]->(a2:Account {peerId: $peerId2})
-                                 DELETE r
-                                 CREATE (a1)-[:FRIENDS_WITH]->(a2)
-                                 CREATE (a2)-[:FRIENDS_WITH]->(a1)
-                             """;
+        await _session.ExecuteWriteAsync(async tx =>
+        {
+            const string query = """
+                                     MATCH (a1:Account {peerId: $peerId1})-[r:FRIEND_REQUEST]->(a2:Account {peerId: $peerId2})
+                                     DELETE r
+                                     MERGE (a1)-[:FRIENDS_WITH]->(a2)
+                                     MERGE (a2)-[:FRIENDS_WITH]->(a1)
+                                 """;
 
-        var parameters = new { peerId1 = peerId1.ToString(), peerId2 = peerId2.ToString() };
+            var parameters = new { peerId1 = peer2.PeerId.ToString(), peerId2 = peer1.PeerId.ToString() };
 
-        await _session.RunAsync(query, parameters);
+            var cursor = await tx.RunAsync(query, parameters);
+            await cursor.ConsumeAsync();
+            return true;
+        });
     }
 
     public async Task<PeerResponse[]> GetFriendsAsync(Guid peerId)
@@ -163,7 +202,7 @@ public class PeerConnectionManager : IPeerConnectionManager
         return (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["peerId"].As<string>()),
                 record["userName"].As<string>(),
-                record["createdDate"].As<ZonedDateTime>().UtcDateTime
+                record["createdDate"].As<ZonedDateTime?>()!.UtcDateTime
             )))
             .ToArray();
     }

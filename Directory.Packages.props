@@ -45,5 +45,11 @@
 		<!-- Gateway -->
 		<PackageVersion Include="Ocelot" Version="24.0.1" />
 		<PackageVersion Include="Ocelot.Provider.Consul" Version="24.0.0" />
+
+		<!-- Test packages (centralized) -->
+		<PackageVersion Include="Moq" Version="4.20.2" />
+		<PackageVersion Include="xunit" Version="2.5.3" />
+		<PackageVersion Include="xunit.runner.visualstudio" Version="2.5.0" />
+		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.2.0" />
 	</ItemGroup>
 </Project>

@@ -12,14 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-await PostIndexer.IndexPost(builder.Services.BuildServiceProvider());
-
 builder.Services.AddPresentation();
 builder.Services.AddApplication();
 builder.Services.AddConsulService(builder.Configuration);
 
 var app = builder.Build();
 
+await PostIndexer.IndexPost(app.Services);
 app.UseCors("CorsPolicy");
 
 var feedGroup = app.MapGroup("/api/feed");

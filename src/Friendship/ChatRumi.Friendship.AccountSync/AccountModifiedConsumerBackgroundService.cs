@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using ChatRum.InterCommunication;
+using ChatRumi.Friendship.Application.Dto.Request;
 using ChatRumi.Friendship.Application.IntegrationEvents;
 using ChatRumi.Friendship.Application.Services;
 using Confluent.Kafka;
@@ -51,7 +52,7 @@ public class AccountModifiedConsumerBackgroundService(
                             return;
                         }
 
-                        await peerConnectionManager.UpdatePeerAsync(@event.AccountId, @event.UserName, DateTime.UtcNow);
+                        await peerConnectionManager.UpdatePeerAsync(new PeerDto(@event.AccountId, @event.UserName));
                     }
 
                     logger.LogInformation("Consumed message: Key = {Key}, Value = {Value}", cr.Message.Key,

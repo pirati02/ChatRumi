@@ -4,7 +4,6 @@ using ChatRumi.Friendship.Application;
 using ChatRumi.Friendship.Application.Dto.Request;
 using ChatRumi.Friendship.Application.Dto.Response;
 using ChatRumi.Friendship.Application.Services;
-using Consul;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,40 +37,36 @@ friendship.MapGet("{peerId:guid}/sent-requests",
         Results.Ok(await connectionManager.GetRequestsISent(peerId)))
     .WithName("sent-requests");
 
-friendship.MapPut("{peerId:guid}/request", async (
-        Guid peerId,
+friendship.MapPost("request", async (
         [FromBody] InviteFriendRequest request,
         [FromServices] IPeerConnectionManager connectionManager
     ) =>
     {
-        await connectionManager.SendFriendRequestAsync(peerId, request.PeerId);
-        return Results.Accepted();
+        await connectionManager.SendFriendRequestAsync(request.Peer1, request.Peer2);
+        return Results.NoContent();
     })
     .WithName("invite-friend");
 
-friendship.MapPut("{peerId:guid}/accept", async (
-        Guid peerId,
+friendship.MapPost("accept", async (
         [FromBody] AcceptFriendRequest request,
         [FromServices] IPeerConnectionManager connectionManager
     ) =>
     {
-        await connectionManager.AcceptFriendRequestAsync(peerId, request.PeerId);
-        return Results.Accepted();
+        await connectionManager.AcceptFriendRequestAsync(request.Peer1, request.Peer2);
+        return Results.NoContent();
     })
     .WithName("accept-friend");
 
 
-friendship.MapDelete("{peerId:guid}/unfriend", async (
-        Guid peerId,
+friendship.MapDelete("unfriend", async (
         [FromBody] UnfriendRequest request,
         [FromServices] IPeerConnectionManager connectionManager
     ) =>
     {
-        await connectionManager.UnfriendAsync(peerId, request.PeerId);
-        return Results.Accepted();
+        await connectionManager.UnfriendAsync(request.Peer1, request.Peer2);
+        return Results.NoContent();
     })
     .WithName("unfriend");
 
-friendship.MapGet("/health", () => Results.Ok("Healthy ✅"));
-
 await app.RunAsync();
+

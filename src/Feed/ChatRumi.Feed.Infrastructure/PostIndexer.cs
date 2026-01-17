@@ -31,7 +31,7 @@ public static class PostIndexer
                         )
                         .Date(d => d.Name(n => n.CreationDate))
                     )
-                )
+                ).Aliases(a => a.Alias("user-posts").Alias("feed-posts"))
             );
 
             if (!createResponse.IsValid)
