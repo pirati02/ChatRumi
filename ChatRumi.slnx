@@ -1,0 +1,45 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/solution-files/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Packages.props" />
+    <File Path="solution-files/docker-compose.yaml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ChatRum.Gateway/ChatRum.Gateway.csproj" />
+    <Project Path="src/ChatRum.InterCommunication/ChatRum.InterCommunication.csproj" />
+    <Project Path="src/ChatRumi.Infrastructure/ChatRumi.Infrastructure.csproj" />
+    <Project Path="src/ChatRumi.Kernel/ChatRumi.Kernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Account/">
+    <Project Path="src/Account/ChatRumi.Account.Api/ChatRumi.Account.Api.csproj" />
+    <Project Path="src/Account/ChatRumi.Account.Application/ChatRumi.Account.Application.csproj" />
+    <Project Path="src/Account/ChatRumi.Account.Domain/ChatRumi.Account.Domain.csproj" />
+    <Project Path="src/Account/ChatRumi.Account.Infrastructure/ChatRumi.Account.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Chat/">
+    <Project Path="src/Chat/ChatRumi.Chat.AccountSync/ChatRumi.Chat.AccountSync.csproj" />
+    <Project Path="src/Chat/ChatRumi.Chat.Api/ChatRumi.Chat.Api.csproj" />
+    <Project Path="src/Chat/ChatRumi.Chat.Application/ChatRumi.Chat.Application.csproj" />
+    <Project Path="src/Chat/ChatRumi.Chat.Domain/ChatRumi.Chat.Domain.csproj" />
+    <Project Path="src/Chat/ChatRumi.Chat.Infrastructure/ChatRumi.Chat.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Feed/">
+    <Project Path="src/Feed/ChatRumi.Feed.AccountSync/ChatRumi.Feed.AccountSync.csproj" />
+    <Project Path="src/Feed/ChatRumi.Feed.Api/ChatRumi.Feed.Api.csproj" />
+    <Project Path="src/Feed/ChatRumi.Feed.Application/ChatRumi.Feed.Application.csproj" />
+    <Project Path="src/Feed/ChatRumi.Feed.Domain/ChatRumi.Feed.Domain.csproj" />
+    <Project Path="src/Feed/ChatRumi.Feed.Infrastructure/ChatRumi.Feed.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Friendship/">
+    <Project Path="src/Friendship/ChatRumi.Friendship.AccountSync/ChatRumi.Friendship.AccountSync.csproj" />
+    <Project Path="src/Friendship/ChatRumi.Friendship.Api/ChatRumi.Friendship.Api.csproj" />
+    <Project Path="src/Friendship/ChatRumi.Friendship.Application/ChatRumi.Friendship.Application.csproj" />
+    <Project Path="src/Friendship/ChatRumi.Friendship.Domain/ChatRumi.Friendship.Domain.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
