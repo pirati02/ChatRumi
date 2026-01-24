@@ -14,7 +14,11 @@ public static class ModuleRegistration
             {
                 options.AddPolicy("CorsPolicy", policyBuilder =>
                 {
-                    policyBuilder.WithOrigins("http://localhost:4200")
+                    policyBuilder.WithOrigins(
+                            "http://localhost:4200",
+                            "http://gateway:7000",
+                            "http://localhost:7000"
+                        )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();

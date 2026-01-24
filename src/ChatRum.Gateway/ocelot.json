@@ -41,11 +41,23 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/hub/chat/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "chatservice",
+      "UpstreamPathTemplate": "/hub/chat/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
+    },
+    {
       "DownstreamPathTemplate": "/hub/chat",
       "DownstreamScheme": "http",
       "ServiceName": "chatservice",
       "UpstreamPathTemplate": "/hub/chat",
-      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
       "UseWebSockets": true,
       "DownstreamHttpVersion": "1.1",
       "LoadBalancerOptions": {
