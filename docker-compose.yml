@@ -432,6 +432,11 @@ services:
       - "7000:7000"
     environment:
       - ASPNETCORE_URLS=http://+:7000
+      - ASPNETCORE_ENVIRONMENT=Production
+      - "GlobalConfiguration__BaseUrl=http://gateway:7000"
+      - "GlobalConfiguration__ServiceDiscoveryProvider__Host=${CONSUL_HOST:-consul}"
+      - "GlobalConfiguration__ServiceDiscoveryProvider__Port=${CONSUL_PORT:-8500}"
+      - GlobalConfiguration__ServiceDiscoveryProvider__Type=Consul
     depends_on:
       consul:
         condition: service_healthy

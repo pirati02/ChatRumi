@@ -1,3 +1,4 @@
+using ChatRum.Gateway;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Consul;
@@ -12,7 +13,7 @@ builder.Configuration.AddJsonFile(ocelotJson, optional: false, reloadOnChange: t
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddOcelot()
-    .AddConsul();
+    .AddConsul<ChatRumConsulServiceBuilder>();
 
 builder.Services.AddCors(options =>
 {

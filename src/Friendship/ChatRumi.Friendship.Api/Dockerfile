@@ -17,7 +17,7 @@ COPY ["src/ChatRumi.Kernel/ChatRumi.Kernel.csproj", "ChatRumi.Kernel/"]
 COPY ["src/ChatRum.InterCommunication/ChatRum.InterCommunication.csproj", "ChatRum.InterCommunication/"]
 RUN dotnet restore "Friendship/ChatRumi.Friendship.Api/ChatRumi.Friendship.Api.csproj"
 COPY . .
-WORKDIR "/src/Friendship/ChatRumi.Friendship.Api"
+WORKDIR "/src/src/Friendship/ChatRumi.Friendship.Api"
 RUN dotnet build "ChatRumi.Friendship.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

@@ -31,6 +31,16 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/feed/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "feedservice",
+      "UpstreamPathTemplate": "/feed/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
+    },
+    {
       "DownstreamPathTemplate": "/hub/chat",
       "DownstreamScheme": "http",
       "ServiceName": "chatservice",
@@ -45,12 +55,16 @@
   ],
   "GlobalConfiguration": {
     "UseServiceDiscovery": true,
-    "BaseUrl": "https://localhost:5136",
+    "BaseUrl": "http://localhost:7000",
     "ServiceDiscoveryProvider": {
+      "Scheme": "http",
       "Host": "consul",
       "Port": 8500,
       "Type": "Consul",
       "PollingInterval": 10000
+    },
+    "LoadBalancerOptions": {
+      "Type": "LeastConnection"
     }
   }
 }

@@ -1,4 +1,4 @@
-﻿using Consul;
+﻿﻿using Consul;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -18,45 +18,47 @@ public class ConsulServiceRegistrationBackgroundService(
         var uri = new Uri(options.Value.ServiceAddress);
         _serviceId = $"{serviceName}-{uri.Port}";
         
-        var services = await consulClient.Agent.Services(cancellationToken);
-        if (services.Response.Values.Any(s => s.ID == _serviceId))
+        // Always deregister first to ensure clean state
+        try
         {
-            Console.WriteLine($"⚠️ Service {_serviceId} is already registered in Consul. Skipping registration.");
-            return;
+            await consulClient.Agent.ServiceDeregister(_serviceId, cancellationToken);
+            Console.WriteLine($"🔄 Deregistered existing {_serviceId} (if any) to ensure clean registration.");
         }
+        catch
+        {
+            // Ignore if service doesn't exist
+        }
+        
+        // Extract the Docker service name from the URI host
+        // This must match the Docker Compose service name exactly (e.g., "account-service")
+        var dockerServiceName = uri.Host;
         
         var registration = new AgentServiceRegistration
         {
             ID = _serviceId,
             Name = serviceName,
-            Address = uri.Host,   // host.docker.internal
+            Address = dockerServiceName,   // Docker service name for DNS resolution
             Port = uri.Port,
-            TaggedAddresses = new Dictionary<string, ServiceTaggedAddress>
+            Meta = new Dictionary<string, string>
             {
-                ["lan"] = new()
-                {
-                    Address = uri.Host,
-                    Port = uri.Port
-                },
-                ["wan"] = new()
-                {
-                    Address = uri.Host,
-                    Port = uri.Port
-                }
+                ["ServiceUrl"] = options.Value.ServiceAddress,
+                ["DockerServiceName"] = dockerServiceName
             },
-            Tags = ["api"],
+            Tags = ["api", "docker"],
             Check = new AgentServiceCheck
             {
-                HTTP = $"{uri.Scheme}://{uri.Host}:{uri.Port}/health",
+                HTTP = $"{uri.Scheme}://{dockerServiceName}:{uri.Port}/health",
                 Interval = TimeSpan.FromSeconds(10),
                 Timeout = TimeSpan.FromSeconds(5),
-                DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30)
+                DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(60)
             }
         };
 
         await consulClient.Agent.ServiceRegister(registration, cancellationToken);
-        Console.WriteLine("Health Check URL: " + $"{uri.Scheme}://{uri.Host}:{uri.Port}/health");
-        Console.WriteLine($"✅ Registered {serviceName} with Consul at {uri}");
+        Console.WriteLine($"✅ Registered {serviceName} with Consul:");
+        Console.WriteLine($"   Service ID: {_serviceId}");
+        Console.WriteLine($"   Address: {dockerServiceName}:{uri.Port}");
+        Console.WriteLine($"   Health Check: {uri.Scheme}://{dockerServiceName}:{uri.Port}/health");
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -64,8 +66,8 @@ public class ConsulServiceRegistrationBackgroundService(
         if (!string.IsNullOrWhiteSpace(_serviceId))
         {
             await consulClient.Agent.ServiceDeregister(_serviceId, cancellationToken);
-            _serviceId = null;
             Console.WriteLine($"❌ Deregistered {_serviceId} from Consul");
+            _serviceId = null;
         }
     }
 }

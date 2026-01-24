@@ -19,7 +19,7 @@ COPY ["src/ChatRumi.Infrastructure/ChatRumi.Infrastructure.csproj", "src/ChatRum
 COPY ["src/ChatRum.InterCommunication/ChatRum.InterCommunication.csproj", "src/ChatRum.InterCommunication/"]
 RUN dotnet restore "src/Account/ChatRumi.Account.Api/ChatRumi.Account.Api.csproj"
 COPY . .
-WORKDIR "/src/Account/ChatRumi.Account.Api"
+WORKDIR "/src/src/Account/ChatRumi.Account.Api"
 RUN dotnet build "ChatRumi.Account.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

@@ -17,7 +17,7 @@ COPY ["src/ChatRumi.Kernel/ChatRumi.Kernel.csproj", "src/ChatRumi.Kernel/"]
 COPY ["src/ChatRum.InterCommunication/ChatRum.InterCommunication.csproj", "src/ChatRum.InterCommunication/"]
 RUN dotnet restore "src/Feed/ChatRumi.Feed.Api/ChatRumi.Feed.Api.csproj"
 COPY . .
-WORKDIR "/src/Feed/ChatRumi.Feed.Api"
+WORKDIR "/src/src/Feed/ChatRumi.Feed.Api"
 RUN dotnet build "ChatRumi.Feed.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
