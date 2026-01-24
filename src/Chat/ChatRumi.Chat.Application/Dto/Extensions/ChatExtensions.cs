@@ -1,4 +1,5 @@
-﻿using ChatRumi.Chat.Application.Dto.Response;
+﻿using ChatRumi.Chat.Application.Dto.Request;
+using ChatRumi.Chat.Application.Dto.Response;
 
 namespace ChatRumi.Chat.Application.Dto.Extensions;
 
@@ -19,6 +20,19 @@ public static class ChatExtensions
                 chat.Creator.ToDto(),
                 chat.CreationDate
             );
+        }
+    }
+
+    extension(ChatResponse chat)
+    {
+        public Guid[] Receivers(MessageRequest message)
+        {
+            var sender = message.Sender.Id;
+            return
+            [
+                .. chat.Participants.Where(a => a.Id != sender)
+                    .Select(p => p.Id)
+            ];
         }
     }
 }

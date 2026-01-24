@@ -7,5 +7,6 @@ public interface IChatClient
 {
     Task ChatStarted(Guid chatId);
     Task MessageSent(MessageResponse message, bool updateState);
+    Task MessageFailed(MessageResponse message);
     Task MessageStateUpdated(Guid messageId, MessageStatus status);
 }

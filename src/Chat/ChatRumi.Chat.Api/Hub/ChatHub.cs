@@ -1,5 +1,6 @@
 ﻿using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto;
+using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
@@ -65,18 +66,20 @@ public class ChatHub(
         await using var scope = serviceProvider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         var result = await mediator.Send(new AppendMessage.Command(chatId, message));
+        
+        var senderConnection = accountConnectionManager.GetConnections([message.Sender.Id]);
         if (result.IsError)
         {
-            //Todo: fire failed message to sent error
-            //or retry to send automatically
+            await Clients.Clients(senderConnection).MessageFailed(result.Value);
             return;
         }
 
         var chat = await mediator.Send(new GetChatById.Query(chatId));
-        var participantIds = chat.Value.Participants.Select(p => p.Id).ToArray();
-        var connections = accountConnectionManager.GetConnections(participantIds);
-
-        await Clients.Clients(connections).MessageSent(result.Value, false);
+   
+        var receivers = chat.Value.Receivers(message);
+        var connections = accountConnectionManager.GetConnections(receivers);
+        await Clients.Clients(connections).MessageSent(result.Value, true);
+        await Clients.Clients(senderConnection).MessageSent(result.Value, false);
     }
 
     public async Task UpdateMessageState(
