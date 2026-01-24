@@ -14,7 +14,7 @@ COPY ["src/ChatRumi.Kernel/ChatRumi.Kernel.csproj", "src/ChatRumi.Kernel/"]
 COPY ["src/ChatRum.InterCommunication/ChatRum.InterCommunication.csproj", "src/ChatRum.InterCommunication/"]
 RUN dotnet restore "src/Chat/ChatRumi.Chat.AccountSync/ChatRumi.Chat.AccountSync.csproj"
 COPY . .
-WORKDIR "/src/src/Chat/ChatRumi.Chat.AccountSync"
+WORKDIR "/src/Chat/ChatRumi.Chat.AccountSync"
 RUN dotnet build "ChatRumi.Chat.AccountSync.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
