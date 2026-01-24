@@ -7,14 +7,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Account/ChatRumi.Account.Api/ChatRumi.Account.Api.csproj", "Account/ChatRumi.Account.Api/"]
-COPY ["Account/ChatRumi.Account.Application/ChatRumi.Account.Application.csproj", "Account/ChatRumi.Account.Application/"]
-COPY ["Account/ChatRumi.Account.Domain/ChatRumi.Account.Domain.csproj", "Account/ChatRumi.Account.Domain/"]
-COPY ["ChatRumi.Kernel/ChatRumi.Kernel.csproj", "ChatRumi.Kernel/"]
-COPY ["ChatRum.InterCommunication/ChatRum.InterCommunication.csproj", "ChatRum.InterCommunication/"]
-RUN dotnet restore "Account/ChatRumi.Account.Api/ChatRumi.Account.Api.csproj"
+# Central package versions
+COPY ["Directory.Packages.props", "."]
+# Copy project files for restore
+COPY ["src/Account/ChatRumi.Account.Api/ChatRumi.Account.Api.csproj", "src/Account/ChatRumi.Account.Api/"]
+COPY ["src/Account/ChatRumi.Account.Application/ChatRumi.Account.Application.csproj", "src/Account/ChatRumi.Account.Application/"]
+COPY ["src/Account/ChatRumi.Account.Domain/ChatRumi.Account.Domain.csproj", "src/Account/ChatRumi.Account.Domain/"]
+COPY ["src/Account/ChatRumi.Account.Infrastructure/ChatRumi.Account.Infrastructure.csproj", "src/Account/ChatRumi.Account.Infrastructure/"]
+COPY ["src/ChatRumi.Kernel/ChatRumi.Kernel.csproj", "src/ChatRumi.Kernel/"]
+COPY ["src/ChatRumi.Infrastructure/ChatRumi.Infrastructure.csproj", "src/ChatRumi.Infrastructure/"]
+COPY ["src/ChatRum.InterCommunication/ChatRum.InterCommunication.csproj", "src/ChatRum.InterCommunication/"]
+RUN dotnet restore "src/Account/ChatRumi.Account.Api/ChatRumi.Account.Api.csproj"
 COPY . .
-WORKDIR "/src/Account/ChatRumi.Account.Api"
+WORKDIR "/src/src/Account/ChatRumi.Account.Api"
 RUN dotnet build "ChatRumi.Account.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

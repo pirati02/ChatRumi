@@ -20,6 +20,8 @@ var app = builder.Build();
 
 await PostIndexer.IndexPost(app.Services);
 app.UseCors("CorsPolicy");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("feed-health");
 
 var feedGroup = app.MapGroup("/api/feed");
 
@@ -50,7 +52,5 @@ feedGroup.MapPost("", async ([FromBody] CreatePost.Command command, IMediator me
     })
     .WithName("create-post");
 
-feedGroup.MapGet("/health", () => Results.Ok("Healthy ✅"))
-    .WithName("feed-health");
 
 app.Run();

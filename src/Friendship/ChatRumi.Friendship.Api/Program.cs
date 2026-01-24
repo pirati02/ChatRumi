@@ -19,6 +19,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("CorsPolicy");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("friendship-health");
 
 var friendship = app.MapGroup("/api/friendship");
 

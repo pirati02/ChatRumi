@@ -20,6 +20,8 @@ var app = builder.Build();
  
 app.UseRouting();
 app.UseCors("CorsPolicy");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("chat-health");
 
 var chatGroup = app.MapGroup("/api/chat");
 

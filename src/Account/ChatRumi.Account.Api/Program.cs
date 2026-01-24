@@ -17,6 +17,9 @@ builder.Services.AddConsulService(builder.Configuration);
 var app = builder.Build();
 
 app.UseCors("CorsPolicy");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("account-health");
+
 var accountGroup = app.MapGroup("/api/account");
 
 accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator mediator) =>
@@ -80,7 +83,5 @@ accountGroup.MapGet("", async (IMediator mediator) =>
     })
     .WithName("get-accounts");
 
-accountGroup.MapGet("/health", () => Results.Ok("Healthy ✅"))
-    .WithName("account-health");
 
 await app.RunAsync();

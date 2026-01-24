@@ -5,9 +5,12 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/solution-files/">
+    <File Path=".env" />
+    <File Path=".env.example" />
+    <File Path=".env.external" />
     <File Path=".gitignore" />
     <File Path="Directory.Packages.props" />
-    <File Path="solution-files/docker-compose.yaml" />
+    <File Path="docker-compose.yml" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/ChatRum.Gateway/ChatRum.Gateway.csproj" />

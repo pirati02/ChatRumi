@@ -1,0 +1,463 @@
+﻿# ════════════════════════════════════════════════════════════════
+# ChatRumi Microservices Stack
+# ════════════════════════════════════════════════════════════════
+# 
+# USAGE:
+#   Full stack:     docker compose up -d
+#   APIs only:      docker compose up -d account-service chat-service friendship-service feed-service gateway
+#   External infra: Copy .env.example to .env, set variables, then docker compose up -d
+#
+# ENVIRONMENT VARIABLES (defaults for in-docker):
+#   DB_HOST=postgres, DB_PORT=5432, DB_USER=postgres, DB_PASSWORD=postgres
+#   NEO4J_URI=bolt://neo4j:7687, NEO4J_USER=neo4j, NEO4J_PASSWORD=test1234
+#   ELASTIC_URL=http://elasticsearch:9200
+#   RABBITMQ_HOST=rabbitmq, RABBITMQ_PORT=5672, RABBITMQ_USER=admin, RABBITMQ_PASSWORD=rbadminpass
+#   KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+#   CONSUL_HOST=consul, CONSUL_PORT=8500
+#   REDIS_HOST=redis, REDIS_PORT=6379, REDIS_USER=default, REDIS_PASSWORD=RklyeteSYlO6xXVz7wahUlnvQgzS8THD
+#
+# See .env.example and DOCKER_README.md for details
+# ════════════════════════════════════════════════════════════════
+
+services:
+  # ════════════════════════════════════════════════════════════════
+  # INFRASTRUCTURE SERVICES
+  # ════════════════════════════════════════════════════════════════
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    environment:
+      - xpack.monitoring.enabled=true
+      - xpack.watcher.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.9.2
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    networks:
+      - backend
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: rbadminpass
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.6.0
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:7.6.0
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8082:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:14.1
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accountdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  neo4j:
+    container_name: neo4j
+    image: neo4j:latest
+    hostname: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/test1234
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  consul:
+    container_name: consul
+    image: hashicorp/consul:1.16.2
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: agent -dev -ui -client=0.0.0.0
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass RklyeteSYlO6xXVz7wahUlnvQgzS8THD
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ════════════════════════════════════════════════════════════════
+  # API SERVICES (REST endpoints with Consul registration)
+  # ════════════════════════════════════════════════════════════════
+
+  account-service:
+    build:
+      context: .
+      dockerfile: src/Account/ChatRumi.Account.Api/Dockerfile
+    container_name: account-service
+    ports:
+      - "5049:5049"
+    environment:
+      - ASPNETCORE_URLS=http://+:5049
+      - "ConnectionStrings__Marten=Host=${DB_HOST:-postgres};Port=${DB_PORT:-5432};Database=accountdb;Username=${DB_USER:-postgres};Password=${DB_PASSWORD:-postgres}"
+      - "ConnectionStrings__MassTransit=amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASSWORD:-rbadminpass}@${RABBITMQ_HOST:-rabbitmq}:${RABBITMQ_PORT:-5672}/"
+      - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
+      - "RedisOptions__Host=${REDIS_HOST:-redis}"
+      - "RedisOptions__Port=${REDIS_PORT:-6379}"
+      - "RedisOptions__User=${REDIS_USER:-default}"
+      - "RedisOptions__Password=${REDIS_PASSWORD:-RklyeteSYlO6xXVz7wahUlnvQgzS8THD}"
+      - ConsulOptions__ServiceName=accountservice
+      - ConsulOptions__ServiceAddress=http://account-service:5049
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=true
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: src/Chat/ChatRumi.Chat.Api/Dockerfile
+    container_name: chat-service
+    ports:
+      - "5111:5111"
+    environment:
+      - ASPNETCORE_URLS=http://+:5111
+      - "ConnectionStrings__Marten=Host=${DB_HOST:-postgres};Port=${DB_PORT:-5432};Database=chatdb;Username=${DB_USER:-postgres};Password=${DB_PASSWORD:-postgres}"
+      - "ConnectionStrings__MassTransit=amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASSWORD:-rbadminpass}@${RABBITMQ_HOST:-rabbitmq}:${RABBITMQ_PORT:-5672}/"
+      - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
+      - "RedisOptions__Host=${REDIS_HOST:-redis}"
+      - "RedisOptions__Port=${REDIS_PORT:-6379}"
+      - "RedisOptions__User=${REDIS_USER:-default}"
+      - "RedisOptions__Password=${REDIS_PASSWORD:-RklyeteSYlO6xXVz7wahUlnvQgzS8THD}"
+      - ConsulOptions__ServiceName=chatservice
+      - ConsulOptions__ServiceAddress=http://chat-service:5111
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=true
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+
+  friendship-service:
+    build:
+      context: .
+      dockerfile: src/Friendship/ChatRumi.Friendship.Api/Dockerfile
+    container_name: friendship-service
+    ports:
+      - "5031:5031"
+    environment:
+      - ASPNETCORE_URLS=http://+:5031
+      - "Neo4jOptions__Neo4jConnection=${NEO4J_URI:-bolt://neo4j:7687}"
+      - "Neo4jOptions__Neo4jUser=${NEO4J_USER:-neo4j}"
+      - "Neo4jOptions__Neo4jPassword=${NEO4J_PASSWORD:-test1234}"
+      - "Neo4jOptions__Neo4jDatabase=neo4j"
+      - ConsulOptions__ServiceName=friendshipservice
+      - ConsulOptions__ServiceAddress=http://friendship-service:5031
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=true
+    depends_on:
+      consul:
+        condition: service_healthy
+      neo4j:
+        condition: service_started
+    networks:
+      - backend
+
+  feed-service:
+    build:
+      context: .
+      dockerfile: src/Feed/ChatRumi.Feed.Api/Dockerfile
+    container_name: feed-service
+    ports:
+      - "5211:5211"
+    environment:
+      - ASPNETCORE_URLS=http://+:5211
+      - "ConnectionStrings__FeedContext=${ELASTIC_URL:-http://elasticsearch:9200}"
+      - "Elastic__User=${ELASTIC_USER:-elastic}"
+      - "Elastic__Password=${ELASTIC_PASSWORD:-elastic_pass}"
+      - ConsulOptions__ServiceName=feedservice
+      - ConsulOptions__ServiceAddress=http://feed-service:5211
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=true
+    depends_on:
+      consul:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - backend
+
+  # ════════════════════════════════════════════════════════════════
+  # BACKGROUND SERVICES (Event/Message Consumers - No REST endpoints)
+  # ════════════════════════════════════════════════════════════════
+
+  chat-account-sync:
+    build:
+      context: .
+      dockerfile: src/Chat/ChatRumi.Chat.AccountSync/Dockerfile
+    container_name: chat-account-sync
+    environment:
+      - "ConnectionStrings__Marten=Host=${DB_HOST:-postgres};Port=${DB_PORT:-5432};Database=chatdb;Username=${DB_USER:-postgres};Password=${DB_PASSWORD:-postgres}"
+      - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
+      - ConsulOptions__ServiceName=chat-account-sync
+      - ConsulOptions__ServiceAddress=http://chat-account-sync
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=false
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - backend
+
+  friendship-account-sync:
+    build:
+      context: .
+      dockerfile: src/Friendship/ChatRumi.Friendship.AccountSync/Dockerfile
+    container_name: friendship-account-sync
+    environment:
+      - "Neo4jOptions__Neo4jConnection=${NEO4J_URI:-bolt://neo4j:7687}"
+      - "Neo4jOptions__Neo4jUser=${NEO4J_USER:-neo4j}"
+      - "Neo4jOptions__Neo4jPassword=${NEO4J_PASSWORD:-test1234}"
+      - "Neo4jOptions__Neo4jDatabase=neo4j"
+      - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
+      - ConsulOptions__ServiceName=friendship-account-sync
+      - ConsulOptions__ServiceAddress=http://friendship-account-sync
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=false
+    depends_on:
+      consul:
+        condition: service_healthy
+      neo4j:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - backend
+
+  feed-account-sync:
+    build:
+      context: .
+      dockerfile: src/Feed/ChatRumi.Feed.AccountSync/Dockerfile
+    container_name: feed-account-sync
+    environment:
+      - "ConnectionStrings__FeedContext=${ELASTIC_URL:-http://elasticsearch:9200}"
+      - "Elastic__User=${ELASTIC_USER:-elastic}"
+      - "Elastic__Password=${ELASTIC_PASSWORD:-elastic_pass}"
+      - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
+      - ConsulOptions__ServiceName=feed-account-sync
+      - ConsulOptions__ServiceAddress=http://feed-account-sync
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=false
+    depends_on:
+      consul:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - backend
+
+  # ════════════════════════════════════════════════════════════════
+  # API GATEWAY (Dynamic service discovery via Consul)
+  # ════════════════════════════════════════════════════════════════
+
+  gateway:
+    build:
+      context: .
+      dockerfile: src/ChatRum.Gateway/Dockerfile
+    container_name: gateway
+    ports:
+      - "7000:7000"
+    environment:
+      - ASPNETCORE_URLS=http://+:7000
+    depends_on:
+      consul:
+        condition: service_healthy
+      account-service:
+        condition: service_started
+      chat-service:
+        condition: service_started
+      friendship-service:
+        condition: service_started
+      feed-service:
+        condition: service_started
+    networks:
+      - backend
+
+# ════════════════════════════════════════════════════════════════
+# VOLUMES AND NETWORKS
+# ════════════════════════════════════════════════════════════════
+
+volumes:
+  pgdata:
+  neo4j_data:
+  es_data:
+  rabbitmq_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+  redis_data:
+
+networks:
+  backend:
+    driver: bridge

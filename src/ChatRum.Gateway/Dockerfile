@@ -7,10 +7,14 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["ChatRum.Gateway/ChatRum.Gateway.csproj", "ChatRum.Gateway/"]
-RUN dotnet restore "ChatRum.Gateway/ChatRum.Gateway.csproj"
+# Copy central package management props so PackageReference versions are resolved during restore
+COPY ["Directory.Packages.props", "."]
+# Copy project file and restore
+COPY ["src/ChatRum.Gateway/ChatRum.Gateway.csproj", "src/ChatRum.Gateway/"]
+RUN dotnet restore "src/ChatRum.Gateway/ChatRum.Gateway.csproj"
+# Copy the rest of the source and build
 COPY . .
-WORKDIR "/src/ChatRum.Gateway"
+WORKDIR "/src/src/ChatRum.Gateway"
 RUN dotnet build "ChatRum.Gateway.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
