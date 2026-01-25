@@ -12,7 +12,8 @@ public static class ModifyChatParticipant
         Guid ParticipantId,
         string UserName,
         string FirstName,
-        string LastName
+        string LastName,
+        string? PublicKey
     ) : IRequest;
 
     public sealed class Handler(
@@ -39,7 +40,8 @@ public static class ModifyChatParticipant
                         request.ParticipantId,
                         request.FirstName,
                         request.LastName,
-                        request.UserName
+                        request.UserName,
+                        request.PublicKey
                     )
                 );
                 logger.LogInformation("Successfully updated {Chat} for participant {Id}", chatId, request.ParticipantId);

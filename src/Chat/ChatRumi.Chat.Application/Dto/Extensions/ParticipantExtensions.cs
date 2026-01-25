@@ -13,7 +13,8 @@ public static class ParticipantExtensions
                 Id = participant.Id,
                 FirstName = participant.FirstName,
                 LastName = participant.LastName,
-                NickName = participant.NickName
+                NickName = participant.NickName,
+                PublicKey = participant.PublicKey
             };
         }
     }
@@ -26,7 +27,8 @@ public static class ParticipantExtensions
                 participant.Id,
                 participant.FirstName,
                 participant.LastName,
-                participant.NickName
+                participant.NickName,
+                participant.PublicKey
             );
         }
     }

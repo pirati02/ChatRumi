@@ -5,5 +5,6 @@ public record ParticipantDto(
     Guid Id,
     string FirstName,
     string LastName,
-    string? NickName
+    string? NickName,
+    string? PublicKey = null
 );

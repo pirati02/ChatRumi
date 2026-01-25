@@ -6,5 +6,6 @@ public record ParticipantModifiedEvent(
     Guid ParticipantId,
     string UserName,
     string FirstName,
-    string LastName
+    string LastName,
+    string? PublicKey
 ) : DomainEvent;

@@ -83,5 +83,19 @@ accountGroup.MapGet("", async (IMediator mediator) =>
     })
     .WithName("get-accounts");
 
+accountGroup.MapPut("{accountId:guid}/public-key", async (
+        [FromRoute] Guid accountId,
+        [FromBody] RegisterPublicKeyRequest request,
+        IMediator mediator) =>
+    {
+        var result = await mediator.Send(new RegisterPublicKey.Command(accountId, request.PublicKey));
+        return result.Match(
+            _ => Results.Ok(),
+            Results.NotFound
+        );
+    })
+    .WithName("register-public-key");
 
 await app.RunAsync();
+
+public record RegisterPublicKeyRequest(string PublicKey);

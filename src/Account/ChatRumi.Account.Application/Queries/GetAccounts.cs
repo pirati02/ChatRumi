@@ -25,7 +25,8 @@ public static class GetAccounts
                     account.LastName,
                     account.PhoneNumber,
                     account.CountryCode,
-                    account.IsVerified
+                    account.IsVerified,
+                    account.PublicKey
                 ))
                 .ToArray();
         }

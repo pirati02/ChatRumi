@@ -1,5 +1,4 @@
-﻿using ChatRumi.Account.Application.Projections;
-using ErrorOr;
+﻿using ErrorOr;
 using Marten;
 using MediatR;
 
@@ -34,7 +33,8 @@ public static class GetAccount
                 account.LastName,
                 account.PhoneNumber,
                 account.CountryCode,
-                account.IsVerified
+                account.IsVerified,
+                account.PublicKey
             );
         }
     }
@@ -48,5 +48,6 @@ public record AccountResponse(
     string LastName,
     string PhoneNumber,
     string CountryCode,
-    bool IsVerified
+    bool IsVerified,
+    string? PublicKey
 );

@@ -130,10 +130,10 @@ public class PeerConnectionManager : IPeerConnectionManager
 
             var cursor = await tx.RunAsync(requestQuery, requestParams);
             await cursor.ConsumeAsync();
-            
-            await _hubContext.FriendRequestReceived(peer1, peer2);
             return true;
         });
+            
+        await _hubContext.FriendRequestReceived(peer1, peer2);
     }
 
     public async Task AcceptFriendRequestAsync(PeerDto peer1, PeerDto peer2)
@@ -152,9 +152,9 @@ public class PeerConnectionManager : IPeerConnectionManager
             var cursor = await tx.RunAsync(query, parameters);
             await cursor.ConsumeAsync();
             
-            await _hubContext.FriendRequestAccepted(peer1, peer2);
             return true;
         });
+        await _hubContext.FriendRequestAccepted(peer1, peer2);
     }
 
     public async Task<PeerResponse[]> GetFriendsAsync(Guid peerId)

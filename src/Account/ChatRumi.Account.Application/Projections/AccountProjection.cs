@@ -16,6 +16,11 @@ public sealed record AccountProjection
     
     public bool IsVerified { get; set; }
     public DateTimeOffset VerifiedOn { get; set; }
+    
+    /// <summary>
+    /// Public key for end-to-end encryption (Base64 encoded)
+    /// </summary>
+    public string? PublicKey { get; set; }
 }
 
 public class AccountProjectionTransform : SingleStreamProjection<AccountProjection, Guid>
@@ -46,6 +51,12 @@ public class AccountProjectionTransform : SingleStreamProjection<AccountProjecti
             account.Id = @event.AccountId;
             account.IsVerified = true;
             account.VerifiedOn = DateTimeOffset.UtcNow;
+        });
+        
+        ProjectEvent<AccountKeyRegisteredEvent>((account, @event) =>
+        {
+            account.Id = @event.AccountId;
+            account.PublicKey = @event.PublicKey;
         });
     }
 }

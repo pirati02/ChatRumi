@@ -75,7 +75,8 @@ public static class UpdateAccount
                     account.Id,
                     @event.UserName,
                     @event.FirstName,
-                    @event.LastName
+                    @event.LastName,
+                    account.PublicKey
                 ),
                 cancellationToken
             );

@@ -57,7 +57,8 @@ public class AccountModifiedConsumerBackgroundService(
                                 @event.AccountId,
                                 @event.UserName,
                                 @event.FirstName,
-                                @event.LastName
+                                @event.LastName,
+                                @event.PublicKey
                             ), stoppingToken);
                     }
 

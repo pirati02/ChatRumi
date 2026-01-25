@@ -18,6 +18,11 @@ public class Account : Kernel.Aggregate
     
     public byte[] PasswordHash { get; set; } = [];
     public byte[] PasswordSalt { get; set; } = [];
+    
+    /// <summary>
+    /// Public key for end-to-end encryption (Base64 encoded)
+    /// </summary>
+    public string? PublicKey { get; set; }
 
     public void Apply(AccountCreateEvent @event)
     {
@@ -43,5 +48,10 @@ public class Account : Kernel.Aggregate
         UserName = @event.UserName;
         FirstName = @event.FirstName;
         LastName = @event.LastName;
+    }
+
+    public void Apply(AccountKeyRegisteredEvent @event)
+    {
+        PublicKey = @event.PublicKey;
     }
 }

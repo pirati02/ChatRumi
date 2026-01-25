@@ -44,7 +44,8 @@ public class Chat : Aggregate
         {
             FirstName = @event.FirstName,
             LastName = @event.LastName,
-            NickName = @event.UserName
+            NickName = @event.UserName,
+            PublicKey = @event.PublicKey ?? existing.PublicKey
         };
         
         ReplaceParticipant(existing, updated);
