@@ -12,7 +12,8 @@ namespace ChatRumi.Chat.Api.Hub;
 
 public class ChatHub(
     IServiceProvider serviceProvider,
-    AccountConnectionManager accountConnectionManager) : Hub<IChatClient>
+    AccountConnectionManager accountConnectionManager,
+    ILogger<ChatHub> logger) : Hub<IChatClient>
 {
     public override Task OnConnectedAsync()
     {
@@ -63,23 +64,32 @@ public class ChatHub(
         MessageRequest message
     )
     {
-        await using var scope = serviceProvider.CreateAsyncScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var result = await mediator.Send(new AppendMessage.Command(chatId, message));
-        
-        var senderConnection = accountConnectionManager.GetConnections([message.Sender.Id]);
-        if (result.IsError)
+        try
         {
-            await Clients.Clients(senderConnection).MessageFailed(result.Value);
-            return;
-        }
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var result = await mediator.Send(new AppendMessage.Command(chatId, message));
+        
+            var senderConnection = accountConnectionManager.GetConnections([message.Sender.Id]);
+            if (result.IsError)
+            {
+                logger.LogWarning("SendMessage failed for chatId {ChatId}: {Error}", chatId, result.Value);
+                await Clients.Clients(senderConnection).MessageFailed(result.Value);
+                return;
+            }
 
-        var chat = await mediator.Send(new GetChatById.Query(chatId));
+            var chat = await mediator.Send(new GetChatById.Query(chatId));
    
-        var receivers = chat.Value.Receivers(message);
-        var connections = accountConnectionManager.GetConnections(receivers);
-        await Clients.Clients(connections).MessageSent(result.Value, true);
-        await Clients.Clients(senderConnection).MessageSent(result.Value, false);
+            var receivers = chat.Value.Receivers(message);
+            var connections = accountConnectionManager.GetConnections(receivers);
+            await Clients.Clients(connections).MessageSent(result.Value, true);
+            await Clients.Clients(senderConnection).MessageSent(result.Value, false);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in SendMessage for chatId {ChatId}", chatId);
+            throw;
+        }
     }
 
     public async Task UpdateMessageState(

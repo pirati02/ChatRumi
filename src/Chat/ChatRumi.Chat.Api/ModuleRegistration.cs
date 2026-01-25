@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Api.Hub;
+﻿﻿using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Hubs;
 
@@ -27,7 +27,10 @@ public static class ModuleRegistration
  
             services.AddSingleton<AccountConnectionManager>();
             services.AddScoped<IChatHubContextProxy, ChatHubContextProxy>();
-            services.AddSignalR().AddJsonProtocol(o => o.PayloadSerializerOptions = DefaultJsonContentOptions.CreateJsonOptions());
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            }).AddJsonProtocol(o => o.PayloadSerializerOptions = DefaultJsonContentOptions.CreateJsonOptions());
             services.AddOpenApi();
         }
     }
