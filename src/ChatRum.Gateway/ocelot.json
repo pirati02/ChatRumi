@@ -63,6 +63,30 @@
       "LoadBalancerOptions": {
         "Type": "LeastConnection"
       }
+    },
+    {
+      "DownstreamPathTemplate": "/hub/friendship/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "friendshipservice",
+      "UpstreamPathTemplate": "/hub/friendship/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/hub/friendship",
+      "DownstreamScheme": "http",
+      "ServiceName": "friendshipservice",
+      "UpstreamPathTemplate": "/hub/friendship",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
     }
   ],
   "GlobalConfiguration": {

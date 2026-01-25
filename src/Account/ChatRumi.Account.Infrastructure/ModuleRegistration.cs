@@ -1,5 +1,6 @@
 ﻿using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Projections;
+using ChatRumi.Infrastructure;
 using JasperFx;
 using JasperFx.Events;
 using JasperFx.Events.Daemon;
@@ -21,6 +22,7 @@ public static class ModuleRegistration
             IHostEnvironment environment
         )
         {
+            DbInitializer.Initialize(configuration.GetConnectionString("Marten")!);
             services.AddMarten(options =>
             {
                 options.Connection(configuration.GetConnectionString("Marten")!);

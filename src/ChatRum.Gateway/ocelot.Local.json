@@ -37,6 +37,20 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
     },
     {
+      "DownstreamPathTemplate": "/hub/friendship/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5031
+        }
+      ],
+      "UpstreamPathTemplate": "/hub/friendship/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1"
+    },
+    {
       "DownstreamPathTemplate": "/api/feed/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

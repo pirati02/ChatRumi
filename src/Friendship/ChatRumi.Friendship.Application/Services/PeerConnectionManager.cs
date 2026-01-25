@@ -18,13 +18,16 @@ public interface IPeerConnectionManager
 
 public class PeerConnectionManager : IPeerConnectionManager
 {
+    private readonly IFriendshipHubContextProxy _hubContext;
     private readonly IAsyncSession _session;
 
     public PeerConnectionManager(
         IDriver driver,
-        IOptions<Neo4jOptions> options
+        IOptions<Neo4jOptions> options,
+        IFriendshipHubContextProxy hubContext
     )
     {
+        _hubContext = hubContext;
         _session = driver.AsyncSession(builder => builder.WithDatabase(options.Value.Neo4jDatabase));
     }
 
@@ -127,6 +130,8 @@ public class PeerConnectionManager : IPeerConnectionManager
 
             var cursor = await tx.RunAsync(requestQuery, requestParams);
             await cursor.ConsumeAsync();
+            
+            await _hubContext.FriendRequestReceived(peer1, peer2);
             return true;
         });
     }
@@ -146,6 +151,8 @@ public class PeerConnectionManager : IPeerConnectionManager
 
             var cursor = await tx.RunAsync(query, parameters);
             await cursor.ConsumeAsync();
+            
+            await _hubContext.FriendRequestAccepted(peer1, peer2);
             return true;
         });
     }

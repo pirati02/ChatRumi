@@ -1,5 +1,6 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRumi.Friendship.Api;
+using ChatRumi.Friendship.Api.Hub;
 using ChatRumi.Friendship.Application;
 using ChatRumi.Friendship.Application.Dto.Request;
 using ChatRumi.Friendship.Application.Dto.Response;
@@ -69,6 +70,8 @@ friendship.MapDelete("unfriend", async (
         return Results.NoContent();
     })
     .WithName("unfriend");
+
+app.MapHub<FriendshipHub>("/hub/friendship");
 
 await app.RunAsync();
 
