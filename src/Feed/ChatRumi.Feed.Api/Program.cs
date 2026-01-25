@@ -1,4 +1,5 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
+using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Feed.Api;
 using ChatRumi.Feed.Application;
 using ChatRumi.Feed.Application.Commands;
@@ -6,7 +7,6 @@ using ChatRumi.Feed.Application.Queries;
 using ChatRumi.Feed.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Nest;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +15,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddPresentation();
 builder.Services.AddApplication();
 builder.Services.AddConsulService(builder.Configuration);
+builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
 

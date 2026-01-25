@@ -211,6 +211,23 @@ services:
       timeout: 10s
       retries: 5
 
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:1.53
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC receiver
+      - "4318:4318"    # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:14269/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   # ════════════════════════════════════════════════════════════════
   # API SERVICES (REST endpoints with Consul registration)
   # ════════════════════════════════════════════════════════════════
@@ -237,6 +254,10 @@ services:
       - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
       - ConsulOptions__Scheme=http
       - ConsulOptions__Enabled=true
+      - OpenTelemetry__ServiceName=account-service
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
@@ -247,6 +268,8 @@ services:
       kafka:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - backend
@@ -273,6 +296,10 @@ services:
       - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
       - ConsulOptions__Scheme=http
       - ConsulOptions__Enabled=true
+      - OpenTelemetry__ServiceName=chat-service
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
@@ -281,6 +308,8 @@ services:
       kafka:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - backend
@@ -304,11 +333,17 @@ services:
       - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
       - ConsulOptions__Scheme=http
       - ConsulOptions__Enabled=true
+      - OpenTelemetry__ServiceName=friendship-service
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
       neo4j:
         condition: service_started
+      jaeger:
+        condition: service_healthy
     networks:
       - backend
 
@@ -330,10 +365,16 @@ services:
       - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
       - ConsulOptions__Scheme=http
       - ConsulOptions__Enabled=true
+      - OpenTelemetry__ServiceName=feed-service
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
       elasticsearch:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - backend
@@ -356,12 +397,18 @@ services:
       - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
       - ConsulOptions__Scheme=http
       - ConsulOptions__Enabled=false
+      - OpenTelemetry__ServiceName=chat-account-sync
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
       postgres:
         condition: service_started
       kafka:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - backend
@@ -383,12 +430,18 @@ services:
       - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
       - ConsulOptions__Scheme=http
       - ConsulOptions__Enabled=false
+      - OpenTelemetry__ServiceName=friendship-account-sync
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
       neo4j:
         condition: service_started
       kafka:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - backend
@@ -409,12 +462,18 @@ services:
       - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
       - ConsulOptions__Scheme=http
       - ConsulOptions__Enabled=false
+      - OpenTelemetry__ServiceName=feed-account-sync
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
       kafka:
+        condition: service_healthy
+      jaeger:
         condition: service_healthy
     networks:
       - backend
@@ -437,6 +496,10 @@ services:
       - "GlobalConfiguration__ServiceDiscoveryProvider__Host=${CONSUL_HOST:-consul}"
       - "GlobalConfiguration__ServiceDiscoveryProvider__Port=${CONSUL_PORT:-8500}"
       - GlobalConfiguration__ServiceDiscoveryProvider__Type=Consul
+      - OpenTelemetry__ServiceName=gateway
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
     depends_on:
       consul:
         condition: service_healthy
@@ -448,6 +511,8 @@ services:
         condition: service_started
       feed-service:
         condition: service_started
+      jaeger:
+        condition: service_healthy
     networks:
       - backend
 

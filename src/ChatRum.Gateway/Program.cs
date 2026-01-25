@@ -1,4 +1,5 @@
 using ChatRum.Gateway;
+using ChatRum.InterCommunication.Telemetry;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Consul;
@@ -14,6 +15,8 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 
 builder.Services.AddOcelot()
     .AddConsul<ChatRumConsulServiceBuilder>();
+
+builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {

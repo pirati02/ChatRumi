@@ -1,4 +1,5 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
+using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Friendship.Api;
 using ChatRumi.Friendship.Api.Hub;
 using ChatRumi.Friendship.Application;
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddPresentation()
     .AddApplication();
 builder.Services.AddConsulService(builder.Configuration);
+builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
 

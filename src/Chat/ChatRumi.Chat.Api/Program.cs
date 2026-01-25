@@ -1,4 +1,5 @@
 using ChatRum.InterCommunication.ServiceDiscovery;
+using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Chat.Api;
 using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application;
@@ -15,6 +16,7 @@ builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddPresentation();
 builder.Services.AddConsulService(builder.Configuration);
+builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
  
