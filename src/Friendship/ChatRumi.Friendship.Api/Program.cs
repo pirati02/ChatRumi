@@ -16,6 +16,11 @@ builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
 
+// Add request/response body logging for OpenTelemetry (must be early in pipeline)
+app.UseRequestResponseLogging(
+    maxBodySize: 8192,  // 8KB max body capture
+    excludedPaths: "/health");
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

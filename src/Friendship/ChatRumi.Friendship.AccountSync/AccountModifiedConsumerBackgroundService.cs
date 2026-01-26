@@ -52,7 +52,11 @@ public class AccountModifiedConsumerBackgroundService(
                             return;
                         }
 
-                        await peerConnectionManager.UpdatePeerAsync(new PeerDto(@event.AccountId, @event.UserName));
+                        await peerConnectionManager.UpdatePeerAsync(new PeerDto(
+                            @event.AccountId, 
+                            @event.UserName,
+                            @event.PublicKey
+                        ));
                     }
 
                     logger.LogInformation("Consumed message: Key = {Key}, Value = {Value}", cr.Message.Key,

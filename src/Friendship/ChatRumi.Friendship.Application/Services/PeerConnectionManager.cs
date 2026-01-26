@@ -55,9 +55,11 @@ public class PeerConnectionManager : IPeerConnectionManager
                                  MERGE (a:Account {peerId: $peerId})
                                  ON CREATE SET 
                                      a.userName = $userName,
+                                     a.publicKey = $publicKey,
                                      a.createdDate = $modifiedDate
                                  ON MATCH SET 
                                      a.userName = $userName,
+                                     a.publicKey = COALESCE($publicKey, a.publicKey),
                                      a.modifiedDate = $modifiedDate
                              """;
 
@@ -65,6 +67,7 @@ public class PeerConnectionManager : IPeerConnectionManager
         {
             peerId = peer.PeerId.ToString(),
             userName = peer.UserName,
+            publicKey = peer.PublicKey,
             modifiedDate = DateTime.UtcNow
         };
 
@@ -161,7 +164,7 @@ public class PeerConnectionManager : IPeerConnectionManager
     {
         const string query = """
                                  MATCH (a:Account {peerId: $peerId})-[:FRIENDS_WITH]-(friend:Account)
-                                 RETURN friend.peerId, friend.userName, friend.createdDate
+                                 RETURN friend.peerId, friend.userName, friend.createdDate, friend.publicKey
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
@@ -170,7 +173,8 @@ public class PeerConnectionManager : IPeerConnectionManager
         return (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["friend.peerId"].As<string>()),
                 record["friend.userName"].As<string>(),
-                record["friend.createdDate"].As<ZonedDateTime>().UtcDateTime
+                record["friend.createdDate"].As<ZonedDateTime>().UtcDateTime,
+                record["friend.publicKey"].As<string?>()
             )))
             .DistinctBy(a => a.PeerId)
             .ToArray();
@@ -180,7 +184,7 @@ public class PeerConnectionManager : IPeerConnectionManager
     {
         const string query = """
                                  MATCH (sender:Account)-[:FRIEND_REQUEST]->(recipient:Account {peerId: $peerId})
-                                 RETURN sender.peerId AS peerId, sender.userName AS userName, sender.createdDate AS createdDate
+                                 RETURN sender.peerId AS peerId, sender.userName AS userName, sender.createdDate AS createdDate, sender.publicKey AS publicKey
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
@@ -190,7 +194,8 @@ public class PeerConnectionManager : IPeerConnectionManager
         return (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["peerId"].As<string>()),
                 record["userName"].As<string>(),
-                record["createdDate"].As<ZonedDateTime>().UtcDateTime
+                record["createdDate"].As<ZonedDateTime>().UtcDateTime,
+                record["publicKey"].As<string?>()
             )))
             .ToArray();
     }
@@ -199,7 +204,7 @@ public class PeerConnectionManager : IPeerConnectionManager
     {
         const string query = """
                                  MATCH (requester:Account {peerId: $peerId})-[:FRIEND_REQUEST]->(recipient:Account)
-                                 RETURN recipient.peerId AS peerId, recipient.userName AS userName, recipient.createdDate AS createdDate
+                                 RETURN recipient.peerId AS peerId, recipient.userName AS userName, recipient.createdDate AS createdDate, recipient.publicKey AS publicKey
                              """;
         
         var parameters = new { peerId = peerId.ToString() };
@@ -209,7 +214,8 @@ public class PeerConnectionManager : IPeerConnectionManager
         return (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["peerId"].As<string>()),
                 record["userName"].As<string>(),
-                record["createdDate"].As<ZonedDateTime?>()!.UtcDateTime
+                record["createdDate"].As<ZonedDateTime?>()!.UtcDateTime,
+                record["publicKey"].As<string?>()
             )))
             .ToArray();
     }
