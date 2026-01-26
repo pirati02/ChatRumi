@@ -1,3 +1,3 @@
 ﻿namespace ChatRumi.Friendship.Application.Dto.Request;
 
-public record PeerDto(Guid PeerId, string UserName);
+public record PeerDto(Guid PeerId, string UserName, string? PublicKey = null);

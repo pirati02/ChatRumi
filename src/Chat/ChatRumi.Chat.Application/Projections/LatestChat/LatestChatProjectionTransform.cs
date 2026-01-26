@@ -18,5 +18,26 @@ public class LatestChatProjectionTransform : SingleStreamProjection<LatestChatPr
         {
             projection.LatestMessage = @event.AsLatestMessage();
         });
+
+        ProjectEvent<ParticipantModifiedEvent>((projection, @event) =>
+        {
+            var existing = projection.Participants.FirstOrDefault(p => p.Id == @event.ParticipantId);
+            if (existing is null)
+                return;
+
+            var updated = existing with
+            {
+                FirstName = @event.FirstName,
+                LastName = @event.LastName,
+                NickName = @event.UserName,
+                PublicKey = @event.PublicKey ?? existing.PublicKey
+            };
+
+            var index = projection.Participants.IndexOf(existing);
+            if (index >= 0)
+            {
+                projection.Participants[index] = updated;
+            }
+        });
     }
 }
