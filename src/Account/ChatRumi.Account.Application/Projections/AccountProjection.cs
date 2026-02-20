@@ -13,10 +13,10 @@ public sealed record AccountProjection
     public required string LastName { get; set; }
     public required string PhoneNumber { get; set; }
     public required string CountryCode { get; set; }
-    
+
     public bool IsVerified { get; set; }
     public DateTimeOffset VerifiedOn { get; set; }
-    
+
     /// <summary>
     /// Public key for end-to-end encryption (Base64 encoded)
     /// </summary>
@@ -37,7 +37,7 @@ public class AccountProjectionTransform : SingleStreamProjection<AccountProjecti
             account.PhoneNumber = @event.PhoneNumber;
             account.CountryCode = @event.CountryCode;
         });
-        
+
         ProjectEvent<AccountModifiedEvent>((account, @event) =>
         {
             account.Id = @event.AccountId;
@@ -45,14 +45,14 @@ public class AccountProjectionTransform : SingleStreamProjection<AccountProjecti
             account.FirstName = @event.FirstName;
             account.LastName = @event.LastName;
         });
-        
+
         ProjectEvent<VerifyAccountEvent>((account, @event) =>
         {
             account.Id = @event.AccountId;
             account.IsVerified = true;
             account.VerifiedOn = DateTimeOffset.UtcNow;
         });
-        
+
         ProjectEvent<AccountKeyRegisteredEvent>((account, @event) =>
         {
             account.Id = @event.AccountId;

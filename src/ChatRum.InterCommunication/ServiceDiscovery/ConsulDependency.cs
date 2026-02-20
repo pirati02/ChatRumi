@@ -11,10 +11,10 @@ public static class ConsulDependency
     public static void AddConsulService(this IServiceCollection services, IConfiguration configuration)
     {
         var configure = configuration.GetSection("ConsulOptions").Get<ConsulOptions>()?.Enabled ?? false;
-        
+
         if (!configure)
             return;
-        
+
         services.AddOptions<ConsulOptions>()
             .BindConfiguration(ConsulOptions.Name)
             .ValidateOnStart();

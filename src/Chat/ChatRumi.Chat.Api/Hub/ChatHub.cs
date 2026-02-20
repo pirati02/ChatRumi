@@ -69,7 +69,7 @@ public class ChatHub(
             await using var scope = serviceProvider.CreateAsyncScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var result = await mediator.Send(new AppendMessage.Command(chatId, message));
-        
+
             var senderConnection = accountConnectionManager.GetConnections([message.Sender.Id]);
             if (result.IsError)
             {
@@ -79,7 +79,7 @@ public class ChatHub(
             }
 
             var chat = await mediator.Send(new GetChatById.Query(chatId));
-   
+
             var receivers = chat.Value.Receivers(message);
             var connections = accountConnectionManager.GetConnections(receivers);
             await Clients.Clients(connections).MessageSent(result.Value, true);

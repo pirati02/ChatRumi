@@ -12,13 +12,13 @@ public static class DefaultJsonContentOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = false,
-            Converters = 
-            { 
+            Converters =
+            {
                 new JsonStringEnumConverter(),
                 new MessageContentConverter()
             }
         };
 
         return options;
-    }    
+    }
 }

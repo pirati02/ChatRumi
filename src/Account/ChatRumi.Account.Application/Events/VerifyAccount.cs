@@ -44,11 +44,11 @@ public static class VerifyAccount
         }
 
         private async Task<bool> SendSmsOtpAsync(ConsumeContext<Event> context)
-        { 
+        {
             var database = connectionMultiplexer.GetDatabase(0);
             var smsCode = new SmsCode(context.Message.PhoneNumber, OtpGenerate.New());
             if (!await database.StringSetAsync(smsCode.Key(), smsCode.Otp, TimeSpan.FromMinutes(options.Value.Expiration))) return false;
-           
+
             var result = await smsService.SendSmsAsync($"{context.Message.CountryCode}{context.Message.PhoneNumber}", $"Your otp code is: {smsCode.Otp}");
             return result is { Success: true, ErrorCode: 0 };
         }

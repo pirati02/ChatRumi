@@ -53,7 +53,7 @@ public class AccountModifiedConsumerBackgroundService(
                         }
 
                         await peerConnectionManager.UpdatePeerAsync(new PeerDto(
-                            @event.AccountId, 
+                            @event.AccountId,
                             @event.UserName,
                             @event.PublicKey
                         ));

@@ -2,7 +2,7 @@
 
 namespace ChatRumi.Chat.Domain.Events;
 
-public record GroupChatStartedEvent: DomainEvent
+public record GroupChatStartedEvent : DomainEvent
 {
     public required Guid[] Participants { get; init; }
 };

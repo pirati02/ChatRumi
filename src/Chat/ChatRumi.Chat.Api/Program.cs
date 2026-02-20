@@ -24,7 +24,7 @@ var app = builder.Build();
 app.UseRequestResponseLogging(
     maxBodySize: 8192,  // 8KB max body capture
     excludedPaths: "/health");
- 
+
 app.UseRouting();
 app.UseCors("CorsPolicy");
 app.MapGet("/health", () => Results.Ok("Healthy ✅"))

@@ -1,4 +1,4 @@
-﻿﻿using ChatRum.InterCommunication;
+﻿using ChatRum.InterCommunication;
 using ChatRumi.Account.Application.IntegrationEvents;
 using ChatRumi.Account.Domain.Events;
 using ErrorOr;
