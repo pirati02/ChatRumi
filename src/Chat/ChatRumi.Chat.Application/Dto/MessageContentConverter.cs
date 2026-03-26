@@ -75,7 +75,7 @@ public class MessageContentConverter : JsonConverter<MessageContent>
     public override void Write(Utf8JsonWriter writer, MessageContent value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();
-        
+
         // Write type discriminator
         var type = value switch
         {
@@ -99,7 +99,7 @@ public class MessageContentConverter : JsonConverter<MessageContent>
             }
             writer.WriteEndObject();
         }
-        
+
         writer.WriteEndObject();
     }
 }

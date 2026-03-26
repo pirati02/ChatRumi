@@ -34,16 +34,16 @@ public static class ModifyChatParticipant
 
             foreach (var chatId in chatIds.Chunk(100).SelectMany(a => a))
             {
-               session.Events.Append(
-                    chatId,
-                    new ParticipantModifiedEvent(
-                        request.ParticipantId,
-                        request.FirstName,
-                        request.LastName,
-                        request.UserName,
-                        request.PublicKey
-                    )
-                );
+                session.Events.Append(
+                     chatId,
+                     new ParticipantModifiedEvent(
+                         request.ParticipantId,
+                         request.FirstName,
+                         request.LastName,
+                         request.UserName,
+                         request.PublicKey
+                     )
+                 );
                 logger.LogInformation("Successfully updated {Chat} for participant {Id}", chatId, request.ParticipantId);
             }
 

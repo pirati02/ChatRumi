@@ -25,7 +25,7 @@ public static class AppendMessage
                 request.ChatId,
                 token: cancellationToken
             );
-            
+
             if (chat is null)
             {
                 return Error.NotFound("Chat not found.", $"Chat by '{request.ChatId}' not found.");

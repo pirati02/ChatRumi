@@ -39,7 +39,7 @@ public class Chat : Aggregate
         var existing = Participants.FirstOrDefault(p => p.Id == @event.ParticipantId);
         if (existing is null)
             return;
-        
+
         var updated = existing with
         {
             FirstName = @event.FirstName,
@@ -47,7 +47,7 @@ public class Chat : Aggregate
             NickName = @event.UserName,
             PublicKey = @event.PublicKey ?? existing.PublicKey
         };
-        
+
         ReplaceParticipant(existing, updated);
     }
 
@@ -73,7 +73,7 @@ public class Chat : Aggregate
     {
         Messages.Add(@event.AsMessage());
     }
-      
+
     private void ReplaceParticipant(Participant oldParticipant, Participant updated)
     {
         var index = Participants.IndexOf(oldParticipant);

@@ -24,7 +24,7 @@ public class FriendshipHub(FriendshipConnectionManager friendshipConnectionManag
 
         return base.OnDisconnectedAsync(exception);
     }
-    
+
     private bool TryGetAccount(out Guid accountId)
     {
         accountId = Guid.Empty;

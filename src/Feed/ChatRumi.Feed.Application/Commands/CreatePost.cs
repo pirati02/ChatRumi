@@ -1,6 +1,6 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
 using ChatRumi.Feed.Domain.Aggregates;
-using ChatRumi.Feed.Domain.ValueObject; 
+using ChatRumi.Feed.Domain.ValueObject;
 using ErrorOr;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,7 @@ public static class CreatePost
     public sealed record Command(
         Participant Creator,
         string Title,
-        string Description 
+        string Description
     ) : MediatR.IRequest<ErrorOr<string>>;
 
     public sealed class Handler(
@@ -25,7 +25,7 @@ public static class CreatePost
         {
             var post = Post.Create(request.Creator, request.Title, request.Description, [])
                 .ToDocument();
- 
+
             var response = await client.CreateDocumentAsync(
                 post,
                 cancellationToken

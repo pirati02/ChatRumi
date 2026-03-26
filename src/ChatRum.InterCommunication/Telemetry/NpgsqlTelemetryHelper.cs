@@ -18,7 +18,7 @@ public static class NpgsqlTelemetryHelper
         {
             connectionString = connectionString.TrimEnd(';') + ";Include Error Detail=true";
         }
-        
+
         return connectionString;
     }
 }

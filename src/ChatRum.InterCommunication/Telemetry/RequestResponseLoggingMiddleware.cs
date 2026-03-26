@@ -17,7 +17,7 @@ public class RequestResponseLoggingMiddleware(
     public async Task InvokeAsync(HttpContext context)
     {
         var activity = Activity.Current;
-        
+
         // Skip if no activity or path is excluded
         if (activity == null || _excludedPaths.Any(p => context.Request.Path.StartsWithSegments(p)))
         {
@@ -54,7 +54,7 @@ public class RequestResponseLoggingMiddleware(
         if (context.Request.ContentLength > 0 && context.Request.ContentLength <= maxBodySize)
         {
             context.Request.EnableBuffering();
-            
+
             try
             {
                 var buffer = new byte[context.Request.ContentLength.Value];
@@ -62,7 +62,7 @@ public class RequestResponseLoggingMiddleware(
                 context.Request.Body.Position = 0;
 
                 var requestBody = Encoding.UTF8.GetString(buffer);
-                
+
                 // Only log if it's text-based content
                 if (IsTextBasedContentType(context.Request.ContentType))
                 {
@@ -90,7 +90,7 @@ public class RequestResponseLoggingMiddleware(
     private async Task CaptureResponseBodyAsync(HttpContext context, Activity activity, MemoryStream responseBody)
     {
         responseBody.Seek(0, SeekOrigin.Begin);
-        
+
         if (responseBody.Length > 0 && responseBody.Length <= maxBodySize)
         {
             try
@@ -100,7 +100,7 @@ public class RequestResponseLoggingMiddleware(
                 responseBody.Seek(0, SeekOrigin.Begin);
 
                 var responseBodyText = Encoding.UTF8.GetString(buffer);
-                
+
                 // Only log if it's text-based content
                 if (IsTextBasedContentType(context.Response.ContentType))
                 {

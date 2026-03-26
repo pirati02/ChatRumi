@@ -1,4 +1,4 @@
-﻿﻿using ChatRumi.Chat.Domain.Aggregates;
+﻿using ChatRumi.Chat.Domain.Aggregates;
 using ChatRumi.Chat.Domain.ValueObject;
 using ChatRumi.Kernel;
 

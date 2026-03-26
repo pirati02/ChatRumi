@@ -12,7 +12,7 @@ public static class PostExtensions
             Description = post.Description,
             Title = post.Title,
             Creator = post.Creator,
-            Attachments = [..post.Attachments.Select(a => a.Id)],
+            Attachments = [.. post.Attachments.Select(a => a.Id)],
             CreationDate = post.CreationDate,
             Reactions = post.Reactions,
             Shares = post.Shares

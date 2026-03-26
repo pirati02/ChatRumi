@@ -38,7 +38,7 @@ public static class StartChat
                     return existing.Id;
                 }
             }
- 
+
             var chat = new Domain.Aggregates.Chat(
                 request.ChatName,
                 request.Creator.ToDomain(),

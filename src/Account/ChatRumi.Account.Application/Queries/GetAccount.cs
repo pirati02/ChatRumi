@@ -15,10 +15,10 @@ public static class GetAccount
         public async Task<ErrorOr<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
-            
+
             var account = await session.Events
                 .AggregateStreamAsync<Domain.Aggregate.Account>(request.AccountId, token: cancellationToken);
-            
+
             if (account is null)
             {
                 return Error.NotFound("Account not found.",
