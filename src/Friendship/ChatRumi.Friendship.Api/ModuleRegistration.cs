@@ -1,6 +1,6 @@
 ﻿using ChatRumi.Friendship.Api.Hub;
 using ChatRumi.Friendship.Application.Services;
- 
+
 namespace ChatRumi.Friendship.Api;
 
 public static class ModuleRegistration
@@ -19,7 +19,7 @@ public static class ModuleRegistration
                         .AllowAnyMethod();
                 });
             });
-            
+
             services.AddSignalR();
             services.AddSingleton<FriendshipConnectionManager>();
             services.AddScoped<IFriendshipHubContextProxy, FriendshipHubContextProxy>();

@@ -8,12 +8,12 @@ public static class DbInitializer
     {
         var builder = new NpgsqlConnectionStringBuilder(connectionString);
         var targetDb = builder.Database;
- 
+
         builder.Database = "postgres";
 
         using var conn = new NpgsqlConnection(builder.ConnectionString);
         conn.Open();
- 
+
         using var cmd = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname = @name", conn);
         cmd.Parameters.AddWithValue("name", targetDb!);
         var exists = cmd.ExecuteScalar();

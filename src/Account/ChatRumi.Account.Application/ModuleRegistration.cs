@@ -20,7 +20,7 @@ public static class ModuleRegistration
             services.AddOptions<SmsOfficeOptions>().BindConfiguration(SmsOfficeOptions.Name);
             services.AddOptions<RedisOptions>().BindConfiguration(RedisOptions.Name);
             services.AddOptions<KafkaOptions>().BindConfiguration(KafkaOptions.Name);
-        
+
             services.AddScoped<ISmsService, SmsOfficeService>();
             services.AddHttpClient<ISmsService, SmsOfficeService>((sp, httpClient) =>
             {

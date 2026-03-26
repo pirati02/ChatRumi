@@ -11,7 +11,7 @@ public record struct MessageType
             Timestamp = DateTimeOffset.UtcNow
         };
     }
-    
+
     public static MessageType Sent()
     {
         return new MessageType
@@ -19,7 +19,7 @@ public record struct MessageType
             Timestamp = DateTimeOffset.UtcNow
         };
     }
-    
+
     public static MessageType Seen()
     {
         return new MessageType

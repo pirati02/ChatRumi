@@ -11,14 +11,14 @@ public class Account : Kernel.Aggregate
     public required string LastName { get; set; }
     public required string PhoneNumber { get; set; }
     public required string CountryCode { get; set; }
-    
+
     public bool IsVerified { get; private set; } = false;
     public DateTimeOffset VerifiedOn { get; set; }
     public bool MfaEnabled { get; set; } = false;
-    
+
     public byte[] PasswordHash { get; set; } = [];
     public byte[] PasswordSalt { get; set; } = [];
-    
+
     /// <summary>
     /// Public key for end-to-end encryption (Base64 encoded)
     /// </summary>
@@ -32,7 +32,7 @@ public class Account : Kernel.Aggregate
         LastName = @event.LastName;
         PhoneNumber = @event.PhoneNumber;
         CountryCode = @event.CountryCode;
-        
+
         IsVerified = false;
         MfaEnabled = false;
     }

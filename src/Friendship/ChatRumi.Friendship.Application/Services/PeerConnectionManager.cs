@@ -73,7 +73,7 @@ public class PeerConnectionManager : IPeerConnectionManager
 
         await _session.ExecuteWriteAsync(async tx => { await tx.RunAsync(query, parameters); });
     }
-    
+
     public async Task UnfriendAsync(PeerDto peer, PeerDto targetPeer)
     {
         await _session.ExecuteWriteAsync(async tx =>
@@ -135,7 +135,7 @@ public class PeerConnectionManager : IPeerConnectionManager
             await cursor.ConsumeAsync();
             return true;
         });
-            
+
         await _hubContext.FriendRequestReceived(peer1, peer2);
     }
 
@@ -154,7 +154,7 @@ public class PeerConnectionManager : IPeerConnectionManager
 
             var cursor = await tx.RunAsync(query, parameters);
             await cursor.ConsumeAsync();
-            
+
             return true;
         });
         await _hubContext.FriendRequestAccepted(peer1, peer2);
@@ -206,7 +206,7 @@ public class PeerConnectionManager : IPeerConnectionManager
                                  MATCH (requester:Account {peerId: $peerId})-[:FRIEND_REQUEST]->(recipient:Account)
                                  RETURN recipient.peerId AS peerId, recipient.userName AS userName, recipient.createdDate AS createdDate, recipient.publicKey AS publicKey
                              """;
-        
+
         var parameters = new { peerId = peerId.ToString() };
 
         var result = await _session.RunAsync(query, parameters);

@@ -1,4 +1,4 @@
-﻿﻿using Consul;
+﻿using Consul;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -17,7 +17,7 @@ public class ConsulServiceRegistrationBackgroundService(
         var serviceName = options.Value.ServiceName;
         var uri = new Uri(options.Value.ServiceAddress);
         _serviceId = $"{serviceName}-{uri.Port}";
-        
+
         // Always deregister first to ensure clean state
         try
         {
@@ -28,11 +28,11 @@ public class ConsulServiceRegistrationBackgroundService(
         {
             // Ignore if service doesn't exist
         }
-        
+
         // Extract the Docker service name from the URI host
         // This must match the Docker Compose service name exactly (e.g., "account-service")
         var dockerServiceName = uri.Host;
-        
+
         var registration = new AgentServiceRegistration
         {
             ID = _serviceId,

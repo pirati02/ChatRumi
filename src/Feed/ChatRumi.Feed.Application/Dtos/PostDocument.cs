@@ -28,7 +28,7 @@ public sealed class PostDocument
             Id = participantId,
             FirstName = firstName,
             LastName = lastName,
-            NickName = userName 
+            NickName = userName
         };
 
         return this;

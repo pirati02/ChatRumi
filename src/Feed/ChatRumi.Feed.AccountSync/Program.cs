@@ -13,5 +13,5 @@ builder.Services.AddHostedService<AccountModifiedConsumerBackgroundService>();
 builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
- 
+
 app.Run();
