@@ -21,8 +21,11 @@
     <ItemGroup>
       <ProjectReference Include="..\src\Account\ChatRumi.Account.Api\ChatRumi.Account.Api.csproj" />
       <ProjectReference Include="..\src\ChatRum.Gateway\ChatRum.Gateway.csproj" />
+      <ProjectReference Include="..\src\Chat\ChatRumi.Chat.AccountSync\ChatRumi.Chat.AccountSync.csproj" />
       <ProjectReference Include="..\src\Chat\ChatRumi.Chat.Api\ChatRumi.Chat.Api.csproj" />
+      <ProjectReference Include="..\src\Feed\ChatRumi.Feed.AccountSync\ChatRumi.Feed.AccountSync.csproj" />
       <ProjectReference Include="..\src\Feed\ChatRumi.Feed.Api\ChatRumi.Feed.Api.csproj" />
+      <ProjectReference Include="..\src\Friendship\ChatRumi.Friendship.AccountSync\ChatRumi.Friendship.AccountSync.csproj" />
       <ProjectReference Include="..\src\Friendship\ChatRumi.Friendship.Api\ChatRumi.Friendship.Api.csproj" />
     </ItemGroup>
 

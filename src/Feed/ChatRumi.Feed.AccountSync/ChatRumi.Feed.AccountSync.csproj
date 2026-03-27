@@ -12,5 +12,9 @@
       <ProjectReference Include="..\ChatRumi.Feed.Application\ChatRumi.Feed.Application.csproj" />
       <ProjectReference Include="..\ChatRumi.Feed.Infrastructure\ChatRumi.Feed.Infrastructure.csproj" />
     </ItemGroup>
- 
+
+    <ItemGroup>
+      <PackageReference Include="Confluent.Kafka" />
+    </ItemGroup>
+
 </Project>

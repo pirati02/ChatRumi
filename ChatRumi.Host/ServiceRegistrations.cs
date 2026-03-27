@@ -1,7 +1,16 @@
+using Aspire.Hosting.ApplicationModel;
+
 namespace ChatRumi.Host;
 
 public static class ServiceRegistrations
 {
+    private static ReferenceExpression KafkaBootstrapServers(IResourceBuilder<ContainerResource> kafka)
+    {
+        var endpoint = kafka.GetEndpoint("internal");
+        return ReferenceExpression.Create(
+            $"{endpoint.Property(EndpointProperty.Host)}:{endpoint.Property(EndpointProperty.Port)}");
+    }
+
     extension(IDistributedApplicationBuilder builder)
     {
         public IResourceBuilder<ProjectResource> AddAccountService(
@@ -33,15 +42,13 @@ public static class ServiceRegistrations
         }
 
         public IResourceBuilder<ProjectResource> AddChatService(
-            IResourceBuilder<PostgresServerResource> postgres,
+            IResourceBuilder<PostgresDatabaseResource> chatDatabase,
             IResourceBuilder<RedisResource> redis,
             IResourceBuilder<RabbitMQServerResource> rabbitMq,
             string defaultUser,
             string defaultPassword
         )
         {
-            var chatDatabase = postgres.AddDatabase("chatDatabase", "chatDatabase");
-
             return builder.AddProject<Projects.ChatRumi_Chat_Api>("chatService")
                 .WithHttpHealthCheck("/health")
                 .WithReference(redis)
@@ -60,6 +67,50 @@ public static class ServiceRegistrations
                 .WithEnvironment("MassTransit_Password", defaultPassword);
         }
 
+        public IResourceBuilder<ProjectResource> AddChatAccountSyncService(
+            IResourceBuilder<PostgresDatabaseResource> chatDatabase,
+            IResourceBuilder<RedisResource> redis,
+            IResourceBuilder<RabbitMQServerResource> rabbitMq,
+            IResourceBuilder<ContainerResource> kafka,
+            string defaultUser,
+            string defaultPassword
+        )
+        {
+            return builder.AddProject<Projects.ChatRumi_Chat_AccountSync>("chatAccountSyncService")
+                .WithHttpHealthCheck("/health")
+                .WithReference(redis)
+                .WithReference(rabbitMq)
+                .WithReference(chatDatabase)
+                .WaitFor(chatDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitMq)
+                .WaitFor(kafka)
+                .WithEnvironment("KafkaOptions__ConnectionString", KafkaBootstrapServers(kafka))
+                .WithEnvironment("RedisOptions__Host", "redis")
+                .WithEnvironment("RedisOptions__Port", "6379")
+                .WithEnvironment("RedisOptions__User", "default")
+                .WithEnvironment("RedisOptions__Password", "")
+                .WithEnvironment("RedisOptions__Expiration", "2")
+                .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression)
+                .WithEnvironment("MassTransit_User", defaultUser)
+                .WithEnvironment("MassTransit_Password", defaultPassword);
+        }
+
+
+        public IResourceBuilder<ProjectResource> AddFeedAccountSyncService(
+            IResourceBuilder<ElasticsearchResource> elastic, 
+            IResourceBuilder<ContainerResource> kafka
+        )
+        {
+            return builder.AddProject<Projects.ChatRumi_Feed_AccountSync>("feedAccountSyncService")
+              .WithHttpHealthCheck("/health")
+              .WaitFor(elastic)
+              .WaitFor(kafka)
+              .WithReference(elastic)
+              .WithEnvironment("ConnectionStrings__FeedContext", elastic.Resource.ConnectionStringExpression)
+              .WithEnvironment("KafkaOptions__ConnectionString", KafkaBootstrapServers(kafka));
+        }
+
         public IResourceBuilder<ProjectResource> AddFeedService(
             IResourceBuilder<ElasticsearchResource> elastic
         )
@@ -75,13 +126,37 @@ public static class ServiceRegistrations
             IResourceBuilder<ContainerResource> neo4J
         )
         {
+            var bolt = neo4J.GetEndpoint("neo4j-bolt");
+            var neo4jUri = ReferenceExpression.Create(
+                $"bolt://{bolt.Property(EndpointProperty.Host)}:{bolt.Property(EndpointProperty.Port)}");
+
             return builder.AddProject<Projects.ChatRumi_Friendship_Api>("friendshipService")
                 .WithHttpHealthCheck("/health")
                 .WaitFor(neo4J)
-                .WithEnvironment("Neo4jOptions__Neo4jConnection", "bolt://neo4j-dev:7687")
+                .WithEnvironment("Neo4jOptions__Neo4jConnection", neo4jUri)
                 .WithEnvironment("Neo4jOptions__Neo4jUser", "neo4j")
                 .WithEnvironment("Neo4jOptions__Neo4jPassword", "Passw0rd")
                 .WithEnvironment("Neo4jOptions__Neo4jDatabase", "neo4j");
+        }
+
+        public IResourceBuilder<ProjectResource> AddFriendshipAccountSyncService(
+            IResourceBuilder<ContainerResource> neo4J,
+            IResourceBuilder<ContainerResource> kafka
+        )
+        {
+            var bolt = neo4J.GetEndpoint("neo4j-bolt");
+            var neo4jUri = ReferenceExpression.Create(
+                $"bolt://{bolt.Property(EndpointProperty.Host)}:{bolt.Property(EndpointProperty.Port)}");
+
+            return builder.AddProject<Projects.ChatRumi_Friendship_AccountSync>("friendshipAccountSyncService")
+                .WithHttpHealthCheck("/health")
+                .WaitFor(neo4J)
+                .WaitFor(kafka)
+                .WithEnvironment("Neo4jOptions__Neo4jConnection", neo4jUri)
+                .WithEnvironment("Neo4jOptions__Neo4jUser", "neo4j")
+                .WithEnvironment("Neo4jOptions__Neo4jPassword", "Passw0rd")
+                .WithEnvironment("Neo4jOptions__Neo4jDatabase", "neo4j")
+                .WithEnvironment("KafkaOptions__ConnectionString", KafkaBootstrapServers(kafka));
         }
     }
 }
