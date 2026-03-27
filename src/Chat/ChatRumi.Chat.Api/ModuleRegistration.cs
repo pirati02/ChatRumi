@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Api.Hub;
+using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Hubs;
 
@@ -26,7 +26,7 @@ public static class ModuleRegistration
             });
 
             services.AddSingleton<AccountConnectionManager>();
-            services.AddScoped<IChatHubContextProxy, ChatHubContextProxy>();
+            services.AddSingleton<IChatHubContextProxy, ChatHubContextProxy>();
             services.AddSignalR(options =>
             {
                 options.EnableDetailedErrors = true;

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatRumi.Feed.Application;
 
@@ -8,7 +8,7 @@ public static class ModuleRegistration
     {
         public void AddApplication()
         {
-            services.AddMediator(cfg => cfg.Assemblies = [Application.Assembly]);
+            services.AddMediator(cfg => cfg.Assemblies = [typeof(IRefMarker)]);
         }
     }
 }
