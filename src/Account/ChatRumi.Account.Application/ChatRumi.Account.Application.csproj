@@ -11,7 +11,11 @@
         <PackageReference Include="FluentValidation"/>
         <PackageReference Include="Marten"/>
         <PackageReference Include="MassTransit"/>
-        <PackageReference Include="MediatR"/>
+        <PackageReference Include="Mediator.Abstractions" />
+        <PackageReference Include="Mediator.SourceGenerator">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Http"/>
         <PackageReference Include="StackExchange.Redis"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />

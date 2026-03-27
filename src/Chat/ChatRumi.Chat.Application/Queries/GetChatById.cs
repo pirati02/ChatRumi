@@ -2,7 +2,7 @@
 using ChatRumi.Chat.Application.Dto.Response;
 using ErrorOr;
 using Marten;
-using MediatR;
+using Mediator; 
 
 namespace ChatRumi.Chat.Application.Queries;
 
@@ -14,7 +14,7 @@ public static class GetChatById
 
     public sealed class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<ChatResponse>>
     {
-        public async Task<ErrorOr<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 

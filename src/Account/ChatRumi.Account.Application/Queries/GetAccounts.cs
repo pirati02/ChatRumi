@@ -1,6 +1,6 @@
 ﻿using ChatRumi.Account.Application.Projections;
 using Marten;
-using MediatR;
+using Mediator; 
 
 namespace ChatRumi.Account.Application.Queries;
 
@@ -12,7 +12,7 @@ public static class GetAccounts
         IDocumentStore store
     ) : IRequestHandler<Query, IEnumerable<AccountResponse>>
     {
-        public async Task<IEnumerable<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 

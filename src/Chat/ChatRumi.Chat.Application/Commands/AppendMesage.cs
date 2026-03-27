@@ -5,7 +5,7 @@ using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
 using ErrorOr;
 using Marten;
-using MediatR;
+using Mediator;
 
 namespace ChatRumi.Chat.Application.Commands;
 
@@ -18,7 +18,7 @@ public static class AppendMessage
         IDocumentStore store
     ) : IRequestHandler<Command, ErrorOr<MessageResponse>>
     {
-        public async Task<ErrorOr<MessageResponse>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<MessageResponse>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var chat = await session.Events.AggregateStreamAsync<Domain.Aggregates.Chat>(

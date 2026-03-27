@@ -24,10 +24,10 @@ public static class ModuleRegistration
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(configuration.GetConnectionString("MassTransit"), h =>
+                    cfg.Host(configuration.GetConnectionString("MassTransit_Url"), h =>
                     {
-                        h.Username("admin");
-                        h.Password("rbadminpass");
+                        h.Username(configuration.GetConnectionString("MassTransit_User")!);
+                        h.Password(configuration.GetConnectionString("MassTransit_Url")!);
                     });
 
                     cfg.ReceiveEndpoint("verify-account-event-queue",

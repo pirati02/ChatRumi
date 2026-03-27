@@ -8,7 +8,11 @@
 
     <ItemGroup>
         <PackageReference Include="ErrorOr"/>
-        <PackageReference Include="MediatR"/>
+        <PackageReference Include="Mediator.Abstractions" />
+        <PackageReference Include="Mediator.SourceGenerator">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
         <PackageReference Include="NEST"/>
     </ItemGroup>

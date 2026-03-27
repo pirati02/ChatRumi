@@ -13,7 +13,6 @@
         <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis"/>
         <PackageReference Include="StackExchange.Redis"/>
-        <PackageReference Include="MediatR"/>
     </ItemGroup>
 
     <ItemGroup>

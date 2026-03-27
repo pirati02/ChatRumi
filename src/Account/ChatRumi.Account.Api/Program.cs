@@ -5,8 +5,8 @@ using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
 using ChatRumi.Account.Application.Queries;
 using ChatRumi.Account.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using IMediator = MediatR.IMediator;
+using Mediator;
+using Microsoft.AspNetCore.Mvc; 
 
 var builder = WebApplication.CreateBuilder(args);
 

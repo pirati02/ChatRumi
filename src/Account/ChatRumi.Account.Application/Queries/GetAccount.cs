@@ -1,6 +1,6 @@
 ﻿using ErrorOr;
 using Marten;
-using MediatR;
+using Mediator;
 
 namespace ChatRumi.Account.Application.Queries;
 
@@ -12,7 +12,7 @@ public static class GetAccount
         IDocumentStore store
     ) : IRequestHandler<Query, ErrorOr<AccountResponse>>
     {
-        public async Task<ErrorOr<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 

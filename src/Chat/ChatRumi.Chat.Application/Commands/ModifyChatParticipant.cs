@@ -1,7 +1,7 @@
 ﻿using ChatRumi.Chat.Application.Projections.ExistingChat;
 using ChatRumi.Chat.Domain.Events;
 using Marten;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace ChatRumi.Chat.Application.Commands;
@@ -21,7 +21,7 @@ public static class ModifyChatParticipant
         ILogger<Handler> logger
     ) : IRequestHandler<Command>
     {
-        public async Task Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 
@@ -48,6 +48,7 @@ public static class ModifyChatParticipant
             }
 
             await session.SaveChangesAsync(cancellationToken);
+            return Unit.Value;
         }
     }
 }

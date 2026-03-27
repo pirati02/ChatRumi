@@ -2,7 +2,7 @@
 using ChatRumi.Feed.Domain.Aggregates;
 using ChatRumi.Feed.Domain.ValueObject;
 using ErrorOr;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
 
@@ -14,14 +14,14 @@ public static class CreatePost
         Participant Creator,
         string Title,
         string Description
-    ) : MediatR.IRequest<ErrorOr<string>>;
+    ) : Mediator.IRequest<ErrorOr<string>>;
 
     public sealed class Handler(
         IElasticClient client,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, ErrorOr<string>>
     {
-        public async Task<ErrorOr<string>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<string>> Handle(Command request, CancellationToken cancellationToken)
         {
             var post = Post.Create(request.Creator, request.Title, request.Description, [])
                 .ToDocument();

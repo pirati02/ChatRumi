@@ -7,8 +7,8 @@ using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Infrastructure;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
-using IMediator = MediatR.IMediator;
 
 var builder = WebApplication.CreateBuilder(args);
 

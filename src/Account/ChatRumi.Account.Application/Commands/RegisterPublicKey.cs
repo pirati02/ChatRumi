@@ -3,7 +3,7 @@ using ChatRumi.Account.Application.IntegrationEvents;
 using ChatRumi.Account.Domain.Events;
 using ErrorOr;
 using Marten;
-using MediatR;
+using Mediator; 
 
 namespace ChatRumi.Account.Application.Commands;
 
@@ -16,7 +16,7 @@ public static class RegisterPublicKey
         IDispatcher dispatcher
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
-        public async Task<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 

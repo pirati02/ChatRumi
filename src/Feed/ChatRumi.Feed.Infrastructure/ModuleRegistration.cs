@@ -15,7 +15,7 @@ public static class ModuleRegistration
             var connectionString = configuration.GetConnectionString("FeedContext");
             // var user = configuration.GetSection("Elastic:User").Value;
             // var password = configuration.GetSection("Elastic:Password").Value;
-
+            
             services.AddSingleton<IElasticClient>(_ =>
             {
                 var settings = new ConnectionSettings(new Uri(connectionString!))

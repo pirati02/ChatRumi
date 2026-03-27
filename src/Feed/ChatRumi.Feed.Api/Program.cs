@@ -5,7 +5,7 @@ using ChatRumi.Feed.Application;
 using ChatRumi.Feed.Application.Commands;
 using ChatRumi.Feed.Application.Queries;
 using ChatRumi.Feed.Infrastructure;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);

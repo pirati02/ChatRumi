@@ -1,18 +1,18 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
-using MediatR;
+using Mediator;
 using Nest;
 
 namespace ChatRumi.Feed.Application.Queries;
 
 public static class GetPosts
 {
-    public sealed record Query(Guid CreatorId, int Size = 10) : MediatR.IRequest<IEnumerable<PostDocument>>;
+    public sealed record Query(Guid CreatorId, int Size = 10) : Mediator.IRequest<IEnumerable<PostDocument>>;
 
     public class Handler(
         IElasticClient client
     ) : IRequestHandler<Query, IEnumerable<PostDocument>>
     {
-        public async Task<IEnumerable<PostDocument>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<PostDocument>> Handle(Query request, CancellationToken cancellationToken)
         {
             var seed = DateTime.UtcNow.Ticks;
 

@@ -5,7 +5,7 @@ using ChatRumi.Account.Domain.Events;
 using ChatRumi.Account.Domain.ValueObjects;
 using ErrorOr;
 using Marten;
-using MediatR;
+using Mediator;
 using StackExchange.Redis;
 
 namespace ChatRumi.Account.Application.Commands;
@@ -20,7 +20,7 @@ public static class VerifyAccount
         IDispatcher dispatcher
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
-        public async Task<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var account = await session.Query<AccountProjection>()

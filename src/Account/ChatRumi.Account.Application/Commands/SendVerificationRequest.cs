@@ -2,7 +2,7 @@
 using ErrorOr;
 using Marten;
 using MassTransit;
-using MediatR;
+using Mediator;
 
 namespace ChatRumi.Account.Application.Commands;
 
@@ -15,7 +15,7 @@ public static class SendVerificationRequest
         IPublishEndpoint publisher
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
-        public async Task<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var account = await session.Query<AccountProjection>().FirstOrDefaultAsync(

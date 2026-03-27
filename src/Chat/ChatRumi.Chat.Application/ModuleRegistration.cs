@@ -8,7 +8,7 @@ public static class ModuleRegistration
     {
         public void AddApplication()
         {
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Application.Assembly));
+            services.AddMediator(cfg => cfg.Assemblies = [Application.Assembly]);
         }
     }
 }

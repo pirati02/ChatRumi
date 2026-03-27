@@ -3,7 +3,7 @@ using ChatRum.InterCommunication;
 using ChatRumi.Feed.Application.Commands;
 using ChatRumi.Feed.Application.IntegrationEvents;
 using Confluent.Kafka;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Options;
 
 namespace ChatRumi.Feed.AccountSync;

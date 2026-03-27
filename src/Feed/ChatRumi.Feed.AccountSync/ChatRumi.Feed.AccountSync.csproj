@@ -6,10 +6,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>189579c1-6640-4778-a371-4cefcef7f8cd</UserSecretsId>
     </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="MediatR" />
-    </ItemGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />

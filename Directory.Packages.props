@@ -1,65 +1,63 @@
 <Project>
-	<PropertyGroup>
-		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageVersion  Include="Consul" Version="1.7.14.9" />
-
-		<!-- MassTransit 8.x -->
-		<PackageVersion Include="MassTransit" Version="8.5.5" />
-		<PackageVersion  Include="MassTransit.RabbitMQ" Version="8.5.5" />
-
-		<!-- Marten + Weasel -->
-		<PackageVersion Include="Marten" Version="8.15.4" />
-		<PackageVersion Include="Weasel.Core" Version="8.3.0" />
-
-		<!-- Core utilities -->
-		<PackageVersion Include="StackExchange.Redis" Version="2.9.32" />
-		<PackageVersion Include="ErrorOr" Version="2.0.1"/>
-		<PackageVersion Include="FluentValidation" Version="12.1.0" />
-		<PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
-		<PackageVersion Include="MediatR" Version="12.4.1"/>
-
-		<!-- Microsoft Extensions -->
-		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
-
-		<!-- Elasticsearch -->
-		<PackageVersion Include="NEST" Version="7.17.5" />
-		<PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.2.1" />
-
-		<!-- Messaging / Streaming -->
-		<PackageVersion Include="Confluent.Kafka" Version="2.12.0" />
-
-		<!-- Databases -->
-		<PackageVersion Include="Neo4j.Driver" Version="5.28.3" />
-		<PackageVersion Include="Npgsql" Version="9.0.4" />
-		<PackageVersion Include="Npgsql.OpenTelemetry" Version="9.0.4" />
-
-		<!-- Gateway -->
-		<PackageVersion Include="Ocelot" Version="24.0.1" />
-		<PackageVersion Include="Ocelot.Provider.Consul" Version="24.0.0" />
-
-		<!-- OpenTelemetry -->
-		<PackageVersion Include="OpenTelemetry" Version="1.15.0" />
-		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
-		<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.0" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.15.0-beta.1" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
-
-		<!-- Test packages (centralized) -->
-		<PackageVersion Include="Moq" Version="4.20.2" />
-		<PackageVersion Include="xunit" Version="2.5.3" />
-		<PackageVersion Include="xunit.runner.visualstudio" Version="2.5.0" />
-		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.2.0" />
-	</ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Aspire.Hosting.Elasticsearch" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.2.0" />
+    <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.2.0" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.2.0" />
+    <PackageVersion Include="Consul" Version="1.8.0" />
+    <!-- MassTransit 8.x -->
+    <PackageVersion Include="MassTransit" Version="9.0.1" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="9.0.1" />
+    <!-- Marten + Weasel -->
+    <PackageVersion Include="Marten" Version="8.26.2" />
+    <PackageVersion Include="Mediator.Abstractions" Version="3.0.2" />
+    <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.2" />
+    <PackageVersion Include="Weasel.Core" Version="8.10.2" />
+    <!-- Core utilities -->
+    <PackageVersion Include="StackExchange.Redis" Version="2.12.8" />
+    <PackageVersion Include="ErrorOr" Version="2.0.1" />
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <!-- Microsoft Extensions -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5" />
+    <!-- Elasticsearch -->
+    <PackageVersion Include="NEST" Version="7.17.5" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="9.3.4" />
+    <!-- Messaging / Streaming -->
+    <PackageVersion Include="Confluent.Kafka" Version="2.13.2" />
+    <!-- Databases -->
+    <PackageVersion Include="Neo4j.Driver" Version="6.0.0" />
+    <PackageVersion Include="Npgsql" Version="10.0.2" />
+    <PackageVersion Include="Npgsql.OpenTelemetry" Version="10.0.2" />
+    <!-- Gateway -->
+    <PackageVersion Include="Ocelot" Version="24.1.0" />
+    <PackageVersion Include="Ocelot.Provider.Consul" Version="24.1.0" />
+    <!-- OpenTelemetry -->
+    <PackageVersion Include="OpenTelemetry" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.15.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
+    <!-- Test packages (centralized) -->
+    <PackageVersion Include="Moq" Version="4.20.2" />
+    <PackageVersion Include="xunit" Version="2.5.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.2.0" />
+    <!-- Aspire -->
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.4.0" />
+  </ItemGroup>
 </Project>

@@ -45,4 +45,6 @@
     <Project Path="src/Friendship/ChatRumi.Friendship.Domain/ChatRumi.Friendship.Domain.csproj" />
   </Folder>
   <Folder Name="/tests/" />
+  <Project Path="ChatRumi.Host/ChatRumi.Host.csproj" />
+  <Project Path="ChatRumi.ServiceDefaults/ChatRumi.ServiceDefaults.csproj" />
 </Solution>

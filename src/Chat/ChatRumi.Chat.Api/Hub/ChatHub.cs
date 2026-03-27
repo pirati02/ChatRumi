@@ -5,7 +5,7 @@ using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Domain.ValueObject;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatRumi.Chat.Api.Hub;

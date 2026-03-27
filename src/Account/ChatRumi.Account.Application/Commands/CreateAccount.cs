@@ -5,7 +5,7 @@ using ErrorOr;
 using FluentValidation;
 using Marten;
 using MassTransit;
-using MediatR;
+using Mediator;
 
 namespace ChatRumi.Account.Application.Commands;
 
@@ -49,7 +49,7 @@ public static class CreateAccount
         IPublishEndpoint publisher
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
-        public async Task<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)

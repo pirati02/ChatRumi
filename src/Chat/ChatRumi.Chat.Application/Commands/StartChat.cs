@@ -1,10 +1,9 @@
 ﻿using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Extensions;
-using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
 using ErrorOr;
 using Marten;
-using MediatR;
+using Mediator; 
 
 namespace ChatRumi.Chat.Application.Commands;
 
@@ -22,7 +21,7 @@ public static class StartChat
         IDocumentStore store
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
-        public async Task<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 

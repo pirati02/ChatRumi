@@ -2,9 +2,9 @@
 using ChatRumi.Account.Application.IntegrationEvents;
 using ChatRumi.Account.Domain.Events;
 using FluentValidation;
-using Marten;
-using MediatR;
+using Marten; 
 using ErrorOr;
+using Mediator;
 
 namespace ChatRumi.Account.Application.Commands;
 
@@ -33,7 +33,7 @@ public static class UpdateAccount
         IDispatcher dispatcher
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
-        public async Task<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)

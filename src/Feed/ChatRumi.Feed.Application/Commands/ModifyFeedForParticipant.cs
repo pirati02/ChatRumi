@@ -1,9 +1,7 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
-using ChatRumi.Feed.Domain.ValueObject;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
-using IRequest = MediatR.IRequest;
 
 namespace ChatRumi.Feed.Application.Commands;
 
@@ -14,14 +12,14 @@ public static class ModifyFeedForParticipant
         string UserName,
         string FirstName,
         string LastName
-    ) : IRequest;
+    ) : Mediator.IRequest<Unit>;
 
     public class Handler(
         IElasticClient client,
         ILogger<Handler> logger
     ) : IRequestHandler<Command>
     {
-        public async Task Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
             var searchResponse = await client.SearchAsync<PostDocument>(s => s
                     .Index(PostIndexes.Posts)
@@ -32,7 +30,7 @@ public static class ModifyFeedForParticipant
             if (!searchResponse.IsValid || searchResponse.Documents.Count == 0)
             {
                 logger.LogInformation("No posts found for participant {Id}", request.ParticipantId);
-                return;
+                return Unit.Value;
             }
 
             var documents = searchResponse.Documents.ToList();
@@ -69,6 +67,8 @@ public static class ModifyFeedForParticipant
                 logger.LogInformation("Successfully updated {Count} posts for participant {Id}",
                     documents.Count, request.ParticipantId);
             }
+            
+            return Unit.Value;
         }
     }
 }

@@ -4,7 +4,7 @@ using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
 using ErrorOr;
 using Marten;
-using MediatR;
+using Mediator;
 
 namespace ChatRumi.Chat.Application.Commands;
 
@@ -21,7 +21,7 @@ public static class UpdateMessageState
         IDocumentStore store
     ) : IRequestHandler<Command, ErrorOr<(Guid messageId, MessageStatus status)>>
     {
-        public async Task<ErrorOr<(Guid messageId, MessageStatus status)>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<ErrorOr<(Guid messageId, MessageStatus status)>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var chat = await session.Events.AggregateStreamAsync<Domain.Aggregates.Chat>(

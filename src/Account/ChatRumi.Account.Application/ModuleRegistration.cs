@@ -13,8 +13,7 @@ public static class ModuleRegistration
     {
         public void AddApplication()
         {
-            services.AddMediatR(config =>
-                config.RegisterServicesFromAssemblies(Application.Assembly));
+            services.AddMediator(config => config.Assemblies = [Application.Assembly]);
             services.AddValidatorsFromAssembly(Application.Assembly);
 
             services.AddOptions<SmsOfficeOptions>().BindConfiguration(SmsOfficeOptions.Name);
