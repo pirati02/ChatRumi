@@ -6,7 +6,7 @@ public static class ServiceRegistrations
 {
     private static ReferenceExpression KafkaBootstrapServers(IResourceBuilder<ContainerResource> kafka)
     {
-        var endpoint = kafka.GetEndpoint("internal");
+        var endpoint = kafka.GetEndpoint("external");
         return ReferenceExpression.Create(
             $"{endpoint.Property(EndpointProperty.Host)}:{endpoint.Property(EndpointProperty.Port)}");
     }

@@ -16,20 +16,13 @@ public interface IPeerConnectionManager
     Task<PeerResponse[]> GetRequestsISent(Guid peerId);
 }
 
-public class PeerConnectionManager : IPeerConnectionManager
+public class PeerConnectionManager(
+    IDriver driver,
+    IOptions<Neo4jOptions> options,
+    IFriendshipHubContextProxy hubContext
+) : IPeerConnectionManager
 {
-    private readonly IFriendshipHubContextProxy _hubContext;
-    private readonly IAsyncSession _session;
-
-    public PeerConnectionManager(
-        IDriver driver,
-        IOptions<Neo4jOptions> options,
-        IFriendshipHubContextProxy hubContext
-    )
-    {
-        _hubContext = hubContext;
-        _session = driver.AsyncSession(builder => builder.WithDatabase(options.Value.Neo4jDatabase));
-    }
+    private readonly IAsyncSession _session = driver.AsyncSession(builder => builder.WithDatabase(options.Value.Neo4jDatabase));
 
     public async Task CreatePeerAsync(PeerDto peer)
     {
@@ -136,7 +129,7 @@ public class PeerConnectionManager : IPeerConnectionManager
             return true;
         });
 
-        await _hubContext.FriendRequestReceived(peer1, peer2);
+        await hubContext.FriendRequestReceived(peer1, peer2);
     }
 
     public async Task AcceptFriendRequestAsync(PeerDto peer1, PeerDto peer2)
@@ -157,7 +150,7 @@ public class PeerConnectionManager : IPeerConnectionManager
 
             return true;
         });
-        await _hubContext.FriendRequestAccepted(peer1, peer2);
+        await hubContext.FriendRequestAccepted(peer1, peer2);
     }
 
     public async Task<PeerResponse[]> GetFriendsAsync(Guid peerId)
@@ -170,14 +163,13 @@ public class PeerConnectionManager : IPeerConnectionManager
         var parameters = new { peerId = peerId.ToString() };
 
         var result = await _session.RunAsync(query, parameters);
-        return (await result.ToListAsync(record => new PeerResponse(
+        return [.. (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["friend.peerId"].As<string>()),
                 record["friend.userName"].As<string>(),
                 record["friend.createdDate"].As<ZonedDateTime>().UtcDateTime,
                 record["friend.publicKey"].As<string?>()
             )))
-            .DistinctBy(a => a.PeerId)
-            .ToArray();
+            .DistinctBy(a => a.PeerId)];
     }
 
     public async Task<PeerResponse[]> GetFriendRequestsAsync(Guid peerId)
@@ -191,13 +183,12 @@ public class PeerConnectionManager : IPeerConnectionManager
 
         var result = await _session.RunAsync(query, parameters);
 
-        return (await result.ToListAsync(record => new PeerResponse(
+        return [.. (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["peerId"].As<string>()),
                 record["userName"].As<string>(),
                 record["createdDate"].As<ZonedDateTime>().UtcDateTime,
                 record["publicKey"].As<string?>()
-            )))
-            .ToArray();
+            )))];
     }
 
     public async Task<PeerResponse[]> GetRequestsISent(Guid peerId)
@@ -211,13 +202,12 @@ public class PeerConnectionManager : IPeerConnectionManager
 
         var result = await _session.RunAsync(query, parameters);
 
-        return (await result.ToListAsync(record => new PeerResponse(
+        return [.. (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["peerId"].As<string>()),
                 record["userName"].As<string>(),
                 record["createdDate"].As<ZonedDateTime?>()!.UtcDateTime,
                 record["publicKey"].As<string?>()
-            )))
-            .ToArray();
+            )))];
     }
 
     private async Task<bool> PeerExistsAsync(Guid peerId)
