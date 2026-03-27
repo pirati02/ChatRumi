@@ -38,6 +38,8 @@ var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseWebSockets();
 app.MapGet("/", () => Results.Ok("Gateway is running"));
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("gateway-health");
 
 await app.UseOcelot();
 await app.RunAsync();

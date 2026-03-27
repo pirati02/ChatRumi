@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
 using ChatRumi.Chat.Infrastructure.Options;
@@ -22,7 +22,7 @@ public static class ModuleRegistration
             IWebHostEnvironment environment
         )
         {
-            DbInitializer.Initialize(configuration.GetConnectionString("Marten")!);
+            DbInitializer.Initialize(configuration.GetConnectionString("chatDatabase")!);
             services.AddMarten(configuration, environment, DefaultJsonContentOptions.CreateJsonOptions());
             services.AddRedis();
         }
@@ -36,7 +36,7 @@ public static class ModuleRegistration
             services.AddMarten(options =>
                 {
                     options.DisableNpgsqlLogging = true;
-                    options.Connection(configuration.GetConnectionString("Marten")!);
+                    options.Connection(configuration.GetConnectionString("chatDatabase")!);
                     options.UseSystemTextJsonForSerialization(jsonOptions);
 
                     if (environment.IsDevelopment())

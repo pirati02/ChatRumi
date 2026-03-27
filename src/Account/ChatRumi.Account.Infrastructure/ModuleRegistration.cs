@@ -1,4 +1,4 @@
-﻿using ChatRumi.Account.Application.Options;
+using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Projections;
 using ChatRumi.Infrastructure;
 using JasperFx;
@@ -22,10 +22,10 @@ public static class ModuleRegistration
             IHostEnvironment environment
         )
         {
-            DbInitializer.Initialize(configuration.GetConnectionString("Marten")!);
+            DbInitializer.Initialize(configuration.GetConnectionString("accountDatabase")!);
             services.AddMarten(options =>
             {
-                options.Connection(configuration.GetConnectionString("Marten")!);
+                options.Connection(configuration.GetConnectionString("accountDatabase")!);
                 options.UseSystemTextJsonForSerialization();
                 if (environment.IsDevelopment())
                 {

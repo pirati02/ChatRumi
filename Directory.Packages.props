@@ -9,8 +9,8 @@
     <PackageVersion Include="Aspire.Hosting.Redis" Version="13.2.0" />
     <PackageVersion Include="Consul" Version="1.8.0" />
     <!-- MassTransit 8.x -->
-    <PackageVersion Include="MassTransit" Version="9.0.1" />
-    <PackageVersion Include="MassTransit.RabbitMQ" Version="9.0.1" />
+    <PackageVersion Include="MassTransit" Version="8.5.5" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.5" />
     <!-- Marten + Weasel -->
     <PackageVersion Include="Marten" Version="8.26.2" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.0.2" />

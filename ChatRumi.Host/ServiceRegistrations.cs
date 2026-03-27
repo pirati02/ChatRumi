@@ -4,7 +4,7 @@ public static class ServiceRegistrations
 {
     extension(IDistributedApplicationBuilder builder)
     {
-        public IDistributedApplicationBuilder AddAccountService(
+        public IResourceBuilder<ProjectResource> AddAccountService(
             IResourceBuilder<PostgresServerResource> postgres,
             IResourceBuilder<RedisResource> redis,
             IResourceBuilder<RabbitMQServerResource> rabbitMq,
@@ -13,27 +13,26 @@ public static class ServiceRegistrations
         )
         {
             var accountDatabase = postgres.AddDatabase("accountDatabase", "accountDatabase");
-            
-            builder.AddProject<Projects.ChatRumi_Account_Api>("accountService")
+
+            return builder.AddProject<Projects.ChatRumi_Account_Api>("accountService")
                 .WithHttpHealthCheck("/health")
                 .WithReference(redis)
+                .WithReference(rabbitMq)
                 .WithReference(accountDatabase)
                 .WaitFor(accountDatabase)
                 .WaitFor(redis)
-                .WithEnvironment("ConnectionStrings__Marten", accountDatabase.Resource.ConnectionStringExpression.ValueExpression)
+                .WaitFor(rabbitMq)
                 .WithEnvironment("RedisOptions__Host", "redis")
                 .WithEnvironment("RedisOptions__Port", "6379")
                 .WithEnvironment("RedisOptions__User", "default")
                 .WithEnvironment("RedisOptions__Password", "")
                 .WithEnvironment("RedisOptions__Expiration", "2")
-                .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression.ValueExpression)
+                .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression)
                 .WithEnvironment("MassTransit_User", defaultUser)
                 .WithEnvironment("MassTransit_Password", defaultPassword);
-            
-            return builder;
         }
-        
-        public IDistributedApplicationBuilder AddChatService(
+
+        public IResourceBuilder<ProjectResource> AddChatService(
             IResourceBuilder<PostgresServerResource> postgres,
             IResourceBuilder<RedisResource> redis,
             IResourceBuilder<RabbitMQServerResource> rabbitMq,
@@ -43,23 +42,46 @@ public static class ServiceRegistrations
         {
             var chatDatabase = postgres.AddDatabase("chatDatabase", "chatDatabase");
 
-            builder.AddProject<Projects.ChatRumi_Chat_Api>("chatService")
+            return builder.AddProject<Projects.ChatRumi_Chat_Api>("chatService")
                 .WithHttpHealthCheck("/health")
                 .WithReference(redis)
+                .WithReference(rabbitMq)
                 .WithReference(chatDatabase)
                 .WaitFor(chatDatabase)
                 .WaitFor(redis)
-                .WithEnvironment("ConnectionStrings__Marten", chatDatabase.Resource.ConnectionStringExpression.ValueExpression)
+                .WaitFor(rabbitMq)
                 .WithEnvironment("RedisOptions__Host", "redis")
                 .WithEnvironment("RedisOptions__Port", "6379")
                 .WithEnvironment("RedisOptions__User", "default")
                 .WithEnvironment("RedisOptions__Password", "")
                 .WithEnvironment("RedisOptions__Expiration", "2")
-                .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression.ValueExpression)
+                .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression)
                 .WithEnvironment("MassTransit_User", defaultUser)
                 .WithEnvironment("MassTransit_Password", defaultPassword);
-            
-            return builder;
+        }
+
+        public IResourceBuilder<ProjectResource> AddFeedService(
+            IResourceBuilder<ElasticsearchResource> elastic
+        )
+        {
+            return builder.AddProject<Projects.ChatRumi_Feed_Api>("feedService")
+                .WithHttpHealthCheck("/health")
+                .WaitFor(elastic)
+                .WithReference(elastic)
+                .WithEnvironment("ConnectionStrings__FeedContext", elastic.Resource.ConnectionStringExpression);
+        }
+
+        public IResourceBuilder<ProjectResource> AddFriendshipService(
+            IResourceBuilder<ContainerResource> neo4J
+        )
+        {
+            return builder.AddProject<Projects.ChatRumi_Friendship_Api>("friendshipService")
+                .WithHttpHealthCheck("/health")
+                .WaitFor(neo4J)
+                .WithEnvironment("Neo4jOptions__Neo4jConnection", "bolt://neo4j-dev:7687")
+                .WithEnvironment("Neo4jOptions__Neo4jUser", "neo4j")
+                .WithEnvironment("Neo4jOptions__Neo4jPassword", "Passw0rd")
+                .WithEnvironment("Neo4jOptions__Neo4jDatabase", "neo4j");
         }
     }
 }
