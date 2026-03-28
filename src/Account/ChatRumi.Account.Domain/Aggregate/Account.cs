@@ -33,6 +33,8 @@ public class Account : Kernel.Aggregate
         LastName = @event.LastName;
         PhoneNumber = @event.PhoneNumber;
         CountryCode = @event.CountryCode;
+        PasswordHash = @event.PasswordHash;
+        PasswordSalt = @event.PasswordSalt;
 
         IsVerified = false;
         MfaEnabled = false;

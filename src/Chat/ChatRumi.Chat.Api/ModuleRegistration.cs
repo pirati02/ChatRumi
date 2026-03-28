@@ -1,6 +1,9 @@
+using ChatRum.InterCommunication.ServiceDiscovery;
+using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Hubs;
+using ChatRumi.Infrastructure;
 
 namespace ChatRumi.Chat.Api;
 
@@ -8,7 +11,7 @@ public static class ModuleRegistration
 {
     extension(IServiceCollection services)
     {
-        public void AddPresentation()
+        public void AddPresentation(IConfiguration configuration)
         {
             services.AddCors(options =>
             {
@@ -32,6 +35,11 @@ public static class ModuleRegistration
                 options.EnableDetailedErrors = true;
             }).AddJsonProtocol(o => o.PayloadSerializerOptions = DefaultJsonContentOptions.CreateJsonOptions());
             services.AddOpenApi();
+
+
+            services.AddChatRumiJwtAuthentication(configuration);
+            services.AddConsulService(configuration);
+            services.AddOpenTelemetryObservability(configuration);
         }
     }
 }

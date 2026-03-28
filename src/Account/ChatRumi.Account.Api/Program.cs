@@ -1,20 +1,18 @@
-using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Account.Api;
 using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
 using ChatRumi.Account.Application.Queries;
 using ChatRumi.Account.Infrastructure;
+using ErrorOr;
 using Mediator;
-using Microsoft.AspNetCore.Mvc; 
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddPresentation(builder.Configuration);
-builder.Services.AddConsulService(builder.Configuration);
-builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
 
@@ -24,10 +22,34 @@ app.UseRequestResponseLogging(
     excludedPaths: "/health");
 
 app.UseCors("CorsPolicy");
-app.MapGet("/health", () => Results.Ok("Healthy ✅"))
-    .WithName("account-health");
+app.UseAuthentication();
+app.UseAuthorization();
 
-var accountGroup = app.MapGroup("/api/account");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("account-health")
+    .AllowAnonymous();
+
+var accountGroup = app.MapGroup("/api/account").RequireAuthorization();
+
+accountGroup.MapPost("login", async ([FromBody] Login.Command command, IMediator mediator) =>
+    {
+        var result = await mediator.Send(command);
+        return result.Match(
+            Results.Ok,
+            errors =>
+            {
+                if (errors.Any(e => e.Type == ErrorType.Unauthorized))
+                {
+                    return Results.Json(
+                        new { message = "Invalid email or password." },
+                        statusCode: StatusCodes.Status401Unauthorized);
+                }
+
+                return Results.BadRequest(errors);
+            });
+    })
+    .WithName("login")
+    .AllowAnonymous();
 
 accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator mediator) =>
     {
@@ -37,7 +59,8 @@ accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMedia
             Results.BadRequest
         );
     })
-    .WithName("create-account");
+    .WithName("create-account")
+    .AllowAnonymous();
 
 accountGroup.MapPut("{accountId:guid}", async ([FromRoute] Guid accountId, [FromBody] UpdateAccount.Command command, IMediator mediator) =>
     {
@@ -61,7 +84,8 @@ accountGroup.MapPut("activate", async ([FromBody] VerifyAccount.Command request,
             Results.NotFound
         );
     })
-    .WithName("activate-account");
+    .WithName("activate-account")
+    .AllowAnonymous();
 
 accountGroup.MapPatch("{accountId:guid}/resend-code", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
@@ -71,7 +95,8 @@ accountGroup.MapPatch("{accountId:guid}/resend-code", async ([FromRoute] Guid ac
             Results.NotFound
         );
     })
-    .WithName("verify-account");
+    .WithName("verify-account")
+    .AllowAnonymous();
 
 accountGroup.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
@@ -112,5 +137,3 @@ accountGroup.MapGet("{accountId:guid}/public-key", async ([FromRoute] Guid accou
     .WithName("get-public-key");
 
 await app.RunAsync();
-
-public record RegisterPublicKeyRequest(string PublicKey);

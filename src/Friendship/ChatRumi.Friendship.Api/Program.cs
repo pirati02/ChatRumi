@@ -1,4 +1,3 @@
-using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Friendship.Api;
 using ChatRumi.Friendship.Api.Hub;
@@ -9,10 +8,9 @@ using ChatRumi.Friendship.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddPresentation()
-    .AddApplication();
-builder.Services.AddConsulService(builder.Configuration);
-builder.Services.AddOpenTelemetryObservability(builder.Configuration);
+
+builder.Services.AddPresentation(builder.Configuration);
+builder.Services.AddApplication();
 
 var app = builder.Build();
 
@@ -27,10 +25,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("CorsPolicy");
-app.MapGet("/health", () => Results.Ok("Healthy ✅"))
-    .WithName("friendship-health");
+app.UseAuthentication();
+app.UseAuthorization();
 
-var friendship = app.MapGroup("/api/friendship");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("friendship-health")
+    .AllowAnonymous();
+
+var friendship = app.MapGroup("/api/friendship").RequireAuthorization();
 
 friendship.MapGet("{peerId:guid}",
         async (Guid peerId, [FromServices] IPeerConnectionManager connectionManager) =>
@@ -78,7 +80,7 @@ friendship.MapDelete("unfriend", async (
     })
     .WithName("unfriend");
 
-app.MapHub<FriendshipHub>("/hub/friendship");
+app.MapHub<FriendshipHub>("/hub/friendship").RequireAuthorization();
 
 await app.RunAsync();
 

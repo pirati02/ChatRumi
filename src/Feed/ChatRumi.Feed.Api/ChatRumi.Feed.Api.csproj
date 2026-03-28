@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
+      <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj" />
       <ProjectReference Include="..\ChatRumi.Feed.Application\ChatRumi.Feed.Application.csproj" />
       <ProjectReference Include="..\ChatRumi.Feed.Infrastructure\ChatRumi.Feed.Infrastructure.csproj" />
     </ItemGroup>

@@ -258,6 +258,9 @@ services:
       - OpenTelemetry__ServiceVersion=1.0.0
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
       - OpenTelemetry__Enabled=true
+      - Jwt__Issuer=ChatRumi
+      - Jwt__Audience=ChatRumi
+      - Jwt__SigningKey=${JWT_SIGNING_KEY:-local_dev_jwt_signing_key_at_least_32_chars}
     depends_on:
       consul:
         condition: service_healthy
@@ -301,6 +304,9 @@ services:
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
       - OpenTelemetry__Enabled=true
       - AccountService__BaseUrl=http://account-service:5049
+      - Jwt__Issuer=ChatRumi
+      - Jwt__Audience=ChatRumi
+      - Jwt__SigningKey=${JWT_SIGNING_KEY:-local_dev_jwt_signing_key_at_least_32_chars}
     depends_on:
       consul:
         condition: service_healthy
@@ -340,6 +346,9 @@ services:
       - OpenTelemetry__ServiceVersion=1.0.0
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
       - OpenTelemetry__Enabled=true
+      - Jwt__Issuer=ChatRumi
+      - Jwt__Audience=ChatRumi
+      - Jwt__SigningKey=${JWT_SIGNING_KEY:-local_dev_jwt_signing_key_at_least_32_chars}
     depends_on:
       consul:
         condition: service_healthy
@@ -372,6 +381,9 @@ services:
       - OpenTelemetry__ServiceVersion=1.0.0
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
       - OpenTelemetry__Enabled=true
+      - Jwt__Issuer=ChatRumi
+      - Jwt__Audience=ChatRumi
+      - Jwt__SigningKey=${JWT_SIGNING_KEY:-local_dev_jwt_signing_key_at_least_32_chars}
     depends_on:
       consul:
         condition: service_healthy

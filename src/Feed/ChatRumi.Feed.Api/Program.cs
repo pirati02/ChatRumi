@@ -1,4 +1,3 @@
-using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Feed.Api;
 using ChatRumi.Feed.Application;
@@ -11,11 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
-
-builder.Services.AddPresentation();
 builder.Services.AddApplication();
-builder.Services.AddConsulService(builder.Configuration);
-builder.Services.AddOpenTelemetryObservability(builder.Configuration);
+builder.Services.AddPresentation(builder.Configuration);
 
 var app = builder.Build();
 
@@ -26,10 +22,14 @@ app.UseRequestResponseLogging(
 
 await PostIndexer.IndexPost(app.Services);
 app.UseCors("CorsPolicy");
-app.MapGet("/health", () => Results.Ok("Healthy ✅"))
-    .WithName("feed-health");
+app.UseAuthentication();
+app.UseAuthorization();
 
-var feedGroup = app.MapGroup("/api/feed");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("feed-health")
+    .AllowAnonymous();
+
+var feedGroup = app.MapGroup("/api/feed").RequireAuthorization();
 
 feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
     {
