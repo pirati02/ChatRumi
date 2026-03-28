@@ -24,17 +24,23 @@ var postgres = builder.AddPostgres(
 
 var neo4J = builder.AddNeo4JInternal();
 
-var accountService = builder.AddAccountService(postgres, redis, rabbitMq, defaultUser, defaultPassword);
+var jwtSigningKey = builder.AddParameter("jwt-signing-key", "local_dev_jwt_signing_key_at_least_32_chars");
+
+var accountService = builder.AddAccountService(postgres, redis, rabbitMq, defaultUser, defaultPassword)
+    .WithChatRumiJwt(jwtSigningKey);
 
 var chatDatabase = postgres.AddDatabase("chatDatabase", "chatDatabase");
-var chatService = builder.AddChatService(chatDatabase, redis, rabbitMq, accountService, defaultUser, defaultPassword);
+var chatService = builder.AddChatService(chatDatabase, redis, rabbitMq, accountService, defaultUser, defaultPassword)
+    .WithChatRumiJwt(jwtSigningKey);
 builder.AddChatAccountSyncService(chatDatabase, redis, rabbitMq, kafka, defaultUser, defaultPassword);
 
 builder.AddFeedAccountSyncService(elastic, kafka);
 builder.AddFriendshipAccountSyncService(neo4J, kafka);
 
-var feedService = builder.AddFeedService(elastic);
-var friendshipService = builder.AddFriendshipService(neo4J);
+var feedService = builder.AddFeedService(elastic)
+    .WithChatRumiJwt(jwtSigningKey);
+var friendshipService = builder.AddFriendshipService(neo4J)
+    .WithChatRumiJwt(jwtSigningKey);
 
 builder.AddProject<Projects.ChatRum_Gateway>("gateway")
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Local")

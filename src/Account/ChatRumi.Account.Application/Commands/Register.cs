@@ -9,7 +9,7 @@ using Mediator;
 
 namespace ChatRumi.Account.Application.Commands;
 
-public static class CreateAccount
+public static class Register
 {
     public sealed record Command(
         string UserName,

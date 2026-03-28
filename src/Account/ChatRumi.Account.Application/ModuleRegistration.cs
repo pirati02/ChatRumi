@@ -1,5 +1,6 @@
 using ChatRum.InterCommunication;
 using ChatRumi.Account.Application.Options;
+using ChatRumi.Account.Application.Services;
 using ChatRumi.Account.Application.Services.Sms;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,7 @@ public static class ModuleRegistration
                 httpClient.BaseAddress = new Uri(options.BaseUrl);
             });
             services.AddSingleton<IDispatcher, KafkaProducer>();
+            services.AddSingleton<IJwtAccessTokenIssuer, JwtAccessTokenIssuer>();
         }
     }
 }

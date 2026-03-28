@@ -17,12 +17,15 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Http"/>
+        <PackageReference Include="Microsoft.Extensions.Options"/>
         <PackageReference Include="StackExchange.Redis"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
+        <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj"/>
         <ProjectReference Include="..\ChatRumi.Account.Domain\ChatRumi.Account.Domain.csproj"/>
     </ItemGroup>
 

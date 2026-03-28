@@ -1,4 +1,7 @@
+using ChatRum.InterCommunication.ServiceDiscovery;
+using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Account.Application.Events;
+using ChatRumi.Infrastructure;
 using MassTransit;
 
 namespace ChatRumi.Account.Api;
@@ -71,6 +74,10 @@ public static class ModuleRegistration
                         });
                 });
             });
+            services.AddChatRumiJwtAuthentication(configuration);
+
+            services.AddConsulService(configuration);
+            services.AddOpenTelemetryObservability(configuration);
         }
     }
 }

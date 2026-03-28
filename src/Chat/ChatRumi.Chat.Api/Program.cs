@@ -1,4 +1,3 @@
-using ChatRum.InterCommunication.ServiceDiscovery;
 using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Chat.Api;
 using ChatRumi.Chat.Api.Hub;
@@ -14,9 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
-builder.Services.AddPresentation();
-builder.Services.AddConsulService(builder.Configuration);
-builder.Services.AddOpenTelemetryObservability(builder.Configuration);
+builder.Services.AddPresentation(builder.Configuration);
 
 var app = builder.Build();
 
@@ -27,10 +24,14 @@ app.UseRequestResponseLogging(
 
 app.UseRouting();
 app.UseCors("CorsPolicy");
-app.MapGet("/health", () => Results.Ok("Healthy ✅"))
-    .WithName("chat-health");
+app.UseAuthentication();
+app.UseAuthorization();
 
-var chatGroup = app.MapGroup("/api/chat");
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("chat-health")
+    .AllowAnonymous();
+
+var chatGroup = app.MapGroup("/api/chat").RequireAuthorization();
 
 chatGroup.MapGet("/{participantId:guid}/top10", async (
     [FromRoute] Guid participantId,
@@ -69,6 +70,6 @@ chatGroup.MapPost("/mark-as-read/{chatId:guid}", async (
     return result.Match(Results.Ok, Results.NotFound);
 });
 
-app.MapHub<ChatHub>("/hub/chat");
+app.MapHub<ChatHub>("/hub/chat").RequireAuthorization();
 
 await app.RunAsync();

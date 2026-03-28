@@ -56,3 +56,5 @@ public static class RegisterPublicKey
         }
     }
 }
+
+public record RegisterPublicKeyRequest(string PublicKey);

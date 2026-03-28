@@ -1,10 +1,14 @@
-﻿namespace ChatRumi.Feed.Api;
+﻿using ChatRum.InterCommunication.ServiceDiscovery;
+using ChatRum.InterCommunication.Telemetry;
+using ChatRumi.Infrastructure;
+
+namespace ChatRumi.Feed.Api;
 
 public static class ModuleRegistration
 {
     extension(IServiceCollection services)
     {
-        public void AddPresentation()
+        public void AddPresentation(IConfiguration configuration)
         {
             services.AddCors(options =>
             {
@@ -15,6 +19,10 @@ public static class ModuleRegistration
                         .AllowAnyMethod();
                 });
             });
+
+            services.AddChatRumiJwtAuthentication(configuration);
+            services.AddConsulService(configuration);
+            services.AddOpenTelemetryObservability(configuration);
         }
     }
 }

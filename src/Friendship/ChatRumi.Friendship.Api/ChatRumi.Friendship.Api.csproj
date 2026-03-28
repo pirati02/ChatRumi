@@ -17,6 +17,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
+        <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj"/>
         <ProjectReference Include="..\ChatRumi.Friendship.Application\ChatRumi.Friendship.Application.csproj"/>
     </ItemGroup>
 
