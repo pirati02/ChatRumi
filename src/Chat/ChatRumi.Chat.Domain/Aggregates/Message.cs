@@ -1,11 +1,11 @@
-﻿using ChatRumi.Chat.Domain.ValueObject;
-using ChatRumi.Kernel;
+using ChatRumi.Chat.Domain.ValueObject;
 
 namespace ChatRumi.Chat.Domain.Aggregates;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class Message : Aggregate
+public class Message
 {
+    public Guid Id { get; init; }
     public Guid ChatId { get; init; }
     public Participant Participant { get; init; } = null!;
     public required MessageContent Content { get; init; }

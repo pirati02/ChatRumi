@@ -103,6 +103,14 @@ accountGroup.MapPut("{accountId:guid}/public-key", async (
     })
     .WithName("register-public-key");
 
+// 404 if account missing; 200 with { publicKey: null } if account exists but no key registered.
+accountGroup.MapGet("{accountId:guid}/public-key", async ([FromRoute] Guid accountId, IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetPublicKey.Query(accountId));
+        return result.Match(Results.Ok, Results.NotFound);
+    })
+    .WithName("get-public-key");
+
 await app.RunAsync();
 
 public record RegisterPublicKeyRequest(string PublicKey);

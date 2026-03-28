@@ -4,6 +4,21 @@ namespace ChatRumi.Host;
 
 public static class ServiceRegistrations
 {
+    /// <summary>
+    /// Aspire Redis primary endpoint <c>tcp</c> may be TLS (<c>rediss://</c>). This app uses StackExchange.Redis
+    /// without SSL, so we inject the plain-TCP <c>secondary</c> endpoint (see RedisResource.SecondaryEndpointName).
+    /// </summary>
+    private const string RedisPlainTcpEndpointName = "secondary";
+
+    private static EndpointReferenceExpression RedisPlainTcpHost(IResourceBuilder<RedisResource> redis) =>
+        redis.GetEndpoint(RedisPlainTcpEndpointName).Property(EndpointProperty.Host);
+
+    private static EndpointReferenceExpression RedisPlainTcpPort(IResourceBuilder<RedisResource> redis) =>
+        redis.GetEndpoint(RedisPlainTcpEndpointName).Property(EndpointProperty.Port);
+
+    private static ReferenceExpression RedisPassword(IResourceBuilder<RedisResource> redis) =>
+        ReferenceExpression.Create($"{redis.Resource.PasswordParameter!}");
+
     private static ReferenceExpression KafkaBootstrapServers(IResourceBuilder<ContainerResource> kafka)
     {
         var endpoint = kafka.GetEndpoint("external");
@@ -31,10 +46,10 @@ public static class ServiceRegistrations
                 .WaitFor(accountDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitMq)
-                .WithEnvironment("RedisOptions__Host", "redis")
-                .WithEnvironment("RedisOptions__Port", "6379")
+                .WithEnvironment("RedisOptions__Host", RedisPlainTcpHost(redis))
+                .WithEnvironment("RedisOptions__Port", RedisPlainTcpPort(redis))
                 .WithEnvironment("RedisOptions__User", "default")
-                .WithEnvironment("RedisOptions__Password", "")
+                .WithEnvironment("RedisOptions__Password", RedisPassword(redis))
                 .WithEnvironment("RedisOptions__Expiration", "2")
                 .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression)
                 .WithEnvironment("MassTransit_User", defaultUser)
@@ -45,6 +60,7 @@ public static class ServiceRegistrations
             IResourceBuilder<PostgresDatabaseResource> chatDatabase,
             IResourceBuilder<RedisResource> redis,
             IResourceBuilder<RabbitMQServerResource> rabbitMq,
+            IResourceBuilder<ProjectResource> accountService,
             string defaultUser,
             string defaultPassword
         )
@@ -54,13 +70,17 @@ public static class ServiceRegistrations
                 .WithReference(redis)
                 .WithReference(rabbitMq)
                 .WithReference(chatDatabase)
+                .WithReference(accountService)
+                // Ensures IOptions<AccountServiceOptions> / HttpClient BaseAddress without relying on ConnectionStrings key shape.
+                .WithEnvironment("AccountService__BaseUrl", accountService.GetEndpoint("http"))
                 .WaitFor(chatDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitMq)
-                .WithEnvironment("RedisOptions__Host", "redis")
-                .WithEnvironment("RedisOptions__Port", "6379")
+                .WaitFor(accountService)
+                .WithEnvironment("RedisOptions__Host", RedisPlainTcpHost(redis))
+                .WithEnvironment("RedisOptions__Port", RedisPlainTcpPort(redis))
                 .WithEnvironment("RedisOptions__User", "default")
-                .WithEnvironment("RedisOptions__Password", "")
+                .WithEnvironment("RedisOptions__Password", RedisPassword(redis))
                 .WithEnvironment("RedisOptions__Expiration", "2")
                 .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression)
                 .WithEnvironment("MassTransit_User", defaultUser)
@@ -86,10 +106,10 @@ public static class ServiceRegistrations
                 .WaitFor(rabbitMq)
                 .WaitFor(kafka)
                 .WithEnvironment("KafkaOptions__ConnectionString", KafkaBootstrapServers(kafka))
-                .WithEnvironment("RedisOptions__Host", "redis")
-                .WithEnvironment("RedisOptions__Port", "6379")
+                .WithEnvironment("RedisOptions__Host", RedisPlainTcpHost(redis))
+                .WithEnvironment("RedisOptions__Port", RedisPlainTcpPort(redis))
                 .WithEnvironment("RedisOptions__User", "default")
-                .WithEnvironment("RedisOptions__Password", "")
+                .WithEnvironment("RedisOptions__Password", RedisPassword(redis))
                 .WithEnvironment("RedisOptions__Expiration", "2")
                 .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression)
                 .WithEnvironment("MassTransit_User", defaultUser)

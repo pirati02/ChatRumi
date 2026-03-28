@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Domain.Events;
+using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
 using ChatRumi.Kernel;
 
@@ -53,6 +53,7 @@ public class Chat : Aggregate
 
     public void Apply(ChatStartedEvent @event)
     {
+        Id = @event.Id;
         CreationDate = @event.Timestamp;
         Participants = @event.Participants;
         Name = @event.ChatName;
@@ -72,6 +73,15 @@ public class Chat : Aggregate
     public void Apply(MessageSentEvent @event)
     {
         Messages.Add(@event.AsMessage());
+    }
+
+    public void Apply(MessageStatusChangeEvent @event)
+    {
+        var message = Messages.FirstOrDefault(m => m.Id == @event.MessageId);
+        if (message is null || message.Participant.Id != @event.SenderId.Id)
+            return;
+
+        UpdateMessageStatus(message, @event.Status);
     }
 
     private void ReplaceParticipant(Participant oldParticipant, Participant updated)

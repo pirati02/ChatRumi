@@ -1,6 +1,7 @@
-﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Dto.Response;
+using ChatRumi.Chat.Application.Services;
 using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
 using ErrorOr;
@@ -15,7 +16,8 @@ public static class AppendMessage
     public sealed record Command(Guid ChatId, MessageRequest Request) : IRequest<ErrorOr<MessageResponse>>;
 
     public sealed class Handler(
-        IDocumentStore store
+        IDocumentStore store,
+        IAccountPublicKeyProvider publicKeyProvider
     ) : IRequestHandler<Command, ErrorOr<MessageResponse>>
     {
         public async ValueTask<ErrorOr<MessageResponse>> Handle(Command request, CancellationToken cancellationToken)
@@ -42,7 +44,7 @@ public static class AppendMessage
             session.Events.Append(chat.Id, chat.Events);
             await session.SaveChangesAsync(cancellationToken);
 
-            return new MessageResponse(
+            var messageResponse = new MessageResponse(
                 chat.Id,
                 @event.Id,
                 MessageStatus.Sent,
@@ -50,6 +52,12 @@ public static class AppendMessage
                 request.Request.Sender,
                 request.Request.ReplyOf
             );
+
+            var lookup = await publicKeyProvider.GetPublicKeysAsync([messageResponse.Sender.Id], cancellationToken);
+            return messageResponse with
+            {
+                Sender = messageResponse.Sender.MergePublicKey(lookup)
+            };
         }
     }
 }

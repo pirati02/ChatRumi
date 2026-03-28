@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
@@ -33,13 +33,16 @@ public static class UpdateMessageState
                 return Error.NotFound("Chat not found.", $"Chat by '{request.ChatId}' not found.");
             }
 
-            chat.Fire(new MessageStatusChangeEvent
+            var @event = new MessageStatusChangeEvent
             {
                 MessageId = request.Message.MessageId,
                 SenderId = request.Message.Sender.ToDomain(),
                 Status = request.Status
-            });
-            session.Events.Append(chat.Id, chat.Events);
+            };
+            chat.Fire(@event);
+            // Exclusive lock prevents concurrent appends from racing on the same (stream_id, version).
+            // Use request.ChatId so the stream matches AggregateStreamAsync even if aggregate identity were wrong.
+            await session.Events.AppendExclusive(request.ChatId, cancellationToken, @event);
             await session.SaveChangesAsync(cancellationToken);
             return (request.Message.MessageId, request.Status);
         }

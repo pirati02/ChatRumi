@@ -48,7 +48,8 @@ public static class ModuleRegistration
                 {
                     EndPoints = { { options.Host, options.Port } },
                     User = options.User,
-                    Password = options.Password
+                    Password = options.Password,
+                    AbortOnConnectFail = false
                 });
             });
         }

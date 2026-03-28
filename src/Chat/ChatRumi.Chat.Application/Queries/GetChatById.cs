@@ -1,8 +1,9 @@
-﻿using ChatRumi.Chat.Application.Dto.Extensions;
+using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Response;
+using ChatRumi.Chat.Application.Services;
 using ErrorOr;
 using Marten;
-using Mediator; 
+using Mediator;
 
 namespace ChatRumi.Chat.Application.Queries;
 
@@ -12,7 +13,10 @@ public static class GetChatById
     // ReSharper disable once ClassNeverInstantiated.Global
     public record Query(Guid ChatId) : IRequest<ErrorOr<ChatResponse>>;
 
-    public sealed class Handler(IDocumentStore store) : IRequestHandler<Query, ErrorOr<ChatResponse>>
+    public sealed class Handler(
+        IDocumentStore store,
+        IAccountPublicKeyProvider publicKeyProvider
+    ) : IRequestHandler<Query, ErrorOr<ChatResponse>>
     {
         public async ValueTask<ErrorOr<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
@@ -28,7 +32,11 @@ public static class GetChatById
                 return Error.NotFound("Chat not found.");
             }
 
-            return chat.ToDto();
+            var dto = chat.ToDto();
+            var lookup = await publicKeyProvider.GetPublicKeysAsync(
+                ParticipantPublicKeyEnrichment.CollectAccountIds(dto),
+                cancellationToken);
+            return dto.EnrichPublicKeys(lookup);
         }
     }
 }

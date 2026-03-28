@@ -10,7 +10,9 @@ var rabbitMq = builder.AddRabbitMqInternal(defaultUser, defaultPassword);
 
 var elastic = builder.AddElasticsearchInternal();
 
+var redisPassword = builder.AddParameter("redis-password", "redis_dev_password");
 var redis = builder.AddRedis("redis")
+    .WithPassword(redisPassword)
     .WithVolume("redis_data", "/data")
     .WithLifetime(ContainerLifetime.Persistent);
 
@@ -25,7 +27,7 @@ var neo4J = builder.AddNeo4JInternal();
 var accountService = builder.AddAccountService(postgres, redis, rabbitMq, defaultUser, defaultPassword);
 
 var chatDatabase = postgres.AddDatabase("chatDatabase", "chatDatabase");
-var chatService = builder.AddChatService(chatDatabase, redis, rabbitMq, defaultUser, defaultPassword);
+var chatService = builder.AddChatService(chatDatabase, redis, rabbitMq, accountService, defaultUser, defaultPassword);
 builder.AddChatAccountSyncService(chatDatabase, redis, rabbitMq, kafka, defaultUser, defaultPassword);
 
 builder.AddFeedAccountSyncService(elastic, kafka);

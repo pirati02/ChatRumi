@@ -1,4 +1,4 @@
-﻿# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
 # ChatRumi Microservices Stack
 # ════════════════════════════════════════════════════════════════
 # 
@@ -300,10 +300,13 @@ services:
       - OpenTelemetry__ServiceVersion=1.0.0
       - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
       - OpenTelemetry__Enabled=true
+      - AccountService__BaseUrl=http://account-service:5049
     depends_on:
       consul:
         condition: service_healthy
       postgres:
+        condition: service_started
+      account-service:
         condition: service_started
       kafka:
         condition: service_healthy

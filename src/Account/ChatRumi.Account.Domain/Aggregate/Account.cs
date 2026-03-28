@@ -1,4 +1,4 @@
-﻿using ChatRumi.Account.Domain.Events;
+using ChatRumi.Account.Domain.Events;
 
 namespace ChatRumi.Account.Domain.Aggregate;
 
@@ -26,6 +26,7 @@ public class Account : Kernel.Aggregate
 
     public void Apply(AccountCreateEvent @event)
     {
+        Id = @event.AccountId;
         UserName = @event.UserName;
         Email = @event.Email;
         FirstName = @event.FirstName;
