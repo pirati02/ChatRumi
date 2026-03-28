@@ -10,16 +10,15 @@ using Microsoft.Extensions.Options;
 
 namespace ChatRumi.Account.Application.Commands;
 
-public static class Login
+public static class Refresh
 {
-    public sealed record Command(string Email, string Password) : IRequest<ErrorOr<AuthTokenResponse>>;
+    public sealed record Command(string refresh_token) : IRequest<ErrorOr<AuthTokenResponse>>;
 
     public sealed class Validator : AbstractValidator<Command>
     {
         public Validator()
         {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress();
-            RuleFor(x => x.Password).NotEmpty();
+            RuleFor(x => x.refresh_token).NotEmpty();
         }
     }
 
@@ -44,13 +43,22 @@ public static class Login
                     );
             }
 
+            var hash = RefreshTokenCrypto.HashToken(request.refresh_token);
             await using var session = store.LightweightSession();
-            var emailLower = request.Email.Trim().ToLowerInvariant();
+
+            var stored = await session.Query<StoredRefreshToken>()
+                .Where(x => x.TokenHash == hash)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (stored is null || stored.ExpiresAt < DateTimeOffset.UtcNow)
+            {
+                return Error.Unauthorized(
+                    code: "Refresh.InvalidToken",
+                    description: "Invalid or expired refresh token.");
+            }
 
             var projection = await session.Query<AccountProjection>()
-                .FirstOrDefaultAsync(
-                    a => a.Email.ToLower() == emailLower,
-                    cancellationToken);
+                .FirstOrDefaultAsync(a => a.Id == stored.AccountId, cancellationToken);
 
             Domain.Aggregate.Account? account = null;
             if (projection is not null)
@@ -60,14 +68,14 @@ public static class Login
                     token: cancellationToken);
             }
 
-            if (projection is null
-                || account is null
-                || !PasswordHasher.VerifyPassword(request.Password, account.PasswordHash, account.PasswordSalt))
+            if (projection is null || account is null)
             {
                 return Error.Unauthorized(
-                    code: "Login.InvalidCredentials",
-                    description: "Invalid email or password.");
+                    code: "Refresh.InvalidToken",
+                    description: "Invalid or expired refresh token.");
             }
+
+            session.Delete(stored);
 
             var accessToken = jwtAccessTokenIssuer.CreateAccessToken(
                 account.Id,

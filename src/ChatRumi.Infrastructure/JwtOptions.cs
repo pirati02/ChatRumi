@@ -12,4 +12,6 @@ public sealed class JwtOptions
     public string SigningKey { get; set; } = "";
 
     public int AccessTokenExpirationMinutes { get; set; } = 60;
+
+    public int RefreshTokenExpirationDays { get; set; } = 14;
 }

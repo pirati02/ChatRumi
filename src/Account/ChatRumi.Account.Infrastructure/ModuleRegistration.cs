@@ -1,3 +1,4 @@
+using ChatRumi.Account.Application.Documents;
 using ChatRumi.Account.Application.Options;
 using ChatRumi.Account.Application.Projections;
 using ChatRumi.Infrastructure;
@@ -37,6 +38,9 @@ public static class ModuleRegistration
                 options.Schema.For<AccountProjection>()
                     .UniqueIndex(x => x.UserName)
                     .UniqueIndex(x => x.Email);
+
+                options.Schema.For<StoredRefreshToken>()
+                    .UniqueIndex(x => x.TokenHash);
 
                 options.Events.StreamIdentity = StreamIdentity.AsGuid;
             }).AddAsyncDaemon(DaemonMode.Solo);

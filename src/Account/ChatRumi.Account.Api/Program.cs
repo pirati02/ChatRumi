@@ -51,6 +51,26 @@ accountGroup.MapPost("login", async ([FromBody] Login.Command command, IMediator
     .WithName("login")
     .AllowAnonymous();
 
+accountGroup.MapPost("refresh", async ([FromBody] Refresh.Command command, IMediator mediator) =>
+    {
+        var result = await mediator.Send(command);
+        return result.Match(
+            Results.Ok,
+            errors =>
+            {
+                if (errors.Any(e => e.Type == ErrorType.Unauthorized))
+                {
+                    return Results.Json(
+                        new { message = "Invalid or expired refresh token." },
+                        statusCode: StatusCodes.Status401Unauthorized);
+                }
+
+                return Results.BadRequest(errors);
+            });
+    })
+    .WithName("refresh")
+    .AllowAnonymous();
+
 accountGroup.MapPost("", async ([FromBody] Register.Command command, IMediator mediator) =>
     {
         var result = await mediator.Send(command);

@@ -19,8 +19,9 @@ public static class JwtAuthenticationExtensions
                     && !string.IsNullOrWhiteSpace(o.Audience)
                     && !string.IsNullOrWhiteSpace(o.SigningKey)
                     && o.SigningKey.Length >= 32
-                    && o.AccessTokenExpirationMinutes is >= 1 and <= 10080,
-                "Jwt: Issuer, Audience, and SigningKey (min 32 chars) are required; AccessTokenExpirationMinutes must be 1–10080.")
+                    && o.AccessTokenExpirationMinutes is >= 1 and <= 10080
+                    && o.RefreshTokenExpirationDays is >= 1 and <= 365,
+                "Jwt: Issuer, Audience, and SigningKey (min 32 chars) are required; AccessTokenExpirationMinutes must be 1–10080; RefreshTokenExpirationDays must be 1–365.")
             .ValidateOnStart();
 
         services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerPostConfigureOptions>();
