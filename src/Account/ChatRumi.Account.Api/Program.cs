@@ -51,7 +51,7 @@ accountGroup.MapPost("login", async ([FromBody] Login.Command command, IMediator
     .WithName("login")
     .AllowAnonymous();
 
-accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMediator mediator) =>
+accountGroup.MapPost("", async ([FromBody] Register.Command command, IMediator mediator) =>
     {
         var result = await mediator.Send(command);
         return result.Match(
@@ -59,7 +59,7 @@ accountGroup.MapPost("", async ([FromBody] CreateAccount.Command command, IMedia
             Results.BadRequest
         );
     })
-    .WithName("create-account")
+    .WithName("register-account")
     .AllowAnonymous();
 
 accountGroup.MapPut("{accountId:guid}", async ([FromRoute] Guid accountId, [FromBody] UpdateAccount.Command command, IMediator mediator) =>

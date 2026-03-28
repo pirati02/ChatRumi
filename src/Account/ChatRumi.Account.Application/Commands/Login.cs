@@ -44,6 +44,7 @@ public static class Login
 
             await using var session = store.LightweightSession();
             var emailLower = request.Email.Trim().ToLowerInvariant();
+
             var projection = await session.Query<AccountProjection>()
                 .FirstOrDefaultAsync(
                     a => a.Email.ToLower() == emailLower,
