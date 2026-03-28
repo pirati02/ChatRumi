@@ -1,4 +1,4 @@
-﻿using ChatRum.InterCommunication;
+using ChatRum.InterCommunication;
 using ChatRumi.Account.Application.IntegrationEvents;
 using ChatRumi.Account.Domain.Events;
 using FluentValidation;
@@ -75,8 +75,7 @@ public static class UpdateAccount
                     account.Id,
                     @event.UserName,
                     @event.FirstName,
-                    @event.LastName,
-                    account.PublicKey
+                    @event.LastName
                 ),
                 cancellationToken
             );

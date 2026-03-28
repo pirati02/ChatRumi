@@ -19,11 +19,6 @@ public class Account : Kernel.Aggregate
     public byte[] PasswordHash { get; set; } = [];
     public byte[] PasswordSalt { get; set; } = [];
 
-    /// <summary>
-    /// Public key for end-to-end encryption (Base64 encoded)
-    /// </summary>
-    public string? PublicKey { get; set; }
-
     public void Apply(AccountCreateEvent @event)
     {
         Id = @event.AccountId;
@@ -55,6 +50,6 @@ public class Account : Kernel.Aggregate
 
     public void Apply(AccountKeyRegisteredEvent @event)
     {
-        PublicKey = @event.PublicKey;
+        // Historical streams may contain this event; E2E keys are no longer stored.
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using ChatRum.InterCommunication;
 using ChatRumi.Friendship.Application.Dto.Request;
 using ChatRumi.Friendship.Application.IntegrationEvents;
@@ -54,8 +54,7 @@ public class AccountModifiedConsumerBackgroundService(
 
                         await peerConnectionManager.UpdatePeerAsync(new PeerDto(
                             @event.AccountId,
-                            @event.UserName,
-                            @event.PublicKey
+                            @event.UserName
                         ));
                     }
 

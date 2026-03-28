@@ -37,7 +37,7 @@ public static class GetPosts
                 )
                 .Size(request.Size), cancellationToken);
 
-            if (!randomPosts.IsValid || !myPosts.IsValid)
+            if (!randomPosts.IsValid && !myPosts.IsValid)
                 return [];
 
             var combined = myPosts.Documents

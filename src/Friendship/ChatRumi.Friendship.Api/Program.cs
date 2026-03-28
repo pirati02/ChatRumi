@@ -24,6 +24,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseRouting();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();

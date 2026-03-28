@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Domain.Aggregates;
+using ChatRumi.Chat.Domain.Aggregates;
 using ChatRumi.Chat.Domain.ValueObject;
 using ChatRumi.Kernel;
 
@@ -46,10 +46,6 @@ public record MessageSentEvent(
             LinkContent content => new PlainTextContent
             {
                 Content = content.Content
-            },
-            EncryptedContent => new PlainTextContent
-            {
-                Content = "🔒 encrypted message"
             },
             _ => throw new Exception("Invalid message content")
         };

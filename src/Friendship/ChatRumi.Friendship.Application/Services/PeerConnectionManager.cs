@@ -1,4 +1,4 @@
-﻿using ChatRumi.Friendship.Application.Dto.Request;
+using ChatRumi.Friendship.Application.Dto.Request;
 using Microsoft.Extensions.Options;
 using Neo4j.Driver;
 
@@ -48,11 +48,9 @@ public class PeerConnectionManager(
                                  MERGE (a:Account {peerId: $peerId})
                                  ON CREATE SET 
                                      a.userName = $userName,
-                                     a.publicKey = $publicKey,
                                      a.createdDate = $modifiedDate
                                  ON MATCH SET 
                                      a.userName = $userName,
-                                     a.publicKey = COALESCE($publicKey, a.publicKey),
                                      a.modifiedDate = $modifiedDate
                              """;
 
@@ -60,7 +58,6 @@ public class PeerConnectionManager(
         {
             peerId = peer.PeerId.ToString(),
             userName = peer.UserName,
-            publicKey = peer.PublicKey,
             modifiedDate = DateTime.UtcNow
         };
 
@@ -157,7 +154,7 @@ public class PeerConnectionManager(
     {
         const string query = """
                                  MATCH (a:Account {peerId: $peerId})-[:FRIENDS_WITH]-(friend:Account)
-                                 RETURN friend.peerId, friend.userName, friend.createdDate, friend.publicKey
+                                 RETURN friend.peerId, friend.userName, friend.createdDate
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
@@ -166,8 +163,7 @@ public class PeerConnectionManager(
         return [.. (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["friend.peerId"].As<string>()),
                 record["friend.userName"].As<string>(),
-                record["friend.createdDate"].As<ZonedDateTime>().UtcDateTime,
-                record["friend.publicKey"].As<string?>()
+                record["friend.createdDate"].As<ZonedDateTime>().UtcDateTime
             )))
             .DistinctBy(a => a.PeerId)];
     }
@@ -176,7 +172,7 @@ public class PeerConnectionManager(
     {
         const string query = """
                                  MATCH (sender:Account)-[:FRIEND_REQUEST]->(recipient:Account {peerId: $peerId})
-                                 RETURN sender.peerId AS peerId, sender.userName AS userName, sender.createdDate AS createdDate, sender.publicKey AS publicKey
+                                 RETURN sender.peerId AS peerId, sender.userName AS userName, sender.createdDate AS createdDate
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
@@ -186,8 +182,7 @@ public class PeerConnectionManager(
         return [.. (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["peerId"].As<string>()),
                 record["userName"].As<string>(),
-                record["createdDate"].As<ZonedDateTime>().UtcDateTime,
-                record["publicKey"].As<string?>()
+                record["createdDate"].As<ZonedDateTime>().UtcDateTime
             )))];
     }
 
@@ -195,7 +190,7 @@ public class PeerConnectionManager(
     {
         const string query = """
                                  MATCH (requester:Account {peerId: $peerId})-[:FRIEND_REQUEST]->(recipient:Account)
-                                 RETURN recipient.peerId AS peerId, recipient.userName AS userName, recipient.createdDate AS createdDate, recipient.publicKey AS publicKey
+                                 RETURN recipient.peerId AS peerId, recipient.userName AS userName, recipient.createdDate AS createdDate
                              """;
 
         var parameters = new { peerId = peerId.ToString() };
@@ -205,8 +200,7 @@ public class PeerConnectionManager(
         return [.. (await result.ToListAsync(record => new PeerResponse(
                 Guid.Parse(record["peerId"].As<string>()),
                 record["userName"].As<string>(),
-                record["createdDate"].As<ZonedDateTime?>()!.UtcDateTime,
-                record["publicKey"].As<string?>()
+                record["createdDate"].As<ZonedDateTime?>()!.UtcDateTime
             )))];
     }
 

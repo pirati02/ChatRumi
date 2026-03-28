@@ -1,9 +1,8 @@
-﻿namespace ChatRumi.Chat.Application.IntegrationEvents;
+namespace ChatRumi.Chat.Application.IntegrationEvents;
 
 public sealed record AccountModified(
     Guid AccountId,
     string UserName,
     string FirstName,
-    string LastName,
-    string? PublicKey
+    string LastName
 );

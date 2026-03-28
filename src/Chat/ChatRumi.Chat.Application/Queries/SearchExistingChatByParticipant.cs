@@ -2,7 +2,6 @@ using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
-using ChatRumi.Chat.Application.Services;
 using ErrorOr;
 using Marten;
 using Mediator;
@@ -17,8 +16,7 @@ public static class SearchExistingChatByParticipant
     ) : IRequest<ErrorOr<ChatResponse?>>;
 
     public sealed class Handler(
-        IDocumentStore store,
-        IAccountPublicKeyProvider publicKeyProvider
+        IDocumentStore store
     ) : IRequestHandler<Query, ErrorOr<ChatResponse?>>
     {
         public async ValueTask<ErrorOr<ChatResponse?>> Handle(Query request, CancellationToken cancellationToken)
@@ -42,11 +40,7 @@ public static class SearchExistingChatByParticipant
             if (chat is null)
                 return (ChatResponse?)null;
 
-            var dto = chat.ToDto();
-            var lookup = await publicKeyProvider.GetPublicKeysAsync(
-                ParticipantPublicKeyEnrichment.CollectAccountIds(dto),
-                cancellationToken);
-            return dto.EnrichPublicKeys(lookup);
+            return chat.ToDto();
         }
     }
 }

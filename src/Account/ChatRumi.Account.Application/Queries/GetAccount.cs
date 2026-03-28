@@ -1,4 +1,4 @@
-﻿using ErrorOr;
+using ErrorOr;
 using Marten;
 using Mediator;
 
@@ -33,8 +33,7 @@ public static class GetAccount
                 account.LastName,
                 account.PhoneNumber,
                 account.CountryCode,
-                account.IsVerified,
-                account.PublicKey
+                account.IsVerified
             );
         }
     }
@@ -48,6 +47,5 @@ public record AccountResponse(
     string LastName,
     string PhoneNumber,
     string CountryCode,
-    bool IsVerified,
-    string? PublicKey
+    bool IsVerified
 );

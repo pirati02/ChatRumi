@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -65,7 +66,8 @@ public static class JwtAuthenticationExtensions
             {
                 OnMessageReceived = context =>
                 {
-                    var accessToken = context.Request.Query["access_token"];
+                    var accessTokenValues = context.Request.Query["access_token"];
+                    var accessToken = accessTokenValues.FirstOrDefault(v => !string.IsNullOrEmpty(v));
                     var path = context.HttpContext.Request.Path;
                     if (!string.IsNullOrEmpty(accessToken) &&
                         (path.StartsWithSegments("/hub/chat") || path.StartsWithSegments("/hub/friendship")))

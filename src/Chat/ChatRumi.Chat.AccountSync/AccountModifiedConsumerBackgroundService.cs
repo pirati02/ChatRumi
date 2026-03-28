@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using ChatRum.InterCommunication;
 using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.IntegrationEvents;
@@ -57,8 +57,7 @@ public class AccountModifiedConsumerBackgroundService(
                                 @event.AccountId,
                                 @event.UserName,
                                 @event.FirstName,
-                                @event.LastName,
-                                @event.PublicKey
+                                @event.LastName
                             ), stoppingToken);
                     }
 

@@ -1,8 +1,6 @@
 using System.Text.Json;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
-using ChatRumi.Chat.Application.Services;
-using ChatRumi.Chat.Infrastructure.AccountPublicKey;
 using ChatRumi.Chat.Infrastructure.Options;
 using ChatRumi.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -28,18 +26,6 @@ public static class ModuleRegistration
             DbInitializer.Initialize(configuration.GetConnectionString("chatDatabase")!);
             services.AddMarten(configuration, environment, DefaultJsonContentOptions.CreateJsonOptions());
             services.AddRedis();
-            services.Configure<AccountServiceOptions>(configuration.GetSection(AccountServiceOptions.SectionName));
-            // BaseUrl: AccountService:BaseUrl, else ConnectionStrings:accountservice (Aspire WithReference from Chat to Account).
-            services.AddHttpClient<IAccountPublicKeyProvider, AccountPublicKeyProvider>((sp, client) =>
-            {
-                var opts = sp.GetRequiredService<IOptions<AccountServiceOptions>>().Value;
-                var baseUrl = opts.BaseUrl;
-                if (string.IsNullOrWhiteSpace(baseUrl))
-                    baseUrl = configuration.GetConnectionString("accountservice") ?? "";
-                if (!string.IsNullOrWhiteSpace(baseUrl))
-                    client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
-                client.Timeout = TimeSpan.FromSeconds(30);
-            });
         }
 
         private void AddMarten(

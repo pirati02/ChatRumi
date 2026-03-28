@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Application.Projections.ExistingChat;
+using ChatRumi.Chat.Application.Projections.ExistingChat;
 using ChatRumi.Chat.Domain.Events;
 using Marten;
 using Mediator;
@@ -12,8 +12,7 @@ public static class ModifyChatParticipant
         Guid ParticipantId,
         string UserName,
         string FirstName,
-        string LastName,
-        string? PublicKey
+        string LastName
     ) : IRequest;
 
     public sealed class Handler(
@@ -35,15 +34,14 @@ public static class ModifyChatParticipant
             foreach (var chatId in chatIds.Chunk(100).SelectMany(a => a))
             {
                 session.Events.Append(
-                     chatId,
-                     new ParticipantModifiedEvent(
-                         request.ParticipantId,
-                         request.FirstName,
-                         request.LastName,
-                         request.UserName,
-                         request.PublicKey
-                     )
-                 );
+                    chatId,
+                    new ParticipantModifiedEvent(
+                        request.ParticipantId,
+                        request.UserName,
+                        request.FirstName,
+                        request.LastName
+                    )
+                );
                 logger.LogInformation("Successfully updated {Chat} for participant {Id}", chatId, request.ParticipantId);
             }
 

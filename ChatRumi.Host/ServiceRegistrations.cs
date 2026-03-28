@@ -71,8 +71,6 @@ public static class ServiceRegistrations
                 .WithReference(rabbitMq)
                 .WithReference(chatDatabase)
                 .WithReference(accountService)
-                // Ensures IOptions<AccountServiceOptions> / HttpClient BaseAddress without relying on ConnectionStrings key shape.
-                .WithEnvironment("AccountService__BaseUrl", accountService.GetEndpoint("http"))
                 .WaitFor(chatDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitMq)

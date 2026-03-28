@@ -1,4 +1,4 @@
-﻿using ChatRumi.Account.Application.Projections;
+using ChatRumi.Account.Application.Projections;
 using Marten;
 using Mediator; 
 
@@ -25,8 +25,7 @@ public static class GetAccounts
                     account.LastName,
                     account.PhoneNumber,
                     account.CountryCode,
-                    account.IsVerified,
-                    account.PublicKey
+                    account.IsVerified
                 ))
                 .ToArray();
         }

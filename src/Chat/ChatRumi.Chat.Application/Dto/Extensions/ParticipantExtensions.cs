@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Domain.Aggregates;
+using ChatRumi.Chat.Domain.Aggregates;
 
 namespace ChatRumi.Chat.Application.Dto.Extensions;
 
@@ -13,8 +13,7 @@ public static class ParticipantExtensions
                 Id = participant.Id,
                 FirstName = participant.FirstName,
                 LastName = participant.LastName,
-                NickName = participant.NickName,
-                PublicKey = participant.PublicKey
+                NickName = participant.NickName
             };
         }
     }
@@ -27,8 +26,7 @@ public static class ParticipantExtensions
                 participant.Id,
                 participant.FirstName,
                 participant.LastName,
-                participant.NickName,
-                participant.PublicKey
+                participant.NickName
             );
         }
     }

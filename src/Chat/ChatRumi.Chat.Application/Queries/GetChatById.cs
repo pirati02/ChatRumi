@@ -1,6 +1,5 @@
 using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Response;
-using ChatRumi.Chat.Application.Services;
 using ErrorOr;
 using Marten;
 using Mediator;
@@ -14,8 +13,7 @@ public static class GetChatById
     public record Query(Guid ChatId) : IRequest<ErrorOr<ChatResponse>>;
 
     public sealed class Handler(
-        IDocumentStore store,
-        IAccountPublicKeyProvider publicKeyProvider
+        IDocumentStore store
     ) : IRequestHandler<Query, ErrorOr<ChatResponse>>
     {
         public async ValueTask<ErrorOr<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
@@ -32,11 +30,7 @@ public static class GetChatById
                 return Error.NotFound("Chat not found.");
             }
 
-            var dto = chat.ToDto();
-            var lookup = await publicKeyProvider.GetPublicKeysAsync(
-                ParticipantPublicKeyEnrichment.CollectAccountIds(dto),
-                cancellationToken);
-            return dto.EnrichPublicKeys(lookup);
+            return chat.ToDto();
         }
     }
 }

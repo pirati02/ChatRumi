@@ -1,4 +1,4 @@
-﻿using ChatRumi.Chat.Domain.Events;
+using ChatRumi.Chat.Domain.Events;
 using Marten.Events.Aggregation;
 
 namespace ChatRumi.Chat.Application.Projections.LatestChat;
@@ -29,8 +29,7 @@ public class LatestChatProjectionTransform : SingleStreamProjection<LatestChatPr
             {
                 FirstName = @event.FirstName,
                 LastName = @event.LastName,
-                NickName = @event.UserName,
-                PublicKey = @event.PublicKey ?? existing.PublicKey
+                NickName = @event.UserName
             };
 
             var index = projection.Participants.IndexOf(existing);

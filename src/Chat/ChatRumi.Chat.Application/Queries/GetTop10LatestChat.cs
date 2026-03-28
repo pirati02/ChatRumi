@@ -1,7 +1,6 @@
 using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Application.Projections.LatestChat;
-using ChatRumi.Chat.Application.Services;
 using ErrorOr;
 using Marten;
 using Mediator;
@@ -15,8 +14,7 @@ public static class GetTop10LatestChat
         : IRequest<ErrorOr<LatestChatResponse[]>>;
 
     public sealed class Handler(
-        IDocumentStore store,
-        IAccountPublicKeyProvider publicKeyProvider
+        IDocumentStore store
     ) : IRequestHandler<Query, ErrorOr<LatestChatResponse[]>>
     {
         public async ValueTask<ErrorOr<LatestChatResponse[]>> Handle(Query request,
@@ -29,7 +27,7 @@ public static class GetTop10LatestChat
                 cancellationToken
             );
 
-            var responses = chats.Select(chat => new LatestChatResponse(
+            return chats.Select(chat => new LatestChatResponse(
                 chat.Id,
                 chat.IsGroupChat,
                 chat.LatestMessage is not null
@@ -37,11 +35,6 @@ public static class GetTop10LatestChat
                     : null,
                 chat.Participants.Select(p => p.ToDto()).ToList()
             )).ToArray();
-
-            var allIds = responses.SelectMany(ParticipantPublicKeyEnrichment.CollectAccountIds).Distinct();
-            var lookup = await publicKeyProvider.GetPublicKeysAsync(allIds, cancellationToken);
-
-            return responses.Select(r => r.EnrichPublicKeys(lookup)).ToArray();
         }
     }
 }

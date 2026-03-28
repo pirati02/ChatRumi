@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using ChatRumi.Chat.Domain.ValueObject;
 
@@ -6,6 +6,8 @@ namespace ChatRumi.Chat.Application.Dto;
 
 public class MessageContentConverter : JsonConverter<MessageContent>
 {
+    private const string LegacyEncryptedPlaceholder = "[Encrypted message — not available]";
+
     public override MessageContent Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         using var doc = JsonDocument.ParseValue(ref reader);
@@ -33,42 +35,8 @@ public class MessageContentConverter : JsonConverter<MessageContent>
             "plain" or null => new PlainTextContent { Content = content },
             "link" => new LinkContent { Content = content },
             "image" => new ImageContent { Content = content },
-            "encrypted" => DeserializeEncryptedContent(root, content),
+            "encrypted" => new PlainTextContent { Content = LegacyEncryptedPlaceholder },
             _ => new PlainTextContent { Content = content } // fallback
-        };
-    }
-
-    private static EncryptedContent DeserializeEncryptedContent(JsonElement root, string content)
-    {
-        var iv = "";
-        if (root.TryGetProperty("iv", out var ivProp) ||
-            root.TryGetProperty("Iv", out ivProp))
-        {
-            iv = ivProp.GetString() ?? "";
-        }
-
-        var encryptedKeys = new Dictionary<Guid, string>();
-        if (!root.TryGetProperty("encryptedKeys", out var keysProp) &&
-            !root.TryGetProperty("EncryptedKeys", out keysProp))
-            return new EncryptedContent
-            {
-                Content = content,
-                Iv = iv,
-                EncryptedKeys = encryptedKeys
-            };
-        foreach (var prop in keysProp.EnumerateObject())
-        {
-            if (Guid.TryParse(prop.Name, out var guid))
-            {
-                encryptedKeys[guid] = prop.Value.GetString() ?? "";
-            }
-        }
-
-        return new EncryptedContent
-        {
-            Content = content,
-            Iv = iv,
-            EncryptedKeys = encryptedKeys
         };
     }
 
@@ -76,29 +44,15 @@ public class MessageContentConverter : JsonConverter<MessageContent>
     {
         writer.WriteStartObject();
 
-        // Write type discriminator
         var type = value switch
         {
             PlainTextContent => "plain",
             LinkContent => "link",
             ImageContent => "image",
-            EncryptedContent => "encrypted",
             _ => "plain"
         };
         writer.WriteString("type", type);
         writer.WriteString("content", value.Content);
-
-        // Write additional properties for EncryptedContent
-        if (value is EncryptedContent encrypted)
-        {
-            writer.WriteString("iv", encrypted.Iv);
-            writer.WriteStartObject("encryptedKeys");
-            foreach (var kvp in encrypted.EncryptedKeys)
-            {
-                writer.WriteString(kvp.Key.ToString(), kvp.Value);
-            }
-            writer.WriteEndObject();
-        }
 
         writer.WriteEndObject();
     }
