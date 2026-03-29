@@ -10,7 +10,7 @@ public class LatestChatProjectionTransform : SingleStreamProjection<LatestChatPr
         ProjectEvent<ChatStartedEvent>((projection, @event) =>
         {
             projection.Id = @event.Id;
-            projection.Participants = @event.Participants;
+            projection.Participants = [.. @event.Participants];
             projection.IsGroupChat = @event.IsGroupChat;
         });
 

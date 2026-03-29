@@ -11,6 +11,7 @@ using JasperFx.Events.Daemon;
 using JasperFx.Events.Projections;
 using Marten;
 using StackExchange.Redis;
+using ChatRumi.Chat.Application.Projections.LatestChat;
 
 namespace ChatRumi.Chat.Infrastructure;
 
@@ -48,6 +49,9 @@ public static class ModuleRegistration
                     options.Projections.LiveStreamAggregation<Domain.Aggregates.Chat>();
                     options.Projections.Add<ExistingChatProjectionTransform>(ProjectionLifecycle.Inline);
                     options.Schema.For<ExistingChatProjection>();
+
+                    options.Projections.Add<LatestChatProjectionTransform>(ProjectionLifecycle.Inline);
+                    options.Schema.For<LatestChatProjection>();
 
                     options.Events.StreamIdentity = StreamIdentity.AsGuid;
                 })
