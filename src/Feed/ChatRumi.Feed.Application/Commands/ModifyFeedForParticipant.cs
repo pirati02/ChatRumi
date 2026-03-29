@@ -64,10 +64,9 @@ public static class ModifyFeedForParticipant
             }
             else
             {
-                logger.LogInformation("Successfully updated {Count} posts for participant {Id}",
-                    documents.Count, request.ParticipantId);
+                logger.LogInformation("Successfully updated {Count} posts for participant {Id}", documents.Count, request.ParticipantId);
             }
-            
+
             return Unit.Value;
         }
     }

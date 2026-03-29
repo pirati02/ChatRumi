@@ -1,4 +1,4 @@
-﻿using ChatRumi.Feed.Application.Dtos;
+using ChatRumi.Feed.Application.Dtos;
 using Mediator;
 using Nest;
 
@@ -23,7 +23,9 @@ public static class GetPosts
                         .MustNot(mn => mn.Term(t => t.Field(f => f.Creator.Id).Value(request.CreatorId)))
                         .Must(mu => mu.FunctionScore(fs => fs
                             .Query(qr => qr.MatchAll())
-                            .Functions(f => f.RandomScore(rs => rs.Seed(seed)))
+                            .Functions(f => f.RandomScore(rs => rs
+                                .Field(fd => fd.Id)
+                                .Seed(seed)))
                         ))
                     )
                 ), cancellationToken);

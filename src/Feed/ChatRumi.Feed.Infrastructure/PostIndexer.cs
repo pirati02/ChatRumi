@@ -19,6 +19,7 @@ public static class PostIndexer
             var createResponse = await client.Indices.CreateAsync(indexName, c => c
                 .Map<PostDocument>(m => m
                     .AutoMap()
+                    .Dynamic()
                     .Properties(ps => ps
                         .Object<Participant>(p => p
                             .Name(n => n.Creator)
