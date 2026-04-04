@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Sdk Name="Aspire.AppHost.Sdk" Version="13.2.0"/>
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UserSecretsId>a5e42789-1989-42d2-b55a-1bf7d54209d4</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" />
+        <PackageReference Include="Aspire.Hosting.Elasticsearch" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+        <PackageReference Include="Aspire.Hosting.RabbitMQ" />
+        <PackageReference Include="Aspire.Hosting.Redis" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Account\ChatRumi.Account.Api\ChatRumi.Account.Api.csproj" />
+      <ProjectReference Include="..\ChatRum.Gateway\ChatRum.Gateway.csproj" />
+      <ProjectReference Include="..\Chat\ChatRumi.Chat.AccountSync\ChatRumi.Chat.AccountSync.csproj" />
+      <ProjectReference Include="..\Chat\ChatRumi.Chat.Api\ChatRumi.Chat.Api.csproj" />
+      <ProjectReference Include="..\Feed\ChatRumi.Feed.AccountSync\ChatRumi.Feed.AccountSync.csproj" />
+      <ProjectReference Include="..\Feed\ChatRumi.Feed.Api\ChatRumi.Feed.Api.csproj" />
+      <ProjectReference Include="..\Friendship\ChatRumi.Friendship.AccountSync\ChatRumi.Friendship.AccountSync.csproj" />
+      <ProjectReference Include="..\Friendship\ChatRumi.Friendship.Api\ChatRumi.Friendship.Api.csproj" />
+    </ItemGroup>
+
+</Project>

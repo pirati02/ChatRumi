@@ -15,6 +15,7 @@
   <Folder Name="/src/">
     <Project Path="src/ChatRum.Gateway/ChatRum.Gateway.csproj" />
     <Project Path="src/ChatRum.InterCommunication/ChatRum.InterCommunication.csproj" />
+    <Project Path="src/ChatRumi.Host/ChatRumi.Host.csproj" />
     <Project Path="src/ChatRumi.Infrastructure/ChatRumi.Infrastructure.csproj" />
     <Project Path="src/ChatRumi.Kernel/ChatRumi.Kernel.csproj" />
   </Folder>
@@ -45,6 +46,4 @@
     <Project Path="src/Friendship/ChatRumi.Friendship.Domain/ChatRumi.Friendship.Domain.csproj" />
   </Folder>
   <Folder Name="/tests/" />
-  <Project Path="ChatRumi.Host/ChatRumi.Host.csproj" />
-  <Project Path="ChatRumi.ServiceDefaults/ChatRumi.ServiceDefaults.csproj" />
 </Solution>

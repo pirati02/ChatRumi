@@ -78,10 +78,11 @@ public static class ResourceRegistration
                 .WithEnvironment("NEO4J_apoc_import_file_enabled", "true")
                 .WithEnvironment("NEO4J_apoc_import_file_use__neo4j__config", "true")
                 .WithEnvironment("NEO4J_PLUGINS", "[\"apoc\", \"graph-data-science\"]")
-                .WithVolume("neo4j_data", "/data")
-                .WithVolume("neo4j_logs", "/logs")
-                .WithVolume("neo4j_import", "/var/lib/neo4j/import")
-                .WithVolume("neo4j_plugins", "/plugins")
+                // Distinct from docker-compose neo4j_* volumes so only one Neo4j can lock /data.
+                .WithVolume("chatrumi-aspire-neo4j-data", "/data")
+                .WithVolume("chatrumi-aspire-neo4j-logs", "/logs")
+                .WithVolume("chatrumi-aspire-neo4j-import", "/var/lib/neo4j/import")
+                .WithVolume("chatrumi-aspire-neo4j-plugins", "/plugins")
                 .WithLifetime(ContainerLifetime.Persistent);
 
             return neo4J;

@@ -37,9 +37,31 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 app.UseWebSockets();
-app.MapGet("/", () => Results.Ok("Gateway is running"));
-app.MapGet("/health", () => Results.Ok("Healthy ✅"))
-    .WithName("gateway-health");
+
+// Ocelot runs as middleware and does not forward unmatched routes to minimal API endpoints, so /health must be
+// handled before UseOcelot (Aspire WithHttpHealthCheck uses GET /health).
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method != HttpMethods.Get)
+    {
+        await next();
+        return;
+    }
+
+    if (context.Request.Path == "/")
+    {
+        await context.Response.WriteAsync("Gateway is running");
+        return;
+    }
+
+    if (context.Request.Path.Equals("/health", StringComparison.OrdinalIgnoreCase))
+    {
+        await context.Response.WriteAsync("Healthy ✅");
+        return;
+    }
+
+    await next();
+});
 
 await app.UseOcelot();
 await app.RunAsync();
