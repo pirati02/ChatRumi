@@ -42,7 +42,7 @@ var feedService = builder.AddFeedService(elastic)
 var friendshipService = builder.AddFriendshipService(neo4J)
     .WithChatRumiJwt(jwtSigningKey);
 
-builder.AddProject<Projects.ChatRum_Gateway>("gateway")
+builder.AddProject<Projects.ChatRum_Gateway>("gateway", launchProfileName: "https")
     .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Local")
     .WithReference(accountService)
     .WithReference(chatService)

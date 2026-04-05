@@ -12,6 +12,7 @@ public static class ModuleRegistration
     {
         public void AddPresentation(IConfiguration configuration)
         {
+            services.AddChatRumiResponseCompression();
             services.AddOpenApi();
             services.AddCors(options =>
             {

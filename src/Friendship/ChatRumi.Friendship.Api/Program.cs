@@ -14,6 +14,7 @@ builder.Services.AddApplication();
 
 var app = builder.Build();
 
+app.UseResponseCompression();
 // Add request/response body logging for OpenTelemetry (must be early in pipeline)
 app.UseRequestResponseLogging(
     maxBodySize: 8192,  // 8KB max body capture
