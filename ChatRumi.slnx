@@ -45,5 +45,20 @@
     <Project Path="src/Friendship/ChatRumi.Friendship.Application/ChatRumi.Friendship.Application.csproj" />
     <Project Path="src/Friendship/ChatRumi.Friendship.Domain/ChatRumi.Friendship.Domain.csproj" />
   </Folder>
-  <Folder Name="/tests/" />
+  <Folder Name="/tests/Account/">
+    <Project Path="tests/Account/ChatRumi.Account.Domain.Tests/ChatRumi.Account.Domain.Tests.csproj" />
+    <Project Path="tests/Account/ChatRumi.Account.Application.Tests/ChatRumi.Account.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Chat/">
+    <Project Path="tests/Chat/ChatRumi.Chat.Domain.Tests/ChatRumi.Chat.Domain.Tests.csproj" />
+    <Project Path="tests/Chat/ChatRumi.Chat.Application.Tests/ChatRumi.Chat.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Feed/">
+    <Project Path="tests/Feed/ChatRumi.Feed.Domain.Tests/ChatRumi.Feed.Domain.Tests.csproj" />
+    <Project Path="tests/Feed/ChatRumi.Feed.Application.Tests/ChatRumi.Feed.Application.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Friendship/">
+    <Project Path="tests/Friendship/ChatRumi.Friendship.Domain.Tests/ChatRumi.Friendship.Domain.Tests.csproj" />
+    <Project Path="tests/Friendship/ChatRumi.Friendship.Application.Tests/ChatRumi.Friendship.Application.Tests.csproj" />
+  </Folder>
 </Solution>

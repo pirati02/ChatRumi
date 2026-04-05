@@ -37,7 +37,7 @@ public static class CreatePost
                 return post.Id.ToString();
             }
 
-            logger.LogError("Post index failed. {Error}", response.OriginalException.StackTrace);
+            logger.LogError("Post index failed. {Error}", response.OriginalException?.StackTrace);
             return Error.Unexpected("Post creation failed.");
         }
     }
