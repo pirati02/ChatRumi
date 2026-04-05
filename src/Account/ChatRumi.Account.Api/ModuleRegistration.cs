@@ -13,15 +13,7 @@ public static class ModuleRegistration
         public void AddPresentation(IConfiguration configuration)
         {
             services.AddChatRumiResponseCompression();
-            services.AddCors(options =>
-            {
-                options.AddPolicy("CorsPolicy", policyBuilder =>
-                {
-                    policyBuilder.WithOrigins("http://localhost:4200")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
-            });
+            services.AddChatRumiCorsFromConfiguration(configuration, "CorsPolicy");
             var useInMemoryMassTransit = configuration.GetValue("IntegrationTesting:UseInMemoryMassTransit", false)
                                          || string.Equals(
                                              configuration["ASPNETCORE_ENVIRONMENT"],

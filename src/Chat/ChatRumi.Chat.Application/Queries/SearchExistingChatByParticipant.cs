@@ -12,7 +12,8 @@ namespace ChatRumi.Chat.Application.Queries;
 public static class SearchExistingChatByParticipant
 {
     public sealed record Query(
-        ParticipantDto[] Participants
+        ParticipantDto[] Participants,
+        Guid RequestingUserId
     ) : IRequest<ErrorOr<ChatResponse?>>;
 
     public sealed class Handler(
@@ -21,6 +22,11 @@ public static class SearchExistingChatByParticipant
     {
         public async ValueTask<ErrorOr<ChatResponse?>> Handle(Query request, CancellationToken cancellationToken)
         {
+            if (!request.Participants.Any(p => p.Id == request.RequestingUserId))
+            {
+                return Error.Forbidden("Chat.AccessDenied", "You must be a participant in the chat search.");
+            }
+
             await using var session = store.LightweightSession();
 
             var existing = await session.TryGetExistingChat(
@@ -38,7 +44,7 @@ public static class SearchExistingChatByParticipant
             );
 
             if (chat is null)
-                return (ChatResponse?)null;
+                return Error.NotFound("Chat not found.", "Chat not found.");
 
             return chat.ToDto();
         }

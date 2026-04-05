@@ -5,6 +5,7 @@ using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Domain.ValueObject;
+using ChatRumi.Infrastructure;
 using Mediator;
 using Microsoft.AspNetCore.SignalR;
 
@@ -42,6 +43,11 @@ public class ChatHub(
         bool overrideExisting
     )
     {
+        if (!TryGetAccount(out var callerId) || creator.Id != callerId)
+        {
+            return;
+        }
+
         var participantIds = participants.Select(p => p.Id).ToArray();
         var connections = accountConnectionManager.GetConnections(participantIds);
 
@@ -64,6 +70,11 @@ public class ChatHub(
         MessageRequest message
     )
     {
+        if (!TryGetAccount(out var callerId) || message.Sender.Id != callerId)
+        {
+            return;
+        }
+
         try
         {
             await using var scope = serviceProvider.CreateAsyncScope();
@@ -78,7 +89,11 @@ public class ChatHub(
                 return;
             }
 
-            var chat = await mediator.Send(new GetChatById.Query(chatId));
+            var chat = await mediator.Send(new GetChatById.Query(chatId, callerId));
+            if (chat.IsError)
+            {
+                return;
+            }
 
             var receivers = chat.Value.Receivers(message);
             var connections = accountConnectionManager.GetConnections(receivers);
@@ -98,6 +113,11 @@ public class ChatHub(
         MessageStatus messageStatus
     )
     {
+        if (!TryGetAccount(out var callerId) || message.Sender.Id != callerId)
+        {
+            return;
+        }
+
         using var scope = serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         var result = await mediator.Send(new UpdateMessageState.Command(chatId, message, messageStatus));
@@ -117,9 +137,6 @@ public class ChatHub(
 
     private bool TryGetAccount(out Guid accountId)
     {
-        accountId = Guid.Empty;
-
-        return Context.GetHttpContext()?.Request.Query.TryGetValue("accountId", out var values) == true &&
-               Guid.TryParse(values, out accountId);
+        return Context.User.TryGetAccountId(out accountId);
     }
 }

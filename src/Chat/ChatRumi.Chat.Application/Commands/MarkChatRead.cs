@@ -10,7 +10,7 @@ namespace ChatRumi.Chat.Application.Commands;
 // ReSharper disable once ClassNeverInstantiated.Global
 public static class MarkChatRead
 {
-    public sealed record Command(Guid ChatId, Guid[] MessageIds) : IRequest<ErrorOr<bool>>;
+    public sealed record Command(Guid ChatId, Guid[] MessageIds, Guid RequestingUserId) : IRequest<ErrorOr<bool>>;
 
     public sealed class Handler(
         IDocumentStore store,
@@ -28,6 +28,11 @@ public static class MarkChatRead
             if (chat is null)
             {
                 return Error.NotFound("Chat not found.");
+            }
+
+            if (!chat.Participants.Any(p => p.Id == request.RequestingUserId))
+            {
+                return Error.Forbidden("Chat.AccessDenied", "You do not have access to this chat.");
             }
 
             chat.Fire(new MarkChatReadEvent

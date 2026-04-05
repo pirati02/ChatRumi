@@ -20,6 +20,7 @@ public sealed class ChatApiIntegrationTests : IAsyncLifetime
     private RedisContainer? _redis;
     private WebApplicationFactory<Program>? _factory;
     private HttpClient? _client;
+    private Guid _accountId;
 
     public async Task InitializeAsync()
     {
@@ -50,7 +51,8 @@ public sealed class ChatApiIntegrationTests : IAsyncLifetime
 
         using var scope = _factory.Services.CreateScope();
         var jwt = scope.ServiceProvider.GetRequiredService<IOptions<JwtOptions>>().Value;
-        var token = IntegrationTestJwt.CreateAccessToken(jwt, Guid.NewGuid());
+        _accountId = Guid.NewGuid();
+        var token = IntegrationTestJwt.CreateAccessToken(jwt, _accountId);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
@@ -76,8 +78,7 @@ public sealed class ChatApiIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task Top10_latest_chats_queries_database()
     {
-        var participantId = Guid.NewGuid();
-        var response = await _client!.GetAsync($"/api/chat/{participantId}/top10");
+        var response = await _client!.GetAsync($"/api/chat/{_accountId}/top10");
         response.EnsureSuccessStatusCode();
         using var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         Assert.Equal(JsonValueKind.Array, doc.RootElement.ValueKind);

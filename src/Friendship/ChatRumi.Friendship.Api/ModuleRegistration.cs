@@ -3,6 +3,7 @@ using ChatRum.InterCommunication.Telemetry;
 using ChatRumi.Friendship.Api.Hub;
 using ChatRumi.Friendship.Application.Services;
 using ChatRumi.Infrastructure;
+using Microsoft.Extensions.Hosting;
 
 namespace ChatRumi.Friendship.Api;
 
@@ -10,19 +11,15 @@ public static class ModuleRegistration
 {
     extension(IServiceCollection services)
     {
-        public void AddPresentation(IConfiguration configuration)
+        public void AddPresentation(IConfiguration configuration, IHostEnvironment environment)
         {
             services.AddChatRumiResponseCompression();
-            services.AddOpenApi();
-            services.AddCors(options =>
+            if (environment.IsDevelopment())
             {
-                options.AddPolicy("CorsPolicy", policyBuilder =>
-                {
-                    policyBuilder.WithOrigins("http://localhost:4200")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
-            });
+                services.AddOpenApi();
+            }
+
+            services.AddChatRumiCorsFromConfiguration(configuration, "CorsPolicy");
 
             services.AddSignalR();
             services.AddSingleton<FriendshipConnectionManager>();

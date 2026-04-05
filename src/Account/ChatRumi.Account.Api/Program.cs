@@ -4,11 +4,39 @@ using ChatRumi.Account.Application;
 using ChatRumi.Account.Application.Commands;
 using ChatRumi.Account.Application.Queries;
 using ChatRumi.Account.Infrastructure;
+using ChatRumi.Infrastructure;
 using ErrorOr;
 using Mediator;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(
+            ip,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            });
+    });
+});
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
@@ -16,6 +44,9 @@ builder.Services.AddPresentation(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+app.UseChatRumiHttpsRedirectionAndHsts();
+app.UseChatRumiSecurityHeaders();
 app.UseResponseCompression();
 // Add request/response body logging for OpenTelemetry (must be early in pipeline)
 app.UseRequestResponseLogging(
@@ -23,6 +54,7 @@ app.UseRequestResponseLogging(
     excludedPaths: "/health");
 
 app.UseCors("CorsPolicy");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -50,6 +82,7 @@ accountGroup.MapPost("login", async ([FromBody] Login.Command command, IMediator
             });
     })
     .WithName("login")
+    .RequireRateLimiting("auth")
     .AllowAnonymous();
 
 accountGroup.MapPost("refresh", async ([FromBody] Refresh.Command command, IMediator mediator) =>
@@ -70,6 +103,7 @@ accountGroup.MapPost("refresh", async ([FromBody] Refresh.Command command, IMedi
             });
     })
     .WithName("refresh")
+    .RequireRateLimiting("auth")
     .AllowAnonymous();
 
 accountGroup.MapPost("", async ([FromBody] Register.Command command, IMediator mediator) =>
