@@ -41,7 +41,7 @@ public static class ModuleRegistration
                     options.Connection(configuration.GetConnectionString("chatDatabase")!);
                     options.UseSystemTextJsonForSerialization(jsonOptions);
 
-                    if (environment.IsDevelopment())
+                    if (environment.IsDevelopment() || environment.IsEnvironment("Integration"))
                     {
                         options.AutoCreateSchemaObjects = AutoCreate.All;
                     }
