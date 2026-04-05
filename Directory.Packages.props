@@ -69,7 +69,7 @@
     <PackageVersion Include="Testcontainers.Elasticsearch" Version="4.3.0" />
     <PackageVersion Include="Testcontainers.Neo4j" Version="4.3.0" />
     <!-- Aspire -->
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.0" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.1" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.4.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.4.0" />
   </ItemGroup>
