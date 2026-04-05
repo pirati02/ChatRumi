@@ -28,7 +28,7 @@ public static class ModuleRegistration
             {
                 options.Connection(configuration.GetConnectionString("accountDatabase")!);
                 options.UseSystemTextJsonForSerialization();
-                if (environment.IsDevelopment())
+                if (environment.IsDevelopment() || environment.IsEnvironment("Integration"))
                 {
                     options.AutoCreateSchemaObjects = AutoCreate.All;
                 }
