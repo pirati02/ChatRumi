@@ -26,7 +26,7 @@ var neo4J = builder.AddNeo4JInternal();
 
 var jwtSigningKey = builder.AddParameter("jwt-signing-key", "local_dev_jwt_signing_key_at_least_32_chars");
 
-var accountService = builder.AddAccountService(postgres, redis, rabbitMq, defaultUser, defaultPassword)
+var accountService = builder.AddAccountService(postgres, redis, rabbitMq, kafka, defaultUser, defaultPassword)
     .WithChatRumiJwt(jwtSigningKey);
 
 var chatDatabase = postgres.AddDatabase("chatDatabase", "chatDatabase");

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ChatRum.InterCommunication;
@@ -9,27 +10,40 @@ public interface IDispatcher
     Task ProduceAsync<TEvent>(string topic, string key, TEvent value, CancellationToken cancellationToken = default);
 }
 
-public class KafkaProducer : IDispatcher
+public class KafkaProducer(
+    IOptions<KafkaOptions> options,
+    ILogger<KafkaProducer> logger
+) : IDispatcher
 {
-    private readonly IProducer<string, string> _producer;
+    private readonly IProducer<string, string> _producer = new ProducerBuilder<string, string>(BuildProducerConfig(options.Value))
+        .Build();
 
-    public KafkaProducer(IOptions<KafkaOptions> options)
+    private static ProducerConfig BuildProducerConfig(KafkaOptions o)
     {
-        var config = new ProducerConfig
+        if (!Enum.TryParse<CompressionType>(o.CompressionType, ignoreCase: true, out var compression))
         {
-            BootstrapServers = options.Value.ConnectionString,
+            compression = CompressionType.Lz4;
+        }
 
+        return new ProducerConfig
+        {
+            BootstrapServers = o.ConnectionString,
+            CompressionType = compression,
+            LingerMs = o.LingerMs,
+            BatchSize = o.BatchSizeBytes,
+            Acks = o.ProducerAcks
         };
-
-        _producer = new ProducerBuilder<string, string>(config).Build();
     }
 
     public async Task ProduceAsync<TEvent>(string topic, string key, TEvent value, CancellationToken cancellationToken = default)
     {
         var message = new Message<string, string> { Key = key, Value = JsonSerializer.Serialize(value) };
 
-        var deliveryResult = await _producer.ProduceAsync(topic, message, cancellationToken: cancellationToken);
+        var deliveryResult = await _producer.ProduceAsync(topic, message, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
-        Console.WriteLine($"Delivered '{deliveryResult.Value}' to '{deliveryResult.TopicPartitionOffset}'");
+        logger.LogInformation(
+            "Kafka delivered message to {TopicPartitionOffset}",
+            deliveryResult.TopicPartitionOffset);
     }
 }

@@ -23,8 +23,9 @@ public class AccountCreatedConsumerBackgroundService(
     {
         return Task.Run(async () =>
         {
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var peerConnectionManager = scope.ServiceProvider.GetRequiredService<IPeerConnectionManager>();
+            await KafkaTopicBootstrap.EnsureInterCommunicationTopicsAsync(
+                options.Value.ConnectionString,
+                stoppingToken).ConfigureAwait(false);
 
             var consumerConfig = new ConsumerConfig
             {
@@ -38,32 +39,44 @@ public class AccountCreatedConsumerBackgroundService(
 
             logger.LogInformation("Kafka Consumer started...");
 
+            var errorBackoffMs = 0;
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     var cr = consumer.Consume(stoppingToken);
+                    errorBackoffMs = 0;
 
                     if (!string.IsNullOrWhiteSpace(cr.Message.Value))
                     {
                         var @event = JsonSerializer.Deserialize<AccountCreated>(cr.Message.Value, SerializerOptions);
                         if (@event is null)
                         {
-                            return;
+                            logger.LogWarning("Skipped message with null deserialized payload. Key = {Key}", cr.Message.Key);
+                            continue;
                         }
 
-                        await peerConnectionManager.CreatePeerAsync(new PeerDto(@event.AccountId, @event.UserName));
+                        await using var scope = serviceProvider.CreateAsyncScope();
+                        var peerConnectionManager = scope.ServiceProvider.GetRequiredService<IPeerConnectionManager>();
+
+                        await peerConnectionManager.CreatePeerAsync(new PeerDto(@event.AccountId, @event.UserName))
+                            .ConfigureAwait(false);
                     }
 
                     logger.LogInformation("Consumed message: Key = {Key}, Value = {Value}", cr.Message.Key,
                         cr.Message.Value);
                 }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
                 catch (ConsumeException ex)
                 {
                     logger.LogError(ex, "Kafka consume error");
+                    errorBackoffMs = errorBackoffMs == 0 ? 200 : Math.Min(errorBackoffMs * 2, 10_000);
+                    await Task.Delay(errorBackoffMs, stoppingToken).ConfigureAwait(false);
                 }
-
-                await Task.Delay(100, stoppingToken); // optional delay
             }
 
             consumer.Close();

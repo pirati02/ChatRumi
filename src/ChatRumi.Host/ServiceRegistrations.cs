@@ -33,6 +33,7 @@ public static class ServiceRegistrations
             IResourceBuilder<PostgresServerResource> postgres,
             IResourceBuilder<RedisResource> redis,
             IResourceBuilder<RabbitMQServerResource> rabbitMq,
+            IResourceBuilder<ContainerResource> kafka,
             string defaultUser,
             string defaultPassword
         )
@@ -47,6 +48,8 @@ public static class ServiceRegistrations
                 .WaitFor(accountDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitMq)
+                .WaitFor(kafka)
+                .WithEnvironment("KafkaOptions__ConnectionString", KafkaBootstrapServers(kafka))
                 .WithEnvironment("RedisOptions__Host", RedisPlainTcpHost(redis))
                 .WithEnvironment("RedisOptions__Port", RedisPlainTcpPort(redis))
                 .WithEnvironment("RedisOptions__User", "default")
