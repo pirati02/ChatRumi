@@ -18,6 +18,7 @@ public sealed class FriendshipApiIntegrationTests : IAsyncLifetime
     private Neo4jContainer? _neo4j;
     private WebApplicationFactory<Program>? _factory;
     private HttpClient? _client;
+    private Guid _peerId;
 
     public async Task InitializeAsync()
     {
@@ -47,7 +48,8 @@ public sealed class FriendshipApiIntegrationTests : IAsyncLifetime
 
         using var scope = _factory.Services.CreateScope();
         var jwt = scope.ServiceProvider.GetRequiredService<IOptions<JwtOptions>>().Value;
-        var token = IntegrationTestJwt.CreateAccessToken(jwt, Guid.NewGuid());
+        _peerId = Guid.NewGuid();
+        var token = IntegrationTestJwt.CreateAccessToken(jwt, _peerId);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
@@ -70,8 +72,7 @@ public sealed class FriendshipApiIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task Friends_list_queries_neo4j()
     {
-        var peerId = Guid.NewGuid();
-        var response = await _client!.GetAsync($"/api/friendship/{peerId}");
+        var response = await _client!.GetAsync($"/api/friendship/{_peerId}");
         response.EnsureSuccessStatusCode();
         var friends = await response.Content.ReadFromJsonAsync<PeerResponse[]>();
         Assert.NotNull(friends);

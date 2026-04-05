@@ -66,7 +66,10 @@ public class RequestResponseLoggingMiddleware(
                 // Only log if it's text-based content
                 if (IsTextBasedContentType(context.Request.ContentType))
                 {
-                    activity.SetTag("http.request.body", TruncateIfNeeded(requestBody, maxBodySize));
+                    var safeBody = context.Request.ContentType?.Contains("json", StringComparison.OrdinalIgnoreCase) == true
+                        ? TelemetryRedaction.RedactSensitiveJson(requestBody)
+                        : requestBody;
+                    activity.SetTag("http.request.body", TruncateIfNeeded(safeBody, maxBodySize));
                     activity.SetTag("http.request.body.size", buffer.Length);
                 }
                 else
@@ -104,7 +107,10 @@ public class RequestResponseLoggingMiddleware(
                 // Only log if it's text-based content
                 if (IsTextBasedContentType(context.Response.ContentType))
                 {
-                    activity.SetTag("http.response.body", TruncateIfNeeded(responseBodyText, maxBodySize));
+                    var safeBody = context.Response.ContentType?.Contains("json", StringComparison.OrdinalIgnoreCase) == true
+                        ? TelemetryRedaction.RedactSensitiveJson(responseBodyText)
+                        : responseBodyText;
+                    activity.SetTag("http.response.body", TruncateIfNeeded(safeBody, maxBodySize));
                     activity.SetTag("http.response.body.size", buffer.Length);
                 }
                 else

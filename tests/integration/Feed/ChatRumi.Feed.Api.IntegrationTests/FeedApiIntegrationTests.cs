@@ -20,6 +20,7 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
     private ElasticsearchContainer? _elastic;
     private WebApplicationFactory<Program>? _factory;
     private HttpClient? _client;
+    private Guid _creatorId;
 
     public async Task InitializeAsync()
     {
@@ -48,7 +49,8 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
 
         using var scope = _factory.Services.CreateScope();
         var jwt = scope.ServiceProvider.GetRequiredService<IOptions<JwtOptions>>().Value;
-        var token = IntegrationTestJwt.CreateAccessToken(jwt, Guid.NewGuid());
+        _creatorId = Guid.NewGuid();
+        var token = IntegrationTestJwt.CreateAccessToken(jwt, _creatorId);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
@@ -71,11 +73,10 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task Create_post_indexes_in_elasticsearch()
     {
-        var creatorId = Guid.NewGuid();
         var command = new CreatePost.Command(
             new Participant
             {
-                Id = creatorId,
+                Id = _creatorId,
                 FirstName = "Fn",
                 LastName = "Ln",
                 NickName = "nn"

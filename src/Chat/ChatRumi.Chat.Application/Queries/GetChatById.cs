@@ -10,7 +10,7 @@ namespace ChatRumi.Chat.Application.Queries;
 public static class GetChatById
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public record Query(Guid ChatId) : IRequest<ErrorOr<ChatResponse>>;
+    public record Query(Guid ChatId, Guid RequestingUserId) : IRequest<ErrorOr<ChatResponse>>;
 
     public sealed class Handler(
         IDocumentStore store
@@ -28,6 +28,11 @@ public static class GetChatById
             if (chat is null)
             {
                 return Error.NotFound("Chat not found.");
+            }
+
+            if (!chat.Participants.Any(p => p.Id == request.RequestingUserId))
+            {
+                return Error.Forbidden("Chat.AccessDenied", "You do not have access to this chat.");
             }
 
             return chat.ToDto();

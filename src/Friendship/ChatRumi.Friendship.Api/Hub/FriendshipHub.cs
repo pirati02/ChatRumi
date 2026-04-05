@@ -1,4 +1,5 @@
 ﻿using ChatRumi.Friendship.Application.Services;
+using ChatRumi.Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatRumi.Friendship.Api.Hub;
@@ -27,9 +28,6 @@ public class FriendshipHub(FriendshipConnectionManager friendshipConnectionManag
 
     private bool TryGetAccount(out Guid accountId)
     {
-        accountId = Guid.Empty;
-
-        return Context.GetHttpContext()?.Request.Query.TryGetValue("accountId", out var values) == true &&
-               Guid.TryParse(values, out accountId);
+        return Context.User.TryGetAccountId(out accountId);
     }
 }

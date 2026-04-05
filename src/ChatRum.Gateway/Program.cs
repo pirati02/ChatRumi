@@ -21,23 +21,12 @@ builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 builder.Services.AddChatRumiResponseCompression();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policyBuilder =>
-    {
-        policyBuilder.WithOrigins(
-                "http://localhost:4200",
-                "http://gateway:7000",
-                "http://localhost:7000"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-});
+builder.Services.AddChatRumiCorsFromConfiguration(builder.Configuration, "AllowFrontend");
 
 var app = builder.Build();
 
+app.UseChatRumiHttpsRedirectionAndHsts();
+app.UseChatRumiSecurityHeaders();
 app.UseCors("AllowFrontend");
 app.UseWebSockets();
 app.UseResponseCompression();

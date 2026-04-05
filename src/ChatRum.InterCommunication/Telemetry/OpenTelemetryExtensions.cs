@@ -45,7 +45,7 @@ public static class OpenTelemetryExtensions
                         {
                             activity.SetTag("http.request.content_type", httpRequest.ContentType);
                             activity.SetTag("http.request.content_length", httpRequest.ContentLength);
-                            activity.SetTag("http.request.query", httpRequest.QueryString.Value);
+                            activity.SetTag("http.request.query", TelemetryRedaction.RedactQueryString(httpRequest.QueryString.Value));
 
                             // Add request headers (excluding sensitive ones)
                             foreach (var header in httpRequest.Headers.Where(h =>
@@ -75,7 +75,11 @@ public static class OpenTelemetryExtensions
                         {
                             activity.SetTag("exception.type", exception.GetType().FullName);
                             activity.SetTag("exception.message", exception.Message);
-                            activity.SetTag("exception.stacktrace", exception.StackTrace);
+                            if (!TelemetryRedaction.IsProductionLikeEnvironment())
+                            {
+                                activity.SetTag("exception.stacktrace", exception.StackTrace);
+                            }
+
                             if (exception.InnerException != null)
                             {
                                 activity.SetTag("exception.inner.type", exception.InnerException.GetType().FullName);
@@ -91,7 +95,7 @@ public static class OpenTelemetryExtensions
                         options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
                         {
                             activity.SetTag("http.request.method", httpRequestMessage.Method.ToString());
-                            activity.SetTag("http.request.uri", httpRequestMessage.RequestUri?.ToString());
+                            activity.SetTag("http.request.uri", TelemetryRedaction.RedactHttpUri(httpRequestMessage.RequestUri?.ToString()));
 
                             if (httpRequestMessage.Content != null)
                             {
@@ -122,7 +126,10 @@ public static class OpenTelemetryExtensions
                         {
                             activity.SetTag("exception.type", exception.GetType().FullName);
                             activity.SetTag("exception.message", exception.Message);
-                            activity.SetTag("exception.stacktrace", exception.StackTrace);
+                            if (!TelemetryRedaction.IsProductionLikeEnvironment())
+                            {
+                                activity.SetTag("exception.stacktrace", exception.StackTrace);
+                            }
                         };
                     })
                     .AddNpgsql() // Enhanced PostgreSQL tracing with SQL commands
@@ -169,9 +176,13 @@ public static class OpenTelemetryExtensions
         int maxBodySize = 4096,
         params string[] excludedPaths)
     {
-        var defaultExcludedPaths = new[] { "/health", "/metrics", "/swagger" };
+        var defaultExcludedPaths = new[]
+        {
+            "/health", "/metrics", "/swagger",
+            "/api/account/login", "/api/account/refresh"
+        };
         var allExcludedPaths = excludedPaths.Length > 0
-            ? excludedPaths
+            ? defaultExcludedPaths.Concat(excludedPaths).Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
             : defaultExcludedPaths;
 
         return app.UseMiddleware<RequestResponseLoggingMiddleware>(maxBodySize, allExcludedPaths);

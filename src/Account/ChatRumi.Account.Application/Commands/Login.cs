@@ -1,6 +1,7 @@
 using ChatRumi.Account.Application.Documents;
 using ChatRumi.Account.Application.Projections;
 using ChatRumi.Account.Application.Services;
+using ChatRumi.Account.Domain.Events;
 using ChatRumi.Infrastructure;
 using ErrorOr;
 using FluentValidation;
@@ -67,6 +68,14 @@ public static class Login
                 return Error.Unauthorized(
                     code: "Login.InvalidCredentials",
                     description: "Invalid email or password.");
+            }
+
+            if (PasswordHasher.IsLegacyHash(account.PasswordHash))
+            {
+                PasswordHasher.CreatePasswordHash(request.Password, out var newHash, out var newSalt);
+                session.Events.Append(
+                    account.Id,
+                    new PasswordRehashedEvent { PasswordHash = newHash, PasswordSalt = newSalt });
             }
 
             var accessToken = jwtAccessTokenIssuer.CreateAccessToken(

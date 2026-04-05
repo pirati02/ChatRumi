@@ -52,4 +52,10 @@ public class Account : Kernel.Aggregate
     {
         // Historical streams may contain this event; E2E keys are no longer stored.
     }
+
+    public void Apply(PasswordRehashedEvent @event)
+    {
+        PasswordHash = @event.PasswordHash;
+        PasswordSalt = @event.PasswordSalt;
+    }
 }

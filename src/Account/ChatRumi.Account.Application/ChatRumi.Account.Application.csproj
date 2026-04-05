@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="ErrorOr"/>
+        <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation"/>
         <PackageReference Include="FluentValidation"/>
         <PackageReference Include="Marten"/>
         <PackageReference Include="MassTransit"/>

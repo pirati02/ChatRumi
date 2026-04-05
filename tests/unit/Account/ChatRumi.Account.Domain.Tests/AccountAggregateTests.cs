@@ -43,6 +43,32 @@ public class AccountAggregateTests
     }
 
     [Fact]
+    public void Apply_PasswordRehashedEvent_UpdatesHashAndSalt()
+    {
+        var account = UnsafeAccountEntity();
+        account.Apply(
+            new AccountCreateEvent
+            {
+                AccountId = Guid.NewGuid(),
+                UserName = "alice",
+                Email = "a@example.com",
+                FirstName = "Alice",
+                LastName = "Smith",
+                PhoneNumber = "+1000",
+                CountryCode = "US",
+                PasswordHash = [1],
+                PasswordSalt = [2]
+            });
+
+        var newHash = new byte[] { 9, 9 };
+        var newSalt = new byte[] { 8, 8 };
+        account.Apply(new PasswordRehashedEvent { PasswordHash = newHash, PasswordSalt = newSalt });
+
+        Assert.Same(newHash, account.PasswordHash);
+        Assert.Same(newSalt, account.PasswordSalt);
+    }
+
+    [Fact]
     public void Apply_VerifyAccountEvent_SetsVerified()
     {
         var account = UnsafeAccountEntity();
