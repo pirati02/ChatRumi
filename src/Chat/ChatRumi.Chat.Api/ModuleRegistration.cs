@@ -13,6 +13,7 @@ public static class ModuleRegistration
     {
         public void AddPresentation(IConfiguration configuration)
         {
+            services.AddChatRumiResponseCompression();
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", policyBuilder =>

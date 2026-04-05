@@ -1,5 +1,6 @@
 using ChatRum.Gateway;
 using ChatRum.InterCommunication.Telemetry;
+using ChatRumi.Infrastructure;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Ocelot.Provider.Consul;
@@ -17,6 +18,8 @@ builder.Services.AddOcelot()
     .AddConsul<ChatRumConsulServiceBuilder>();
 
 builder.Services.AddOpenTelemetryObservability(builder.Configuration);
+
+builder.Services.AddChatRumiResponseCompression();
 
 builder.Services.AddCors(options =>
 {
@@ -37,6 +40,7 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 app.UseWebSockets();
+app.UseResponseCompression();
 
 // Ocelot runs as middleware and does not forward unmatched routes to minimal API endpoints, so /health must be
 // handled before UseOcelot (Aspire WithHttpHealthCheck uses GET /health).

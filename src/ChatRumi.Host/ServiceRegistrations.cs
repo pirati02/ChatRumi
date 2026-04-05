@@ -1,9 +1,10 @@
-using Aspire.Hosting.ApplicationModel;
-
 namespace ChatRumi.Host;
 
 public static class ServiceRegistrations
 {
+    /// <summary>Launch profile name defined in each downstream project's <c>launchSettings.json</c> (HTTPS + HTTP URLs).</summary>
+    private const string HttpsLaunchProfile = "https";
+
     /// <summary>
     /// Aspire Redis primary endpoint <c>tcp</c> may be TLS (<c>rediss://</c>). This app uses StackExchange.Redis
     /// without SSL, so we inject the plain-TCP <c>secondary</c> endpoint (see RedisResource.SecondaryEndpointName).
@@ -38,7 +39,7 @@ public static class ServiceRegistrations
         {
             var accountDatabase = postgres.AddDatabase("accountDatabase", "accountDatabase");
 
-            return builder.AddProject<Projects.ChatRumi_Account_Api>("accountService")
+            return builder.AddProject<Projects.ChatRumi_Account_Api>("accountService", HttpsLaunchProfile)
                 .WithHttpHealthCheck("/health")
                 .WithReference(redis)
                 .WithReference(rabbitMq)
@@ -65,7 +66,7 @@ public static class ServiceRegistrations
             string defaultPassword
         )
         {
-            return builder.AddProject<Projects.ChatRumi_Chat_Api>("chatService")
+            return builder.AddProject<Projects.ChatRumi_Chat_Api>("chatService", HttpsLaunchProfile)
                 .WithHttpHealthCheck("/health")
                 .WithReference(redis)
                 .WithReference(rabbitMq)
@@ -94,7 +95,7 @@ public static class ServiceRegistrations
             string defaultPassword
         )
         {
-            return builder.AddProject<Projects.ChatRumi_Chat_AccountSync>("chatAccountSyncService")
+            return builder.AddProject<Projects.ChatRumi_Chat_AccountSync>("chatAccountSyncService", HttpsLaunchProfile)
                 .WithHttpHealthCheck("/health")
                 .WithReference(redis)
                 .WithReference(rabbitMq)
@@ -120,7 +121,7 @@ public static class ServiceRegistrations
             IResourceBuilder<ContainerResource> kafka
         )
         {
-            return builder.AddProject<Projects.ChatRumi_Feed_AccountSync>("feedAccountSyncService")
+            return builder.AddProject<Projects.ChatRumi_Feed_AccountSync>("feedAccountSyncService", HttpsLaunchProfile)
               .WithHttpHealthCheck("/health")
               .WaitFor(elastic)
               .WaitFor(kafka)
@@ -133,7 +134,7 @@ public static class ServiceRegistrations
             IResourceBuilder<ElasticsearchResource> elastic
         )
         {
-            return builder.AddProject<Projects.ChatRumi_Feed_Api>("feedService")
+            return builder.AddProject<Projects.ChatRumi_Feed_Api>("feedService", HttpsLaunchProfile)
                 .WithHttpHealthCheck("/health")
                 .WaitFor(elastic)
                 .WithReference(elastic)
@@ -148,7 +149,7 @@ public static class ServiceRegistrations
             var neo4jUri = ReferenceExpression.Create(
                 $"bolt://{bolt.Property(EndpointProperty.Host)}:{bolt.Property(EndpointProperty.Port)}");
 
-            return builder.AddProject<Projects.ChatRumi_Friendship_Api>("friendshipService")
+            return builder.AddProject<Projects.ChatRumi_Friendship_Api>("friendshipService", HttpsLaunchProfile)
                 .WithHttpHealthCheck("/health")
                 .WaitFor(neo4J)
                 .WithEnvironment("Neo4jOptions__Neo4jConnection", neo4jUri)
@@ -166,7 +167,7 @@ public static class ServiceRegistrations
             var neo4jUri = ReferenceExpression.Create(
                 $"bolt://{bolt.Property(EndpointProperty.Host)}:{bolt.Property(EndpointProperty.Port)}");
 
-            return builder.AddProject<Projects.ChatRumi_Friendship_AccountSync>("friendshipAccountSyncService")
+            return builder.AddProject<Projects.ChatRumi_Friendship_AccountSync>("friendshipAccountSyncService", HttpsLaunchProfile)
                 .WithHttpHealthCheck("/health")
                 .WaitFor(neo4J)
                 .WaitFor(kafka)
