@@ -17,6 +17,8 @@
     <File Path=".env.example" />
 
     <File Path=".env.external" />
+    <File Path=".github/dependabot.yml" />
+    <File Path=".github/workflows/ci.yml" />
 
     <File Path=".gitignore" />
 
@@ -91,6 +93,7 @@
     <Project Path="src/Friendship/ChatRumi.Friendship.Domain/ChatRumi.Friendship.Domain.csproj" />
 
   </Folder>
+  <Folder Name="/tests/unit/" />
 
   <Folder Name="/tests/unit/Account/">
 
@@ -123,6 +126,8 @@
     <Project Path="tests/unit/Friendship/ChatRumi.Friendship.Application.Tests/ChatRumi.Friendship.Application.Tests.csproj" />
 
   </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/integration/" />
 
   <Folder Name="/tests/integration/Account/">
 
