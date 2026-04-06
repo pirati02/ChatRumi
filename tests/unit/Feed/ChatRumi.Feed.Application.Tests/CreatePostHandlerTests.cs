@@ -29,7 +29,7 @@ public class CreatePostHandlerTests
             .ReturnsAsync(createResponse.Object);
 
         var handler = new CreatePost.Handler(client.Object, NullLogger<CreatePost.Handler>.Instance);
-        var result = await handler.Handle(new CreatePost.Command(creator, "Hello", "World"), CancellationToken.None);
+        var result = await handler.Handle(new CreatePost.Command(creator, "Hello", [Guid.NewGuid()]), CancellationToken.None);
 
         Assert.False(result.IsError);
         Assert.NotNull(result.Value);
@@ -56,7 +56,7 @@ public class CreatePostHandlerTests
             .ReturnsAsync(createResponse.Object);
 
         var handler = new CreatePost.Handler(client.Object, NullLogger<CreatePost.Handler>.Instance);
-        var result = await handler.Handle(new CreatePost.Command(creator, "T", "D"), CancellationToken.None);
+        var result = await handler.Handle(new CreatePost.Command(creator, "D", null), CancellationToken.None);
 
         Assert.True(result.IsError);
     }

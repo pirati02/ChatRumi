@@ -12,8 +12,8 @@ public static class CreatePost
 {
     public sealed record Command(
         Participant Creator,
-        string Title,
-        string Description
+        string Description,
+        IReadOnlyCollection<Guid>? AttachmentIds
     ) : Mediator.IRequest<ErrorOr<string>>;
 
     public sealed class Handler(
@@ -23,7 +23,12 @@ public static class CreatePost
     {
         public async ValueTask<ErrorOr<string>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var post = Post.Create(request.Creator, request.Title, request.Description, [])
+            var attachments = request.AttachmentIds?
+                .Distinct()
+                .Select(id => new ChatRumi.Feed.Domain.ValueObject.Attachment { Id = new AttachmentId(id) })
+                .ToList() ?? [];
+
+            var post = Post.Create(request.Creator, request.Description, attachments)
                 .ToDocument();
 
             var response = await client.CreateDocumentAsync(
@@ -33,7 +38,7 @@ public static class CreatePost
 
             if (response.IsValid)
             {
-                logger.LogInformation("Post was indexed successfully {Title}", request.Title);
+                logger.LogInformation("Post was indexed successfully {PostId}", post.Id);
                 return post.Id.ToString();
             }
 

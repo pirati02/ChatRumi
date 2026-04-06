@@ -21,7 +21,7 @@ public static class GetPost
 
             if (response.IsValid)
             {
-                logger.LogInformation("Post was indexed successfully {Title}", response.Source!.Title);
+                logger.LogInformation("Post was loaded successfully {PostId}", response.Source!.Id);
                 return response.Source!;
             }
 

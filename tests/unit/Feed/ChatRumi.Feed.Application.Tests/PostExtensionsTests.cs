@@ -20,14 +20,12 @@ public class PostExtensionsTests
         var attachmentId = Guid.NewGuid();
         var post = Post.Create(
             creator,
-            "Title",
             "Description",
             [new Attachment { Id = new AttachmentId(attachmentId) }]);
 
         PostDocument doc = post.ToDocument();
 
         Assert.Equal(post.Id, doc.Id);
-        Assert.Equal("Title", doc.Title);
         Assert.Equal("Description", doc.Description);
         Assert.Equal(creator, doc.Creator);
         Assert.Single(doc.Attachments);

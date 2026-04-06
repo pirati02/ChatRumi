@@ -8,6 +8,7 @@ using ChatRumi.Feed.Infrastructure;
 using ChatRumi.Infrastructure;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,8 @@ app.MapGet("/health", () => Results.Ok("Healthy ✅"))
     .AllowAnonymous();
 
 var feedGroup = app.MapGroup("/api/feed").RequireAuthorization();
+const long MaxAttachmentSizeBytes = 20 * 1024 * 1024; // 20 MB
+var feedAttachmentUploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads", "feed-attachments");
 
 feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
     {
@@ -60,6 +63,11 @@ feedGroup.MapPost("", async (HttpContext http, [FromBody] CreatePost.Command com
             return Results.Forbid();
         }
 
+        if (string.IsNullOrWhiteSpace(command.Description))
+        {
+            return Results.BadRequest("Post description is required.");
+        }
+
         var result = await mediator.Send(command);
         return result.Match(
             value => Results.Created($"/api/feed/{value}", value),
@@ -67,6 +75,92 @@ feedGroup.MapPost("", async (HttpContext http, [FromBody] CreatePost.Command com
         );
     })
     .WithName("create-post");
+
+feedGroup.MapPost("/attachments", async (
+    HttpContext http,
+    [FromForm] IFormFile file
+) =>
+{
+    if (!http.User.TryGetAccountId(out _))
+    {
+        return Results.Unauthorized();
+    }
+
+    if (file is null || file.Length == 0)
+    {
+        return Results.BadRequest("Attachment file is required.");
+    }
+
+    if (file.Length > MaxAttachmentSizeBytes)
+    {
+        return Results.BadRequest($"Attachment exceeds max size of {MaxAttachmentSizeBytes} bytes.");
+    }
+
+    if (string.IsNullOrWhiteSpace(file.ContentType) || !file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest("Only image attachments are supported.");
+    }
+
+    Directory.CreateDirectory(feedAttachmentUploadsRoot);
+
+    var attachmentId = Guid.CreateVersion7().ToString();
+    var safeName = Path.GetFileName(file.FileName);
+    var extension = Path.GetExtension(safeName);
+    var storageName = string.IsNullOrWhiteSpace(extension)
+        ? attachmentId
+        : $"{attachmentId}{extension}";
+    var storagePath = Path.Combine(feedAttachmentUploadsRoot, storageName);
+
+    await using (var output = File.Create(storagePath))
+    {
+        await file.CopyToAsync(output);
+    }
+
+    var response = new FeedAttachmentUploadResponse(
+        attachmentId,
+        safeName,
+        file.ContentType,
+        file.Length,
+        $"/feed/attachments/{attachmentId}"
+    );
+
+    return Results.Ok(response);
+})
+.DisableAntiforgery();
+
+feedGroup.MapGet("/attachments/{attachmentId:guid}", async (
+    HttpContext http,
+    [FromRoute] Guid attachmentId
+) =>
+{
+    if (!http.User.TryGetAccountId(out _))
+    {
+        return Results.Unauthorized();
+    }
+
+    if (!Directory.Exists(feedAttachmentUploadsRoot))
+    {
+        return Results.NotFound();
+    }
+
+    var matchedFilePath = Directory
+        .EnumerateFiles(feedAttachmentUploadsRoot, $"{attachmentId}*")
+        .FirstOrDefault();
+    if (matchedFilePath is null)
+    {
+        return Results.NotFound();
+    }
+
+    var safeFileName = Path.GetFileName(matchedFilePath);
+    var contentTypeProvider = new FileExtensionContentTypeProvider();
+    var contentType = contentTypeProvider.TryGetContentType(safeFileName, out var resolvedContentType)
+        ? resolvedContentType
+        : "application/octet-stream";
+
+    var stream = File.OpenRead(matchedFilePath);
+    return Results.File(stream, contentType, enableRangeProcessing: true);
+})
+.WithName("get-feed-attachment");
 
 feedGroup.MapGet("{id:guid}/details", async (Guid id, IMediator mediator) =>
     {
@@ -153,3 +247,10 @@ app.Run();
 
 public sealed record ToggleReactionRequest(Participant Actor, ReactionType ReactionType);
 public sealed record AddCommentRequest(Participant Creator, string Content);
+internal sealed record FeedAttachmentUploadResponse(
+    string Id,
+    string FileName,
+    string MimeType,
+    long SizeBytes,
+    string Url
+);

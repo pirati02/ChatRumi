@@ -81,8 +81,8 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
                 LastName = "Ln",
                 NickName = "nn"
             },
-            Title: "integration-title",
-            Description: "integration-desc");
+            Description: "integration-desc",
+            AttachmentIds: null);
 
         var response = await _client!.PostAsJsonAsync("/api/feed", command);
         response.EnsureSuccessStatusCode();
@@ -94,7 +94,6 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
         get.EnsureSuccessStatusCode();
         var roundTrip = await get.Content.ReadFromJsonAsync<PostDocument>();
         Assert.NotNull(roundTrip);
-        Assert.Equal("integration-title", roundTrip.Title);
         Assert.Equal("integration-desc", roundTrip.Description);
     }
 
@@ -118,15 +117,15 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
         var addResponse = await _client!.PutAsJsonAsync($"/api/feed/{postId}/reactions", togglePayload);
         Assert.Equal(System.Net.HttpStatusCode.NoContent, addResponse.StatusCode);
 
-        var getAfterAdd = await _client.GetFromJsonAsync<PostDocument>($"/api/feed/{postId}");
+        var getAfterAdd = await _client!.GetFromJsonAsync<PostDocument>($"/api/feed/{postId}");
         Assert.NotNull(getAfterAdd);
         Assert.Single(getAfterAdd.Reactions);
         Assert.Equal(ReactionType.Like, getAfterAdd.Reactions[0].ReactionType);
 
-        var removeResponse = await _client.PutAsJsonAsync($"/api/feed/{postId}/reactions", togglePayload);
+        var removeResponse = await _client!.PutAsJsonAsync($"/api/feed/{postId}/reactions", togglePayload);
         Assert.Equal(System.Net.HttpStatusCode.NoContent, removeResponse.StatusCode);
 
-        var getAfterRemove = await _client.GetFromJsonAsync<PostDocument>($"/api/feed/{postId}");
+        var getAfterRemove = await _client!.GetFromJsonAsync<PostDocument>($"/api/feed/{postId}");
         Assert.NotNull(getAfterRemove);
         Assert.Empty(getAfterRemove.Reactions);
     }
@@ -157,7 +156,7 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
             creator = commentPayload.creator,
             content = "A reply"
         };
-        var replyResponse = await _client.PostAsJsonAsync($"/api/feed/{postId}/comments/{commentId}/replies", replyPayload);
+        var replyResponse = await _client!.PostAsJsonAsync($"/api/feed/{postId}/comments/{commentId}/replies", replyPayload);
         replyResponse.EnsureSuccessStatusCode();
 
         var toggleCommentReactionPayload = new
@@ -165,10 +164,10 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
             actor = commentPayload.creator,
             reactionType = ReactionType.Heart
         };
-        var toggleReactionResponse = await _client.PutAsJsonAsync($"/api/feed/comments/{commentId}/reactions", toggleCommentReactionPayload);
+        var toggleReactionResponse = await _client!.PutAsJsonAsync($"/api/feed/comments/{commentId}/reactions", toggleCommentReactionPayload);
         Assert.Equal(System.Net.HttpStatusCode.NoContent, toggleReactionResponse.StatusCode);
 
-        var detailsResponse = await _client.GetAsync($"/api/feed/{postId}/details");
+        var detailsResponse = await _client!.GetAsync($"/api/feed/{postId}/details");
         detailsResponse.EnsureSuccessStatusCode();
         var details = await detailsResponse.Content.ReadFromJsonAsync<PostDetailsDocument>();
         Assert.NotNull(details);
@@ -189,8 +188,8 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
                 LastName = "Ln",
                 NickName = "nn"
             },
-            Title: "integration-title",
-            Description: "integration-desc");
+            Description: "integration-desc",
+            AttachmentIds: null);
 
         var response = await _client!.PostAsJsonAsync("/api/feed", command);
         response.EnsureSuccessStatusCode();
