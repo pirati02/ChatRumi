@@ -76,7 +76,9 @@ public static class JwtAuthenticationExtensions
                     var isHubPath = path.StartsWithSegments("/hub/chat")
                         || path.StartsWithSegments("/hub/friendship");
                     var isAttachmentPath = path.StartsWithSegments("/api/chat/attachments")
-                        || path.StartsWithSegments("/chat/attachments");
+                        || path.StartsWithSegments("/chat/attachments")
+                        || path.StartsWithSegments("/api/feed/attachments")
+                        || path.StartsWithSegments("/feed/attachments");
 
                     if (!string.IsNullOrEmpty(accessToken) &&
                         (isHubPath || (isAttachmentPath && !hasBearerHeader)))

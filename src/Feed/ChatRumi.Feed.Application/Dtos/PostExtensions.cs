@@ -10,7 +10,6 @@ public static class PostExtensions
         {
             Id = post.Id,
             Description = post.Description,
-            Title = post.Title,
             Creator = post.Creator,
             Attachments = [.. post.Attachments.Select(a => a.Id)],
             CreationDate = post.CreationDate,
