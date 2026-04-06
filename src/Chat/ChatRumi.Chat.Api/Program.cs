@@ -7,16 +7,17 @@ using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Infrastructure;
 using ChatRumi.Infrastructure;
+using ChatRumi.Infrastructure.Storage;
 using ErrorOr;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddPresentation(builder.Configuration, builder.Environment);
+builder.Services.AddAttachmentFileStorage();
 
 var app = builder.Build();
 
@@ -114,7 +115,8 @@ chatGroup.MapPost("/mark-as-read/{chatId:guid}", async (
 
 chatGroup.MapPost("/attachments", async (
     HttpContext http,
-    [FromForm] IFormFile file
+    [FromForm] IFormFile file,
+    IAttachmentFileStorage fileStorage
 ) =>
 {
     if (!http.User.TryGetAccountId(out _))
@@ -132,26 +134,22 @@ chatGroup.MapPost("/attachments", async (
         return Results.BadRequest($"Attachment exceeds max size of {MaxAttachmentSizeBytes} bytes.");
     }
 
-    var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads", "chat-attachments");
-    Directory.CreateDirectory(uploadsRoot);
+    await using var input = file.OpenReadStream();
+    var storedFile = await fileStorage.StoreFileAsync(
+        bucket: "chat-attachments",
+        originalFileName: file.FileName,
+        contentType: file.ContentType,
+        content: input,
+        sizeBytes: file.Length,
+        cancellationToken: http.RequestAborted
+    );
 
-    var attachmentId = Guid.CreateVersion7().ToString();
-    var safeName = Path.GetFileName(file.FileName);
-    var extension = Path.GetExtension(safeName);
-    var storageName = $"{attachmentId}{extension}";
-    var storagePath = Path.Combine(uploadsRoot, storageName);
-
-    await using (var output = File.Create(storagePath))
-    {
-        await file.CopyToAsync(output);
-    }
-
-    var url = $"/chat/attachments/{attachmentId}{extension}";
+    var url = $"/chat/attachments/{storedFile.StoredFileName}";
     var response = new ChatAttachmentUploadResponse(
-        attachmentId,
-        safeName,
-        string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
-        file.Length,
+        storedFile.AttachmentId,
+        storedFile.OriginalFileName,
+        storedFile.ContentType,
+        storedFile.SizeBytes,
         url
     );
 
@@ -161,7 +159,8 @@ chatGroup.MapPost("/attachments", async (
 
 chatGroup.MapGet("/attachments/{fileName}", async (
     HttpContext http,
-    [FromRoute] string fileName
+    [FromRoute] string fileName,
+    IAttachmentFileStorage fileStorage
 ) =>
 {
     if (!http.User.TryGetAccountId(out _))
@@ -174,21 +173,17 @@ chatGroup.MapGet("/attachments/{fileName}", async (
         return Results.BadRequest();
     }
 
-    var safeFileName = Path.GetFileName(fileName);
-    var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads", "chat-attachments");
-    var storagePath = Path.Combine(uploadsRoot, safeFileName);
-    if (!File.Exists(storagePath))
+    var attachment = await fileStorage.GetFileAsync(
+        bucket: "chat-attachments",
+        fileName: fileName,
+        cancellationToken: http.RequestAborted
+    );
+    if (attachment is null)
     {
         return Results.NotFound();
     }
 
-    var contentTypeProvider = new FileExtensionContentTypeProvider();
-    var contentType = contentTypeProvider.TryGetContentType(safeFileName, out var resolvedContentType)
-        ? resolvedContentType
-        : "application/octet-stream";
-
-    var stream = File.OpenRead(storagePath);
-    return Results.File(stream, contentType, enableRangeProcessing: true);
+    return Results.File(attachment.ContentStream, attachment.ContentType, enableRangeProcessing: true);
 });
 
 app.MapHub<ChatHub>("/hub/chat").RequireAuthorization();

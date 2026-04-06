@@ -6,15 +6,16 @@ using ChatRumi.Feed.Application.Queries;
 using ChatRumi.Feed.Domain.ValueObject;
 using ChatRumi.Feed.Infrastructure;
 using ChatRumi.Infrastructure;
+using ChatRumi.Infrastructure.Storage;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddPresentation(builder.Configuration);
+builder.Services.AddAttachmentFileStorage();
 
 var app = builder.Build();
 
@@ -37,7 +38,6 @@ app.MapGet("/health", () => Results.Ok("Healthy ✅"))
 
 var feedGroup = app.MapGroup("/api/feed").RequireAuthorization();
 const long MaxAttachmentSizeBytes = 20 * 1024 * 1024; // 20 MB
-var feedAttachmentUploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads", "feed-attachments");
 
 feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
     {
@@ -78,7 +78,8 @@ feedGroup.MapPost("", async (HttpContext http, [FromBody] CreatePost.Command com
 
 feedGroup.MapPost("/attachments", async (
     HttpContext http,
-    [FromForm] IFormFile file
+    [FromForm] IFormFile file,
+    IAttachmentFileStorage fileStorage
 ) =>
 {
     if (!http.User.TryGetAccountId(out _))
@@ -101,27 +102,22 @@ feedGroup.MapPost("/attachments", async (
         return Results.BadRequest("Only image attachments are supported.");
     }
 
-    Directory.CreateDirectory(feedAttachmentUploadsRoot);
-
-    var attachmentId = Guid.CreateVersion7().ToString();
-    var safeName = Path.GetFileName(file.FileName);
-    var extension = Path.GetExtension(safeName);
-    var storageName = string.IsNullOrWhiteSpace(extension)
-        ? attachmentId
-        : $"{attachmentId}{extension}";
-    var storagePath = Path.Combine(feedAttachmentUploadsRoot, storageName);
-
-    await using (var output = File.Create(storagePath))
-    {
-        await file.CopyToAsync(output);
-    }
+    await using var input = file.OpenReadStream();
+    var storedFile = await fileStorage.StoreFileAsync(
+        bucket: "feed-attachments",
+        originalFileName: file.FileName,
+        contentType: file.ContentType,
+        content: input,
+        sizeBytes: file.Length,
+        cancellationToken: http.RequestAborted
+    );
 
     var response = new FeedAttachmentUploadResponse(
-        attachmentId,
-        safeName,
-        file.ContentType,
-        file.Length,
-        $"/feed/attachments/{attachmentId}"
+        storedFile.AttachmentId,
+        storedFile.OriginalFileName,
+        storedFile.ContentType,
+        storedFile.SizeBytes,
+        $"/feed/attachments/{storedFile.AttachmentId}"
     );
 
     return Results.Ok(response);
@@ -130,7 +126,8 @@ feedGroup.MapPost("/attachments", async (
 
 feedGroup.MapGet("/attachments/{attachmentId:guid}", async (
     HttpContext http,
-    [FromRoute] Guid attachmentId
+    [FromRoute] Guid attachmentId,
+    IAttachmentFileStorage fileStorage
 ) =>
 {
     if (!http.User.TryGetAccountId(out _))
@@ -138,27 +135,17 @@ feedGroup.MapGet("/attachments/{attachmentId:guid}", async (
         return Results.Unauthorized();
     }
 
-    if (!Directory.Exists(feedAttachmentUploadsRoot))
+    var attachment = await fileStorage.GetFileByPrefixAsync(
+        bucket: "feed-attachments",
+        fileNamePrefix: attachmentId.ToString(),
+        cancellationToken: http.RequestAborted
+    );
+    if (attachment is null)
     {
         return Results.NotFound();
     }
 
-    var matchedFilePath = Directory
-        .EnumerateFiles(feedAttachmentUploadsRoot, $"{attachmentId}*")
-        .FirstOrDefault();
-    if (matchedFilePath is null)
-    {
-        return Results.NotFound();
-    }
-
-    var safeFileName = Path.GetFileName(matchedFilePath);
-    var contentTypeProvider = new FileExtensionContentTypeProvider();
-    var contentType = contentTypeProvider.TryGetContentType(safeFileName, out var resolvedContentType)
-        ? resolvedContentType
-        : "application/octet-stream";
-
-    var stream = File.OpenRead(matchedFilePath);
-    return Results.File(stream, contentType, enableRangeProcessing: true);
+    return Results.File(attachment.ContentStream, attachment.ContentType, enableRangeProcessing: true);
 })
 .WithName("get-feed-attachment");
 
