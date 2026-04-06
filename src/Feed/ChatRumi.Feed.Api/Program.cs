@@ -3,6 +3,7 @@ using ChatRumi.Feed.Api;
 using ChatRumi.Feed.Application;
 using ChatRumi.Feed.Application.Commands;
 using ChatRumi.Feed.Application.Queries;
+using ChatRumi.Feed.Domain.ValueObject;
 using ChatRumi.Feed.Infrastructure;
 using ChatRumi.Infrastructure;
 using Mediator;
@@ -67,5 +68,88 @@ feedGroup.MapPost("", async (HttpContext http, [FromBody] CreatePost.Command com
     })
     .WithName("create-post");
 
+feedGroup.MapGet("{id:guid}/details", async (Guid id, IMediator mediator) =>
+    {
+        var result = await mediator.Send(new GetPostDetails.Query(id));
+        return result.Match(
+            Results.Ok,
+            Results.NotFound
+        );
+    })
+    .WithName("get-post-details");
+
+feedGroup.MapPut("{id:guid}/reactions", async (HttpContext http, Guid id, [FromBody] ToggleReactionRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Actor.Id)
+        {
+            return Results.Forbid();
+        }
+
+        var result = await mediator.Send(new TogglePostReaction.Command(id, request.Actor, request.ReactionType));
+        return result.Match(
+            _ => Results.NoContent(),
+            _ => Results.NotFound()
+        );
+    })
+    .WithName("toggle-post-reaction");
+
+feedGroup.MapPost("{postId:guid}/comments", async (HttpContext http, Guid postId, [FromBody] AddCommentRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Creator.Id)
+        {
+            return Results.Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content))
+        {
+            return Results.BadRequest("Comment content is required.");
+        }
+
+        var result = await mediator.Send(new AddComment.Command(postId, request.Creator, request.Content));
+        return result.Match(
+            value => Results.Created($"/api/feed/{postId}/comments/{value}", value),
+            Results.NotFound
+        );
+    })
+    .WithName("add-comment");
+
+feedGroup.MapPost("{postId:guid}/comments/{commentId:guid}/replies", async (HttpContext http, Guid postId, Guid commentId, [FromBody] AddCommentRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Creator.Id)
+        {
+            return Results.Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content))
+        {
+            return Results.BadRequest("Reply content is required.");
+        }
+
+        var result = await mediator.Send(new AddReply.Command(postId, commentId, request.Creator, request.Content));
+        return result.Match(
+            value => Results.Created($"/api/feed/{postId}/comments/{commentId}/replies/{value}", value),
+            _ => Results.NotFound()
+        );
+    })
+    .WithName("add-reply");
+
+feedGroup.MapPut("comments/{commentId:guid}/reactions", async (HttpContext http, Guid commentId, [FromBody] ToggleReactionRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Actor.Id)
+        {
+            return Results.Forbid();
+        }
+
+        var result = await mediator.Send(new ToggleCommentReaction.Command(commentId, request.Actor, request.ReactionType));
+        return result.Match(
+            _ => Results.NoContent(),
+            _ => Results.NotFound()
+        );
+    })
+    .WithName("toggle-comment-reaction");
+
 
 app.Run();
+
+public sealed record ToggleReactionRequest(Participant Actor, ReactionType ReactionType);
+public sealed record AddCommentRequest(Participant Creator, string Content);
