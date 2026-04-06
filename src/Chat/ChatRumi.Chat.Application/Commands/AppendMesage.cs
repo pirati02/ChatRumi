@@ -48,7 +48,8 @@ public static class AppendMessage
                 MessageStatus.Sent,
                 request.Request.Content,
                 request.Request.Sender,
-                request.Request.ReplyOf
+                request.Request.ReplyOf,
+                []
             );
         }
     }

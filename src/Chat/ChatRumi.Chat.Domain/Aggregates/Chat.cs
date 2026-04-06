@@ -83,6 +83,40 @@ public class Chat : Aggregate
         UpdateMessageStatus(message, @event.Status);
     }
 
+    public void Apply(MessageReactionUpdatedEvent @event)
+    {
+        var message = Messages.FirstOrDefault(m => m.Id == @event.MessageId);
+        if (message is null)
+            return;
+
+        var actorReaction = message.Reactions.FirstOrDefault(r => r.ActorId == @event.Actor.Id);
+        if (actorReaction is null)
+        {
+            message.Reactions.Add(new MessageReaction
+            {
+                ActorId = @event.Actor.Id,
+                Emoji = @event.Emoji
+            });
+            return;
+        }
+
+        if (actorReaction.Emoji == @event.Emoji)
+        {
+            message.Reactions.Remove(actorReaction);
+            return;
+        }
+
+        var updated = actorReaction with
+        {
+            Emoji = @event.Emoji
+        };
+        var index = message.Reactions.IndexOf(actorReaction);
+        if (index < 0)
+            return;
+
+        message.Reactions[index] = updated;
+    }
+
     private void ReplaceParticipant(Participant oldParticipant, Participant updated)
     {
         var index = Participants.IndexOf(oldParticipant);

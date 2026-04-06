@@ -69,8 +69,17 @@ public static class JwtAuthenticationExtensions
                     var accessTokenValues = context.Request.Query["access_token"];
                     var accessToken = accessTokenValues.FirstOrDefault(v => !string.IsNullOrEmpty(v));
                     var path = context.HttpContext.Request.Path;
+                    var hasBearerHeader = context.Request.Headers.Authorization.Any(h =>
+                        !string.IsNullOrWhiteSpace(h) &&
+                        h.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase));
+
+                    var isHubPath = path.StartsWithSegments("/hub/chat")
+                        || path.StartsWithSegments("/hub/friendship");
+                    var isAttachmentPath = path.StartsWithSegments("/api/chat/attachments")
+                        || path.StartsWithSegments("/chat/attachments");
+
                     if (!string.IsNullOrEmpty(accessToken) &&
-                        (path.StartsWithSegments("/hub/chat") || path.StartsWithSegments("/hub/friendship")))
+                        (isHubPath || (isAttachmentPath && !hasBearerHeader)))
                     {
                         context.Token = accessToken;
                     }

@@ -34,7 +34,13 @@ public class MessageContentConverter : JsonConverter<MessageContent>
         {
             "plain" or null => new PlainTextContent { Content = content },
             "link" => new LinkContent { Content = content },
-            "image" => new ImageContent { Content = content },
+            "attachment" => new AttachmentContent
+            {
+                Content = content,
+                FileName = root.TryGetProperty("fileName", out var fileNameProp) ? fileNameProp.GetString() ?? "attachment" : "attachment",
+                MimeType = root.TryGetProperty("mimeType", out var mimeTypeProp) ? mimeTypeProp.GetString() ?? "application/octet-stream" : "application/octet-stream",
+                SizeBytes = root.TryGetProperty("sizeBytes", out var sizeProp) && sizeProp.TryGetInt64(out var parsedSize) ? parsedSize : 0
+            },
             "encrypted" => new PlainTextContent { Content = LegacyEncryptedPlaceholder },
             _ => new PlainTextContent { Content = content } // fallback
         };
@@ -48,11 +54,17 @@ public class MessageContentConverter : JsonConverter<MessageContent>
         {
             PlainTextContent => "plain",
             LinkContent => "link",
-            ImageContent => "image",
+            AttachmentContent => "attachment",
             _ => "plain"
         };
         writer.WriteString("type", type);
         writer.WriteString("content", value.Content);
+        if (value is AttachmentContent attachment)
+        {
+            writer.WriteString("fileName", attachment.FileName);
+            writer.WriteString("mimeType", attachment.MimeType);
+            writer.WriteNumber("sizeBytes", attachment.SizeBytes);
+        }
 
         writer.WriteEndObject();
     }

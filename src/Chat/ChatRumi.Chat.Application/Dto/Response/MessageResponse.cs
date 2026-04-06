@@ -8,5 +8,6 @@ public record MessageResponse(
     MessageStatus Status,
     MessageContent Content,
     ParticipantDto Sender,
-    Guid? ReplyOf
+    Guid? ReplyOf,
+    MessageReactionResponse[] Reactions
 );

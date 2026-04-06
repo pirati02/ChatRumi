@@ -14,6 +14,7 @@ public class Message
     public MessageType? Sent { get; set; }
     public MessageType? Seen { get; set; }
     public Message? ReplyOf { get; set; }
+    public List<MessageReaction> Reactions { get; set; } = [];
 
     public MessageStatus LatestStatus()
     {
