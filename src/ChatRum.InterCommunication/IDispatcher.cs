@@ -35,15 +35,38 @@ public class KafkaProducer(
         };
     }
 
-    public async Task ProduceAsync<TEvent>(string topic, string key, TEvent value, CancellationToken cancellationToken = default)
+    public Task ProduceAsync<TEvent>(string topic, string key, TEvent value, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var message = new Message<string, string> { Key = key, Value = JsonSerializer.Serialize(value) };
 
-        var deliveryResult = await _producer.ProduceAsync(topic, message, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        try
+        {
+            _producer.Produce(topic, message, deliveryReport =>
+            {
+                if (deliveryReport.Error.IsError)
+                {
+                    logger.LogWarning(
+                        "Kafka failed to deliver message to topic {Topic}. Error: {Error}",
+                        topic,
+                        deliveryReport.Error.Reason);
+                    return;
+                }
 
-        logger.LogInformation(
-            "Kafka delivered message to {TopicPartitionOffset}",
-            deliveryResult.TopicPartitionOffset);
+                logger.LogInformation(
+                    "Kafka delivered message to {TopicPartitionOffset}",
+                    deliveryReport.TopicPartitionOffset);
+            });
+        }
+        catch (ProduceException<string, string> ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Kafka produce enqueue failed for topic {Topic}",
+                topic);
+        }
+
+        return Task.CompletedTask;
     }
 }

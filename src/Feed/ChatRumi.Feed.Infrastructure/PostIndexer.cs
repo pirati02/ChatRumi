@@ -78,4 +78,5 @@ public static class PostIndexer
                 throw new Exception($"Failed to create comments index: {createResponse.DebugInformation}");
         }
     }
+
 }

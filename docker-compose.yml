@@ -394,6 +394,42 @@ services:
     networks:
       - backend
 
+  notification-service:
+    build:
+      context: .
+      dockerfile: src/Notification/ChatRumi.Notification.Api/Dockerfile
+    container_name: notification-service
+    ports:
+      - "5311:5311"
+    environment:
+      - ASPNETCORE_URLS=http://+:5311
+      - "ConnectionStrings__FeedContext=${ELASTIC_URL:-http://elasticsearch:9200}"
+      - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
+      - ConsulOptions__ServiceName=notificationservice
+      - ConsulOptions__ServiceAddress=http://notification-service:5311
+      - "ConsulOptions__Host=${CONSUL_HOST:-consul}"
+      - "ConsulOptions__Port=${CONSUL_PORT:-8500}"
+      - ConsulOptions__Scheme=http
+      - ConsulOptions__Enabled=true
+      - OpenTelemetry__ServiceName=notification-service
+      - OpenTelemetry__ServiceVersion=1.0.0
+      - OpenTelemetry__OtlpEndpoint=http://jaeger:4317
+      - OpenTelemetry__Enabled=true
+      - Jwt__Issuer=ChatRumi
+      - Jwt__Audience=ChatRumi
+      - Jwt__SigningKey=${JWT_SIGNING_KEY:-local_dev_jwt_signing_key_at_least_32_chars}
+    depends_on:
+      consul:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      jaeger:
+        condition: service_healthy
+    networks:
+      - backend
+
   # ════════════════════════════════════════════════════════════════
   # BACKGROUND SERVICES (Event/Message Consumers - No REST endpoints)
   # ════════════════════════════════════════════════════════════════
@@ -525,6 +561,8 @@ services:
       friendship-service:
         condition: service_started
       feed-service:
+        condition: service_started
+      notification-service:
         condition: service_started
       jaeger:
         condition: service_healthy

@@ -35,6 +35,12 @@ public static class KafkaTopicBootstrap
                 Name = Topics.AccountCreatedTopic,
                 NumPartitions = DefaultPartitionCount,
                 ReplicationFactor = DefaultReplicationFactor
+            },
+            new TopicSpecification
+            {
+                Name = Topics.NotificationTriggeredTopic,
+                NumPartitions = DefaultPartitionCount,
+                ReplicationFactor = DefaultReplicationFactor
             }
         ];
 

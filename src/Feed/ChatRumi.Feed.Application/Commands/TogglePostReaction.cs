@@ -1,4 +1,6 @@
 using ChatRumi.Feed.Application.Dtos;
+using ChatRum.InterCommunication;
+using ChatRumi.Feed.Application.IntegrationEvents;
 using ChatRumi.Feed.Domain.ValueObject;
 using ErrorOr;
 using Mediator;
@@ -17,6 +19,7 @@ public static class TogglePostReaction
 
     public sealed class Handler(
         IElasticClient client,
+        IDispatcher dispatcher,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, ErrorOr<Updated>>
     {
@@ -33,6 +36,13 @@ public static class TogglePostReaction
             }
 
             var post = postResponse.Source;
+            var existingReaction = post.Reactions.FirstOrDefault(x => x.Actor.Id == request.Actor.Id);
+            var shouldPublishNotification = FeedNotificationRules.ShouldNotifyForReaction(
+                existingReaction,
+                request.ReactionType,
+                post.Creator.Id,
+                request.Actor.Id
+            );
             post.Reactions.ToggleSingleReaction(request.Actor, request.ReactionType);
 
             var updateResponse = await client.UpdateAsync<PostDocument>(
@@ -44,6 +54,27 @@ public static class TogglePostReaction
             {
                 logger.LogError("Post reaction update failed for post {PostId}. {Error}", request.PostId, updateResponse.OriginalException?.Message);
                 return Error.Unexpected("Post reaction update failed.");
+            }
+
+            if (shouldPublishNotification)
+            {
+                await dispatcher.ProduceAsync(
+                    Topics.NotificationTriggeredTopic,
+                    post.Creator.Id.ToString(),
+                    new NotificationTriggered(
+                        post.Creator.Id,
+                        request.Actor.Id,
+                        request.Actor.FirstName,
+                        request.Actor.LastName,
+                        request.Actor.NickName,
+                        "PostReaction",
+                        request.PostId,
+                        null,
+                        request.ReactionType.ToString(),
+                        DateTimeOffset.UtcNow
+                    ),
+                    cancellationToken
+                );
             }
 
             return new Updated();

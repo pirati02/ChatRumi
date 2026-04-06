@@ -1,4 +1,5 @@
 using ChatRum.InterCommunication.Telemetry;
+using ChatRum.InterCommunication;
 using ChatRumi.Feed.Api;
 using ChatRumi.Feed.Application;
 using ChatRumi.Feed.Application.Commands;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddOptions<KafkaOptions>().BindConfiguration(KafkaOptions.Name);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddPresentation(builder.Configuration);

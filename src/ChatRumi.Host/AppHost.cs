@@ -39,6 +39,8 @@ builder.AddFriendshipAccountSyncService(neo4J, kafka);
 
 var feedService = builder.AddFeedService(elastic)
     .WithChatRumiJwt(jwtSigningKey);
+var notificationService = builder.AddNotificationService(elastic, kafka)
+    .WithChatRumiJwt(jwtSigningKey);
 var friendshipService = builder.AddFriendshipService(neo4J)
     .WithChatRumiJwt(jwtSigningKey);
 
@@ -47,10 +49,12 @@ builder.AddProject<Projects.ChatRum_Gateway>("gateway", launchProfileName: "http
     .WithReference(accountService)
     .WithReference(chatService)
     .WithReference(feedService)
+    .WithReference(notificationService)
     .WithReference(friendshipService)
     .WaitFor(accountService)
     .WaitFor(chatService)
     .WaitFor(feedService)
+    .WaitFor(notificationService)
     .WaitFor(friendshipService)
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health");

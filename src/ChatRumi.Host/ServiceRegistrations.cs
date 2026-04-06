@@ -118,7 +118,6 @@ public static class ServiceRegistrations
                 .WithEnvironment("MassTransit_Password", defaultPassword);
         }
 
-
         public IResourceBuilder<ProjectResource> AddFeedAccountSyncService(
             IResourceBuilder<ElasticsearchResource> elastic, 
             IResourceBuilder<ContainerResource> kafka
@@ -142,6 +141,20 @@ public static class ServiceRegistrations
                 .WaitFor(elastic)
                 .WithReference(elastic)
                 .WithEnvironment("ConnectionStrings__FeedContext", elastic.Resource.ConnectionStringExpression);
+        }
+
+        public IResourceBuilder<ProjectResource> AddNotificationService(
+            IResourceBuilder<ElasticsearchResource> elastic,
+            IResourceBuilder<ContainerResource> kafka
+        )
+        {
+            return builder.AddProject<Projects.ChatRumi_Notification_Api>("notificationService", HttpsLaunchProfile)
+                .WithHttpHealthCheck("/health")
+                .WaitFor(elastic)
+                .WaitFor(kafka)
+                .WithReference(elastic)
+                .WithEnvironment("ConnectionStrings__FeedContext", elastic.Resource.ConnectionStringExpression)
+                .WithEnvironment("KafkaOptions__ConnectionString", KafkaBootstrapServers(kafka));
         }
 
         public IResourceBuilder<ProjectResource> AddFriendshipService(
