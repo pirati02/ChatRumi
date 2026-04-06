@@ -97,4 +97,105 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
         Assert.Equal("integration-title", roundTrip.Title);
         Assert.Equal("integration-desc", roundTrip.Description);
     }
+
+    [Fact]
+    public async Task Toggle_post_reaction_adds_and_removes_same_reaction()
+    {
+        var postId = await CreatePostAndGetId();
+
+        var togglePayload = new
+        {
+            actor = new Participant
+            {
+                Id = _creatorId,
+                FirstName = "Fn",
+                LastName = "Ln",
+                NickName = "nn"
+            },
+            reactionType = ReactionType.Like
+        };
+
+        var addResponse = await _client!.PutAsJsonAsync($"/api/feed/{postId}/reactions", togglePayload);
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, addResponse.StatusCode);
+
+        var getAfterAdd = await _client.GetFromJsonAsync<PostDocument>($"/api/feed/{postId}");
+        Assert.NotNull(getAfterAdd);
+        Assert.Single(getAfterAdd.Reactions);
+        Assert.Equal(ReactionType.Like, getAfterAdd.Reactions[0].ReactionType);
+
+        var removeResponse = await _client.PutAsJsonAsync($"/api/feed/{postId}/reactions", togglePayload);
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, removeResponse.StatusCode);
+
+        var getAfterRemove = await _client.GetFromJsonAsync<PostDocument>($"/api/feed/{postId}");
+        Assert.NotNull(getAfterRemove);
+        Assert.Empty(getAfterRemove.Reactions);
+    }
+
+    [Fact]
+    public async Task Add_comment_reply_and_comment_reaction_are_returned_in_post_details()
+    {
+        var postId = await CreatePostAndGetId();
+        var commentPayload = new
+        {
+            creator = new Participant
+            {
+                Id = _creatorId,
+                FirstName = "Fn",
+                LastName = "Ln",
+                NickName = "nn"
+            },
+            content = "Parent comment"
+        };
+
+        var commentResponse = await _client!.PostAsJsonAsync($"/api/feed/{postId}/comments", commentPayload);
+        commentResponse.EnsureSuccessStatusCode();
+        var commentId = await commentResponse.Content.ReadFromJsonAsync<Guid>();
+        Assert.NotEqual(Guid.Empty, commentId);
+
+        var replyPayload = new
+        {
+            creator = commentPayload.creator,
+            content = "A reply"
+        };
+        var replyResponse = await _client.PostAsJsonAsync($"/api/feed/{postId}/comments/{commentId}/replies", replyPayload);
+        replyResponse.EnsureSuccessStatusCode();
+
+        var toggleCommentReactionPayload = new
+        {
+            actor = commentPayload.creator,
+            reactionType = ReactionType.Heart
+        };
+        var toggleReactionResponse = await _client.PutAsJsonAsync($"/api/feed/comments/{commentId}/reactions", toggleCommentReactionPayload);
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, toggleReactionResponse.StatusCode);
+
+        var detailsResponse = await _client.GetAsync($"/api/feed/{postId}/details");
+        detailsResponse.EnsureSuccessStatusCode();
+        var details = await detailsResponse.Content.ReadFromJsonAsync<PostDetailsDocument>();
+        Assert.NotNull(details);
+        Assert.Equal(postId, details.Post.Id);
+        Assert.Single(details.Comments);
+        Assert.Single(details.Comments[0].Replies);
+        Assert.Single(details.Comments[0].Comment.Reactions);
+        Assert.Equal(ReactionType.Heart, details.Comments[0].Comment.Reactions[0].ReactionType);
+    }
+
+    private async Task<Guid> CreatePostAndGetId()
+    {
+        var command = new CreatePost.Command(
+            new Participant
+            {
+                Id = _creatorId,
+                FirstName = "Fn",
+                LastName = "Ln",
+                NickName = "nn"
+            },
+            Title: "integration-title",
+            Description: "integration-desc");
+
+        var response = await _client!.PostAsJsonAsync("/api/feed", command);
+        response.EnsureSuccessStatusCode();
+        var id = await response.Content.ReadFromJsonAsync<string>();
+        Assert.False(string.IsNullOrWhiteSpace(id));
+        return Guid.Parse(id!);
+    }
 }
