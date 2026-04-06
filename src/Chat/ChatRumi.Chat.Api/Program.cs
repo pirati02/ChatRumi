@@ -10,6 +10,7 @@ using ChatRumi.Infrastructure;
 using ErrorOr;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,7 @@ app.MapGet("/health", () => Results.Ok("Healthy ✅"))
     .AllowAnonymous();
 
 var chatGroup = app.MapGroup("/api/chat").RequireAuthorization();
+const long MaxAttachmentSizeBytes = 20 * 1024 * 1024; // 20 MB
 
 chatGroup.MapGet("/{participantId:guid}/top10", async (
     HttpContext http,
@@ -110,6 +112,93 @@ chatGroup.MapPost("/mark-as-read/{chatId:guid}", async (
         errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound());
 });
 
+chatGroup.MapPost("/attachments", async (
+    HttpContext http,
+    [FromForm] IFormFile file
+) =>
+{
+    if (!http.User.TryGetAccountId(out _))
+    {
+        return Results.Unauthorized();
+    }
+
+    if (file is null || file.Length == 0)
+    {
+        return Results.BadRequest("Attachment file is required.");
+    }
+
+    if (file.Length > MaxAttachmentSizeBytes)
+    {
+        return Results.BadRequest($"Attachment exceeds max size of {MaxAttachmentSizeBytes} bytes.");
+    }
+
+    var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads", "chat-attachments");
+    Directory.CreateDirectory(uploadsRoot);
+
+    var attachmentId = Guid.CreateVersion7().ToString();
+    var safeName = Path.GetFileName(file.FileName);
+    var extension = Path.GetExtension(safeName);
+    var storageName = $"{attachmentId}{extension}";
+    var storagePath = Path.Combine(uploadsRoot, storageName);
+
+    await using (var output = File.Create(storagePath))
+    {
+        await file.CopyToAsync(output);
+    }
+
+    var url = $"/chat/attachments/{attachmentId}{extension}";
+    var response = new ChatAttachmentUploadResponse(
+        attachmentId,
+        safeName,
+        string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+        file.Length,
+        url
+    );
+
+    return Results.Ok(response);
+})
+.DisableAntiforgery();
+
+chatGroup.MapGet("/attachments/{fileName}", async (
+    HttpContext http,
+    [FromRoute] string fileName
+) =>
+{
+    if (!http.User.TryGetAccountId(out _))
+    {
+        return Results.Unauthorized();
+    }
+
+    if (string.IsNullOrWhiteSpace(fileName))
+    {
+        return Results.BadRequest();
+    }
+
+    var safeFileName = Path.GetFileName(fileName);
+    var uploadsRoot = Path.Combine(app.Environment.ContentRootPath, "uploads", "chat-attachments");
+    var storagePath = Path.Combine(uploadsRoot, safeFileName);
+    if (!File.Exists(storagePath))
+    {
+        return Results.NotFound();
+    }
+
+    var contentTypeProvider = new FileExtensionContentTypeProvider();
+    var contentType = contentTypeProvider.TryGetContentType(safeFileName, out var resolvedContentType)
+        ? resolvedContentType
+        : "application/octet-stream";
+
+    var stream = File.OpenRead(storagePath);
+    return Results.File(stream, contentType, enableRangeProcessing: true);
+});
+
 app.MapHub<ChatHub>("/hub/chat").RequireAuthorization();
 
 await app.RunAsync();
+
+internal sealed record ChatAttachmentUploadResponse(
+    string Id,
+    string FileName,
+    string MimeType,
+    long SizeBytes,
+    string Url
+);

@@ -39,9 +39,9 @@ public record MessageSentEvent(
         return messageContent switch
         {
             PlainTextContent content => content,
-            ImageContent => new PlainTextContent
+            AttachmentContent attachment => new PlainTextContent
             {
-                Content = "picture attachment"
+                Content = $"file attachment: {attachment.FileName}"
             },
             LinkContent content => new PlainTextContent
             {

@@ -15,7 +15,10 @@ public static class MessageExtensions
                 message.LatestStatus(),
                 message.Content,
                 message.Participant.ToDto(),
-                message.ReplyOf?.Id
+                message.ReplyOf?.Id,
+                message.Reactions
+                    .Select(r => new MessageReactionResponse(r.ActorId, r.Emoji))
+                    .ToArray()
             );
         }
     }

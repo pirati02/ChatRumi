@@ -97,7 +97,7 @@ friendship.MapPost("accept", async (
         [FromServices] IPeerConnectionManager connectionManager
     ) =>
     {
-        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Peer2.PeerId)
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Peer1.PeerId)
         {
             return Results.Forbid();
         }

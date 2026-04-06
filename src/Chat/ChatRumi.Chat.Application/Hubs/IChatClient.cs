@@ -9,4 +9,5 @@ public interface IChatClient
     Task MessageSent(MessageResponse message, bool updateState);
     Task MessageFailed(MessageResponse message);
     Task MessageStateUpdated(Guid messageId, MessageStatus status);
+    Task MessageReactionUpdated(Guid messageId, MessageReactionResponse[] reactions);
 }

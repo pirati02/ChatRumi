@@ -135,6 +135,35 @@ public class ChatHub(
         }
     }
 
+    public async Task UpdateMessageReaction(
+        Guid chatId,
+        MessageReactionRequest reaction
+    )
+    {
+        if (!TryGetAccount(out var callerId) || reaction.Actor.Id != callerId)
+        {
+            return;
+        }
+
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var result = await mediator.Send(new UpdateMessageReaction.Command(chatId, reaction));
+        if (result.IsError)
+        {
+            return;
+        }
+
+        var chat = await mediator.Send(new GetChatById.Query(chatId, callerId));
+        if (chat.IsError)
+        {
+            return;
+        }
+
+        var connections = accountConnectionManager.GetConnections(chat.Value.Participants.Select(p => p.Id).ToArray());
+        var (messageId, reactions) = result.Value;
+        await Clients.Clients(connections).MessageReactionUpdated(messageId, reactions);
+    }
+
     private bool TryGetAccount(out Guid accountId)
     {
         return Context.User.TryGetAccountId(out accountId);
