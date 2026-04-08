@@ -1,4 +1,6 @@
 using ChatRumi.Feed.Application.Dtos;
+using ChatRum.InterCommunication;
+using ChatRumi.Feed.Application.IntegrationEvents;
 using ChatRumi.Feed.Domain.ValueObject;
 using ErrorOr;
 using Mediator;
@@ -17,6 +19,7 @@ public static class AddComment
 
     public sealed class Handler(
         IElasticClient client,
+        IDispatcher dispatcher,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
@@ -27,7 +30,7 @@ public static class AddComment
                 g => g.Index(PostIndexes.Posts),
                 cancellationToken);
 
-            if (!postResponse.Found)
+            if (!postResponse.Found || postResponse.Source is null)
             {
                 return Error.NotFound("Post not found.");
             }
@@ -48,6 +51,27 @@ public static class AddComment
             {
                 logger.LogError("Comment creation failed for post {PostId}. {Error}", request.PostId, response.OriginalException?.Message);
                 return Error.Unexpected("Comment creation failed.");
+            }
+
+            if (FeedNotificationRules.ShouldNotify(postResponse.Source.Creator.Id, request.Creator.Id))
+            {
+                await dispatcher.ProduceAsync(
+                    Topics.NotificationTriggeredTopic,
+                    postResponse.Source.Creator.Id.ToString(),
+                    new NotificationTriggered(
+                        postResponse.Source.Creator.Id,
+                        request.Creator.Id,
+                        request.Creator.FirstName,
+                        request.Creator.LastName,
+                        request.Creator.NickName,
+                        "PostComment",
+                        request.PostId,
+                        request.Content.Trim(),
+                        null,
+                        DateTimeOffset.UtcNow
+                    ),
+                    cancellationToken
+                );
             }
 
             return comment.Id;

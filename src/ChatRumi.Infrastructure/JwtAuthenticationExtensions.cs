@@ -74,7 +74,8 @@ public static class JwtAuthenticationExtensions
                         h.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase));
 
                     var isHubPath = path.StartsWithSegments("/hub/chat")
-                        || path.StartsWithSegments("/hub/friendship");
+                        || path.StartsWithSegments("/hub/friendship")
+                        || path.StartsWithSegments("/hub/notifications");
                     var isAttachmentPath = path.StartsWithSegments("/api/chat/attachments")
                         || path.StartsWithSegments("/chat/attachments")
                         || path.StartsWithSegments("/api/feed/attachments")

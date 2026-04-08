@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <Sdk Name="Aspire.AppHost.Sdk" Version="13.2.0"/>
+    <Sdk Name="Aspire.AppHost.Sdk" Version="13.2.0" />
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -27,6 +27,7 @@
       <ProjectReference Include="..\Feed\ChatRumi.Feed.Api\ChatRumi.Feed.Api.csproj" />
       <ProjectReference Include="..\Friendship\ChatRumi.Friendship.AccountSync\ChatRumi.Friendship.AccountSync.csproj" />
       <ProjectReference Include="..\Friendship\ChatRumi.Friendship.Api\ChatRumi.Friendship.Api.csproj" />
+      <ProjectReference Include="..\Notification\ChatRumi.Notification.Api\ChatRumi.Notification.Api.csproj" />
     </ItemGroup>
 
 </Project>

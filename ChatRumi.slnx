@@ -93,6 +93,16 @@
     <Project Path="src/Friendship/ChatRumi.Friendship.Domain/ChatRumi.Friendship.Domain.csproj" />
 
   </Folder>
+
+  <Folder Name="/src/Notification/">
+
+    <Project Path="src/Notification/ChatRumi.Notification.Api/ChatRumi.Notification.Api.csproj" />
+
+    <Project Path="src/Notification/ChatRumi.Notification.Application/ChatRumi.Notification.Application.csproj" />
+
+    <Project Path="src/Notification/ChatRumi.Notification.Infrastructure/ChatRumi.Notification.Infrastructure.csproj" />
+
+  </Folder>
   <Folder Name="/tests/unit/" />
 
   <Folder Name="/tests/unit/Account/">

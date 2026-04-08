@@ -63,6 +63,18 @@
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
     },
     {
+      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5311
+        }
+      ],
+      "UpstreamPathTemplate": "/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ]
+    },
+    {
       "DownstreamPathTemplate": "/hub/chat/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
@@ -86,6 +98,34 @@
         }
       ],
       "UpstreamPathTemplate": "/hub/chat",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1"
+    },
+    {
+      "DownstreamPathTemplate": "/hub/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5311
+        }
+      ],
+      "UpstreamPathTemplate": "/hub/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1"
+    },
+    {
+      "DownstreamPathTemplate": "/hub/notifications",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5311
+        }
+      ],
+      "UpstreamPathTemplate": "/hub/notifications",
       "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
       "UseWebSockets": true,
       "DownstreamHttpVersion": "1.1"

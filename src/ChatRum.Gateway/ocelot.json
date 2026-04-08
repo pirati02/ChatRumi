@@ -41,6 +41,16 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "notificationservice",
+      "UpstreamPathTemplate": "/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "PATCH", "DELETE" ],
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
+    },
+    {
       "DownstreamPathTemplate": "/hub/chat/{everything}",
       "DownstreamScheme": "http",
       "ServiceName": "chatservice",
@@ -81,6 +91,30 @@
       "DownstreamScheme": "http",
       "ServiceName": "friendshipservice",
       "UpstreamPathTemplate": "/hub/friendship",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/hub/notifications/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "notificationservice",
+      "UpstreamPathTemplate": "/hub/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
+      "UseWebSockets": true,
+      "DownstreamHttpVersion": "1.1",
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/hub/notifications",
+      "DownstreamScheme": "http",
+      "ServiceName": "notificationservice",
+      "UpstreamPathTemplate": "/hub/notifications",
       "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ],
       "UseWebSockets": true,
       "DownstreamHttpVersion": "1.1",

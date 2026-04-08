@@ -15,11 +15,18 @@ public class KafkaProducer(
     ILogger<KafkaProducer> logger
 ) : IDispatcher
 {
-    private readonly IProducer<string, string> _producer = new ProducerBuilder<string, string>(BuildProducerConfig(options.Value))
+    private readonly IProducer<string, string> _producer = new ProducerBuilder<string, string>(
+            BuildProducerConfig(options.Value))
         .Build();
 
     private static ProducerConfig BuildProducerConfig(KafkaOptions o)
     {
+        if (string.IsNullOrWhiteSpace(o.ConnectionString))
+        {
+            throw new InvalidOperationException(
+                $"Missing required Kafka setting: {KafkaOptions.Name}.ConnectionString");
+        }
+
         if (!Enum.TryParse<CompressionType>(o.CompressionType, ignoreCase: true, out var compression))
         {
             compression = CompressionType.Lz4;
@@ -37,13 +44,38 @@ public class KafkaProducer(
 
     public async Task ProduceAsync<TEvent>(string topic, string key, TEvent value, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var message = new Message<string, string> { Key = key, Value = JsonSerializer.Serialize(value) };
 
-        var deliveryResult = await _producer.ProduceAsync(topic, message, cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+        try
+        {
+            var deliveryResult = await _producer
+                .ProduceAsync(topic, message, cancellationToken)
+                .ConfigureAwait(false);
 
-        logger.LogInformation(
-            "Kafka delivered message to {TopicPartitionOffset}",
-            deliveryResult.TopicPartitionOffset);
+            logger.LogInformation(
+                "Kafka delivered message to {TopicPartitionOffset} for topic {Topic} and key {Key}",
+                deliveryResult.TopicPartitionOffset,
+                topic,
+                key);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning(
+                "Kafka message production was canceled for topic {Topic} and key {Key}",
+                topic,
+                key);
+            throw;
+        }
+        catch (ProduceException<string, string> ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Kafka failed to deliver message for topic {Topic} and key {Key}",
+                topic,
+                key);
+            throw;
+        }
     }
 }
