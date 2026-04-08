@@ -1,4 +1,5 @@
 using ChatRum.InterCommunication.Telemetry;
+using ChatRum.InterCommunication;
 using ChatRumi.Friendship.Api;
 using ChatRumi.Friendship.Api.Hub;
 using ChatRumi.Friendship.Application;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddOptions<KafkaOptions>().BindConfiguration(KafkaOptions.Name);
 builder.Services.AddPresentation(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 
@@ -106,6 +108,22 @@ friendship.MapPost("accept", async (
         return Results.NoContent();
     })
     .WithName("accept-friend");
+
+friendship.MapPost("reject", async (
+        HttpContext http,
+        [FromBody] RejectFriendRequest request,
+        [FromServices] IPeerConnectionManager connectionManager
+    ) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Peer1.PeerId)
+        {
+            return Results.Forbid();
+        }
+
+        await connectionManager.RejectFriendRequestAsync(request.Peer1, request.Peer2);
+        return Results.NoContent();
+    })
+    .WithName("reject-friend");
 
 
 friendship.MapDelete("unfriend", async (

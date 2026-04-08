@@ -1,4 +1,5 @@
-﻿using ChatRumi.Friendship.Application.Services;
+﻿using ChatRum.InterCommunication;
+using ChatRumi.Friendship.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Neo4j.Driver;
@@ -12,6 +13,7 @@ public static class ModuleRegistration
         public void AddApplication()
         {
             services.AddOptions<Neo4jOptions>().BindConfiguration(Neo4jOptions.Name);
+            services.AddSingleton<IDispatcher, KafkaProducer>();
             services.AddSingleton<IDriver>(sp =>
             {
                 var options = sp.GetRequiredService<IOptions<Neo4jOptions>>().Value;

@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
         <ProjectReference Include="..\ChatRumi.Friendship.Domain\ChatRumi.Friendship.Domain.csproj"/>
     </ItemGroup>
 
