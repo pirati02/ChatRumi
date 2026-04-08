@@ -46,7 +46,8 @@ public class KafkaProducer(
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var message = new Message<string, string> { Key = key, Value = JsonSerializer.Serialize(value) };
+        var payload = value is string rawJson ? rawJson : JsonSerializer.Serialize(value);
+        var message = new Message<string, string> { Key = key, Value = payload };
 
         try
         {

@@ -73,6 +73,10 @@ public class NotificationTriggeredConsumerBackgroundService(
                     errorBackoffMs = errorBackoffMs == 0 ? 200 : Math.Min(errorBackoffMs * 2, 10_000);
                     await Task.Delay(errorBackoffMs, stoppingToken).ConfigureAwait(false);
                 }
+                catch (JsonException ex)
+                {
+                    logger.LogWarning(ex, "Skipping malformed notification payload from Kafka.");
+                }
             }
 
             consumer.Close();
