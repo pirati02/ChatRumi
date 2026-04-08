@@ -12,6 +12,9 @@ public sealed class PostDocument
     public List<Share> Shares { get; set; } = [];
 
     public required string Description { get; set; }
+    public DateTimeOffset? LastEditedAt { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 
     public List<AttachmentId> Attachments { get; set; } = [];
 

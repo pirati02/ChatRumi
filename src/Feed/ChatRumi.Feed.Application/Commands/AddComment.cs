@@ -30,7 +30,7 @@ public static class AddComment
                 g => g.Index(PostIndexes.Posts),
                 cancellationToken);
 
-            if (!postResponse.Found || postResponse.Source is null)
+            if (!postResponse.Found || postResponse.Source is null || postResponse.Source.IsDeleted)
             {
                 return Error.NotFound("Post not found.");
             }

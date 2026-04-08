@@ -30,7 +30,7 @@ public static class ToggleCommentReaction
                 g => g.Index(PostIndexes.Comments),
                 cancellationToken);
 
-            if (!commentResponse.Found || commentResponse.Source is null)
+            if (!commentResponse.Found || commentResponse.Source is null || commentResponse.Source.IsDeleted)
             {
                 return Error.NotFound("Comment not found.");
             }

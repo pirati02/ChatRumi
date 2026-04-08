@@ -20,7 +20,10 @@ public static class GetPosts
                 .Size(request.Size)
                 .Query(q => q
                     .Bool(b => b
-                        .MustNot(mn => mn.Term(t => t.Field(f => f.Creator.Id).Value(request.CreatorId)))
+                        .MustNot(
+                            mn => mn.Term(t => t.Field(f => f.Creator.Id).Value(request.CreatorId)),
+                            mn => mn.Term(t => t.Field(f => f.IsDeleted).Value(true))
+                        )
                         .Must(mu => mu.FunctionScore(fs => fs
                             .Query(qr => qr.MatchAll())
                             .Functions(f => f.RandomScore(rs => rs
@@ -32,9 +35,16 @@ public static class GetPosts
 
             var myPosts = await client.SearchAsync<PostDocument>(s => s
                 .Query(q => q
-                    .Term(t => t
-                        .Field(f => f.Creator.Id)
-                        .Value(request.CreatorId)
+                    .Bool(b => b
+                        .Must(
+                            mu => mu.Term(t => t
+                                .Field(f => f.Creator.Id)
+                                .Value(request.CreatorId)
+                            )
+                        )
+                        .MustNot(
+                            mn => mn.Term(t => t.Field(f => f.IsDeleted).Value(true))
+                        )
                     )
                 )
                 .Size(request.Size), cancellationToken);

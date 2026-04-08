@@ -31,7 +31,7 @@ public static class AddReply
                 g => g.Index(PostIndexes.Comments),
                 cancellationToken);
 
-            if (!parentCommentResponse.Found || parentCommentResponse.Source is null)
+            if (!parentCommentResponse.Found || parentCommentResponse.Source is null || parentCommentResponse.Source.IsDeleted)
             {
                 return Error.NotFound("Parent comment not found.");
             }
