@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Confluent.Kafka" />
         <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj" />
         <ProjectReference Include="..\ChatRumi.Account.Application\ChatRumi.Account.Application.csproj"/>
     </ItemGroup>
