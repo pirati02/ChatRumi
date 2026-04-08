@@ -18,6 +18,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddPresentation(builder.Configuration);
 builder.Services.AddAttachmentFileStorage();
+builder.Services.AddHostedService<FeedOutboxRelayBackgroundService>();
 
 var app = builder.Build();
 

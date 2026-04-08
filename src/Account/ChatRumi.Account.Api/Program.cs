@@ -41,6 +41,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddPresentation(builder.Configuration);
+builder.Services.AddHostedService<AccountOutboxRelayBackgroundService>();
 
 var app = builder.Build();
 

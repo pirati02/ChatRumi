@@ -19,7 +19,7 @@ public static class TogglePostReaction
 
     public sealed class Handler(
         IElasticClient client,
-        IDispatcher dispatcher,
+        IOutboxWriter outboxWriter,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, ErrorOr<Updated>>
     {
@@ -58,7 +58,7 @@ public static class TogglePostReaction
 
             if (shouldPublishNotification)
             {
-                await dispatcher.ProduceAsync(
+                await outboxWriter.EnqueueAsync(
                     Topics.NotificationTriggeredTopic,
                     post.Creator.Id.ToString(),
                     new NotificationTriggered(

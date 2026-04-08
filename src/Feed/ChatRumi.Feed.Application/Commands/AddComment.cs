@@ -19,7 +19,7 @@ public static class AddComment
 
     public sealed class Handler(
         IElasticClient client,
-        IDispatcher dispatcher,
+        IOutboxWriter outboxWriter,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
@@ -55,7 +55,7 @@ public static class AddComment
 
             if (FeedNotificationRules.ShouldNotify(postResponse.Source.Creator.Id, request.Creator.Id))
             {
-                await dispatcher.ProduceAsync(
+                await outboxWriter.EnqueueAsync(
                     Topics.NotificationTriggeredTopic,
                     postResponse.Source.Creator.Id.ToString(),
                     new NotificationTriggered(

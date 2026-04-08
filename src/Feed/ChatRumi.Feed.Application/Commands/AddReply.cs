@@ -20,7 +20,7 @@ public static class AddReply
 
     public sealed class Handler(
         IElasticClient client,
-        IDispatcher dispatcher,
+        IOutboxWriter outboxWriter,
         ILogger<Handler> logger
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
@@ -62,7 +62,7 @@ public static class AddReply
 
             if (FeedNotificationRules.ShouldNotify(parentCommentResponse.Source.Creator.Id, request.Creator.Id))
             {
-                await dispatcher.ProduceAsync(
+                await outboxWriter.EnqueueAsync(
                     Topics.NotificationTriggeredTopic,
                     parentCommentResponse.Source.Creator.Id.ToString(),
                     new NotificationTriggered(

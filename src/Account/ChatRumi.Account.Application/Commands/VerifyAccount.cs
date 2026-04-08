@@ -15,14 +15,13 @@ public static class VerifyAccount
     public sealed record Command(string Code, Guid AccountId) : IRequest<ErrorOr<bool>>;
 
     public sealed class Handler(
-        IDocumentStore store,
+        IDocumentSession session,
         IConnectionMultiplexer connectionMultiplexer,
-        IDispatcher dispatcher
+        IOutboxWriter outboxWriter
     ) : IRequestHandler<Command, ErrorOr<bool>>
     {
         public async ValueTask<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            await using var session = store.LightweightSession();
             var account = await session.Query<AccountProjection>()
                 .FirstOrDefaultAsync(a => a.Id == request.AccountId, cancellationToken);
 
@@ -52,9 +51,13 @@ public static class VerifyAccount
                     AccountId = account.Id
                 };
                 session.Events.Append(account.Id, @event);
-                await session.SaveChangesAsync(cancellationToken);
 
-                await dispatcher.ProduceAsync(Topics.AccountCreatedTopic, account.Id.ToString(), new AccountCreated(account.Id, account.UserName), cancellationToken);
+                await outboxWriter.EnqueueAsync(
+                    Topics.AccountCreatedTopic,
+                    account.Id.ToString(),
+                    new AccountCreated(account.Id, account.UserName),
+                    cancellationToken);
+                await session.SaveChangesAsync(cancellationToken);
                 return true;
             }
         }
