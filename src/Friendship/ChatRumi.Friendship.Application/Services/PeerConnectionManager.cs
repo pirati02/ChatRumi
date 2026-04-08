@@ -1,4 +1,6 @@
 using ChatRumi.Friendship.Application.Dto.Request;
+using ChatRumi.Friendship.Application.IntegrationEvents;
+using ChatRum.InterCommunication;
 using Microsoft.Extensions.Options;
 using Neo4j.Driver;
 
@@ -10,6 +12,7 @@ public interface IPeerConnectionManager
     Task UpdatePeerAsync(PeerDto peer);
     Task SendFriendRequestAsync(PeerDto peer1, PeerDto peer2);
     Task AcceptFriendRequestAsync(PeerDto peer1, PeerDto peer2);
+    Task RejectFriendRequestAsync(PeerDto peer1, PeerDto peer2);
     Task UnfriendAsync(PeerDto peer, PeerDto targetPeer);
     Task<PeerResponse[]> GetFriendsAsync(Guid peerId);
     Task<PeerResponse[]> GetFriendRequestsAsync(Guid peerId);
@@ -19,7 +22,8 @@ public interface IPeerConnectionManager
 public class PeerConnectionManager(
     IDriver driver,
     IOptions<Neo4jOptions> options,
-    IFriendshipHubContextProxy hubContext
+    IFriendshipHubContextProxy hubContext,
+    IDispatcher dispatcher
 ) : IPeerConnectionManager
 {
     private readonly IAsyncSession _session = driver.AsyncSession(builder => builder.WithDatabase(options.Value.Neo4jDatabase));
@@ -127,6 +131,12 @@ public class PeerConnectionManager(
         });
 
         await hubContext.FriendRequestReceived(peer1, peer2);
+        await PublishNotificationAsync(
+            recipientId: peer2.PeerId,
+            actor: peer1,
+            type: "FriendRequestReceived",
+            targetId: peer1.PeerId
+        );
     }
 
     public async Task AcceptFriendRequestAsync(PeerDto peer1, PeerDto peer2)
@@ -148,6 +158,37 @@ public class PeerConnectionManager(
             return true;
         });
         await hubContext.FriendRequestAccepted(peer1, peer2);
+        await PublishNotificationAsync(
+            recipientId: peer2.PeerId,
+            actor: peer1,
+            type: "FriendRequestAccepted",
+            targetId: peer1.PeerId
+        );
+    }
+
+    public async Task RejectFriendRequestAsync(PeerDto peer1, PeerDto peer2)
+    {
+        await _session.ExecuteWriteAsync(async tx =>
+        {
+            const string query = """
+                                     MATCH (a1:Account {peerId: $peerId1})-[r:FRIEND_REQUEST]->(a2:Account {peerId: $peerId2})
+                                     DELETE r
+                                 """;
+
+            var parameters = new { peerId1 = peer2.PeerId.ToString(), peerId2 = peer1.PeerId.ToString() };
+
+            var cursor = await tx.RunAsync(query, parameters);
+            await cursor.ConsumeAsync();
+
+            return true;
+        });
+
+        await PublishNotificationAsync(
+            recipientId: peer2.PeerId,
+            actor: peer1,
+            type: "FriendRequestRejected",
+            targetId: peer1.PeerId
+        );
     }
 
     public async Task<PeerResponse[]> GetFriendsAsync(Guid peerId)
@@ -211,5 +252,25 @@ public class PeerConnectionManager(
 
         var result = await _session.RunAsync(query, parameters);
         return await result.FetchAsync();
+    }
+
+    private async Task PublishNotificationAsync(Guid recipientId, PeerDto actor, string type, Guid targetId)
+    {
+        await dispatcher.ProduceAsync(
+            Topics.NotificationTriggeredTopic,
+            recipientId.ToString(),
+            new NotificationTriggered(
+                recipientId,
+                actor.PeerId,
+                string.Empty,
+                string.Empty,
+                actor.UserName,
+                type,
+                targetId,
+                null,
+                null,
+                DateTimeOffset.UtcNow
+            )
+        );
     }
 }
