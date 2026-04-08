@@ -8,7 +8,11 @@ public static class ModuleRegistration
     {
         public void AddApplication()
         {
-            services.AddMediator(cfg => cfg.Assemblies = [typeof(IRefMarker)]);
+            services.AddMediator(cfg =>
+            {
+                cfg.Assemblies = [typeof(IRefMarker)];
+                cfg.ServiceLifetime = ServiceLifetime.Scoped;
+            });
         }
     }
 }
