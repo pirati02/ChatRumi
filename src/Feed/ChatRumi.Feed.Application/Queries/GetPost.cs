@@ -19,13 +19,18 @@ public static class GetPost
         {
             var response = await client.GetAsync<PostDocument>(request.Id, g => g.Index(PostIndexes.Posts), cancellationToken);
 
-            if (response.IsValid)
+            if (!response.Found || response.Source is null || response.Source.IsDeleted)
             {
-                logger.LogInformation("Post was loaded successfully {PostId}", response.Source!.Id);
-                return response.Source!;
+                return Error.NotFound("Post not found.");
             }
 
-            logger.LogError("Post index failed. {Error}", response.OriginalException.StackTrace);
+            if (response.IsValid)
+            {
+                logger.LogInformation("Post was loaded successfully {PostId}", response.Source.Id);
+                return response.Source;
+            }
+
+            logger.LogError("Post load failed for post {PostId}. {Error}", request.Id, response.OriginalException?.Message);
             return Error.NotFound("Post not found.");
         }
     }

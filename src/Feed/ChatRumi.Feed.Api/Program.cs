@@ -8,6 +8,7 @@ using ChatRumi.Feed.Domain.ValueObject;
 using ChatRumi.Feed.Infrastructure;
 using ChatRumi.Infrastructure;
 using ChatRumi.Infrastructure.Storage;
+using ErrorOr;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
@@ -197,6 +198,41 @@ feedGroup.MapPost("{postId:guid}/comments", async (HttpContext http, Guid postId
     })
     .WithName("add-comment");
 
+feedGroup.MapPut("{postId:guid}", async (HttpContext http, Guid postId, [FromBody] EditPostRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.ActorId)
+        {
+            return Results.Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Description))
+        {
+            return Results.BadRequest("Post description is required.");
+        }
+
+        var result = await mediator.Send(new EditPost.Command(postId, request.ActorId, request.Description));
+        return result.Match(
+            _ => Results.NoContent(),
+            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
+        );
+    })
+    .WithName("edit-post");
+
+feedGroup.MapDelete("{postId:guid}", async (HttpContext http, Guid postId, [FromBody] FeedDeleteRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.ActorId)
+        {
+            return Results.Forbid();
+        }
+
+        var result = await mediator.Send(new DeletePost.Command(postId, request.ActorId));
+        return result.Match(
+            _ => Results.NoContent(),
+            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
+        );
+    })
+    .WithName("delete-post");
+
 feedGroup.MapPost("{postId:guid}/comments/{commentId:guid}/replies", async (HttpContext http, Guid postId, Guid commentId, [FromBody] AddCommentRequest request, IMediator mediator) =>
     {
         if (!http.User.TryGetAccountId(out var callerId) || callerId != request.Creator.Id)
@@ -216,6 +252,41 @@ feedGroup.MapPost("{postId:guid}/comments/{commentId:guid}/replies", async (Http
         );
     })
     .WithName("add-reply");
+
+feedGroup.MapPut("comments/{commentId:guid}", async (HttpContext http, Guid commentId, [FromBody] EditCommentRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.ActorId)
+        {
+            return Results.Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content))
+        {
+            return Results.BadRequest("Comment content is required.");
+        }
+
+        var result = await mediator.Send(new EditComment.Command(commentId, request.ActorId, request.Content));
+        return result.Match(
+            _ => Results.NoContent(),
+            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
+        );
+    })
+    .WithName("edit-comment");
+
+feedGroup.MapDelete("comments/{commentId:guid}", async (HttpContext http, Guid commentId, [FromBody] FeedDeleteRequest request, IMediator mediator) =>
+    {
+        if (!http.User.TryGetAccountId(out var callerId) || callerId != request.ActorId)
+        {
+            return Results.Forbid();
+        }
+
+        var result = await mediator.Send(new DeleteComment.Command(commentId, request.ActorId));
+        return result.Match(
+            _ => Results.NoContent(),
+            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
+        );
+    })
+    .WithName("delete-comment");
 
 feedGroup.MapPut("comments/{commentId:guid}/reactions", async (HttpContext http, Guid commentId, [FromBody] ToggleReactionRequest request, IMediator mediator) =>
     {
@@ -237,6 +308,9 @@ app.Run();
 
 public sealed record ToggleReactionRequest(Participant Actor, ReactionType ReactionType);
 public sealed record AddCommentRequest(Participant Creator, string Content);
+public sealed record EditPostRequest(Guid ActorId, string Description);
+public sealed record EditCommentRequest(Guid ActorId, string Content);
+public sealed record FeedDeleteRequest(Guid ActorId);
 internal sealed record FeedAttachmentUploadResponse(
     string Id,
     string FileName,

@@ -18,14 +18,17 @@ public static class GetPostDetails
         public async ValueTask<ErrorOr<PostDetailsDocument>> Handle(Query request, CancellationToken cancellationToken)
         {
             var postResponse = await client.GetAsync<PostDocument>(request.Id, g => g.Index(PostIndexes.Posts), cancellationToken);
-            if (!postResponse.Found || postResponse.Source is null)
+            if (!postResponse.Found || postResponse.Source is null || postResponse.Source.IsDeleted)
             {
                 return Error.NotFound("Post not found.");
             }
 
             var commentsResponse = await client.SearchAsync<CommentDocument>(s => s
                     .Index(PostIndexes.Comments)
-                    .Query(q => q.Term(t => t.Field(f => f.PostId).Value(request.Id)))
+                    .Query(q => q.Bool(b => b
+                        .Must(mu => mu.Term(t => t.Field(f => f.PostId).Value(request.Id)))
+                        .MustNot(mn => mn.Term(t => t.Field(f => f.IsDeleted).Value(true)))
+                    ))
                     .Sort(ss => ss.Ascending(c => c.CreationDate))
                     .Size(1000),
                 cancellationToken);

@@ -179,6 +179,84 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
         Assert.Equal(ReactionType.Heart, details.Comments[0].Comment.Reactions[0].ReactionType);
     }
 
+    [Fact]
+    public async Task Edit_and_delete_post_are_owner_only_and_soft_deleted()
+    {
+        var postId = await CreatePostAndGetId();
+
+        var otherUserId = Guid.NewGuid();
+        SetAuth(otherUserId);
+        var forbiddenEdit = await _client!.PutAsJsonAsync($"/api/feed/{postId}", new { actorId = otherUserId, description = "hijack" });
+        Assert.Equal(System.Net.HttpStatusCode.Forbidden, forbiddenEdit.StatusCode);
+
+        SetAuth(_creatorId);
+        var editResponse = await _client!.PutAsJsonAsync($"/api/feed/{postId}", new { actorId = _creatorId, description = "edited-desc" });
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, editResponse.StatusCode);
+
+        var getEdited = await _client!.GetFromJsonAsync<PostDocument>($"/api/feed/{postId}");
+        Assert.NotNull(getEdited);
+        Assert.Equal("edited-desc", getEdited.Description);
+        Assert.NotNull(getEdited.LastEditedAt);
+
+        using var deletePostRequest = new HttpRequestMessage(HttpMethod.Delete, $"/api/feed/{postId}")
+        {
+            Content = JsonContent.Create(new { actorId = _creatorId })
+        };
+        var deleteResponse = await _client!.SendAsync(deletePostRequest);
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        var getDeleted = await _client!.GetAsync($"/api/feed/{postId}");
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, getDeleted.StatusCode);
+    }
+
+    [Fact]
+    public async Task Edit_and_delete_comment_are_owner_only_and_soft_deleted()
+    {
+        var postId = await CreatePostAndGetId();
+        var commentPayload = new
+        {
+            creator = new Participant
+            {
+                Id = _creatorId,
+                FirstName = "Fn",
+                LastName = "Ln",
+                NickName = "nn"
+            },
+            content = "Parent comment"
+        };
+
+        var commentResponse = await _client!.PostAsJsonAsync($"/api/feed/{postId}/comments", commentPayload);
+        commentResponse.EnsureSuccessStatusCode();
+        var commentId = await commentResponse.Content.ReadFromJsonAsync<Guid>();
+        Assert.NotEqual(Guid.Empty, commentId);
+
+        var otherUserId = Guid.NewGuid();
+        SetAuth(otherUserId);
+        var forbiddenEdit = await _client!.PutAsJsonAsync($"/api/feed/comments/{commentId}", new { actorId = otherUserId, content = "hijack" });
+        Assert.Equal(System.Net.HttpStatusCode.Forbidden, forbiddenEdit.StatusCode);
+
+        SetAuth(_creatorId);
+        var editResponse = await _client!.PutAsJsonAsync($"/api/feed/comments/{commentId}", new { actorId = _creatorId, content = "Updated comment" });
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, editResponse.StatusCode);
+
+        var detailsAfterEdit = await _client!.GetFromJsonAsync<PostDetailsDocument>($"/api/feed/{postId}/details");
+        Assert.NotNull(detailsAfterEdit);
+        Assert.Single(detailsAfterEdit.Comments);
+        Assert.Equal("Updated comment", detailsAfterEdit.Comments[0].Comment.Content);
+        Assert.NotNull(detailsAfterEdit.Comments[0].Comment.LastEditedAt);
+
+        using var deleteCommentRequest = new HttpRequestMessage(HttpMethod.Delete, $"/api/feed/comments/{commentId}")
+        {
+            Content = JsonContent.Create(new { actorId = _creatorId })
+        };
+        var deleteResponse = await _client!.SendAsync(deleteCommentRequest);
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        var detailsAfterDelete = await _client!.GetFromJsonAsync<PostDetailsDocument>($"/api/feed/{postId}/details");
+        Assert.NotNull(detailsAfterDelete);
+        Assert.Empty(detailsAfterDelete.Comments);
+    }
+
     private async Task<Guid> CreatePostAndGetId()
     {
         var command = new CreatePost.Command(
@@ -197,5 +275,13 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
         var id = await response.Content.ReadFromJsonAsync<string>();
         Assert.False(string.IsNullOrWhiteSpace(id));
         return Guid.Parse(id!);
+    }
+
+    private void SetAuth(Guid accountId)
+    {
+        using var scope = _factory!.Services.CreateScope();
+        var jwt = scope.ServiceProvider.GetRequiredService<IOptions<JwtOptions>>().Value;
+        var token = IntegrationTestJwt.CreateAccessToken(jwt, accountId);
+        _client!.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 }
