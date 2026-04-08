@@ -369,6 +369,7 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:5211
       - "ConnectionStrings__FeedContext=${ELASTIC_URL:-http://elasticsearch:9200}"
+      - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
       - "Elastic__User=${ELASTIC_USER:-elastic}"
       - "Elastic__Password=${ELASTIC_PASSWORD:-elastic_pass}"
       - ConsulOptions__ServiceName=feedservice
@@ -388,6 +389,8 @@ services:
       consul:
         condition: service_healthy
       elasticsearch:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
       jaeger:
         condition: service_healthy

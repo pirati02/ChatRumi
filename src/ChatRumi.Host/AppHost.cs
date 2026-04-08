@@ -37,7 +37,7 @@ builder.AddChatAccountSyncService(chatDatabase, redis, rabbitMq, kafka, defaultU
 builder.AddFeedAccountSyncService(elastic, kafka);
 builder.AddFriendshipAccountSyncService(neo4J, kafka);
 
-var feedService = builder.AddFeedService(elastic)
+var feedService = builder.AddFeedService(elastic, kafka)
     .WithChatRumiJwt(jwtSigningKey);
 var notificationService = builder.AddNotificationService(elastic, kafka)
     .WithChatRumiJwt(jwtSigningKey);

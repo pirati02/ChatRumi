@@ -15,11 +15,18 @@ public class KafkaProducer(
     ILogger<KafkaProducer> logger
 ) : IDispatcher
 {
-    private readonly IProducer<string, string> _producer = new ProducerBuilder<string, string>(BuildProducerConfig(options.Value))
+    private readonly IProducer<string, string> _producer = new ProducerBuilder<string, string>(
+            BuildProducerConfig(options.Value))
         .Build();
 
     private static ProducerConfig BuildProducerConfig(KafkaOptions o)
     {
+        if (string.IsNullOrWhiteSpace(o.ConnectionString))
+        {
+            throw new InvalidOperationException(
+                $"Missing required Kafka setting: {KafkaOptions.Name}.ConnectionString");
+        }
+
         if (!Enum.TryParse<CompressionType>(o.CompressionType, ignoreCase: true, out var compression))
         {
             compression = CompressionType.Lz4;
@@ -35,7 +42,7 @@ public class KafkaProducer(
         };
     }
 
-    public Task ProduceAsync<TEvent>(string topic, string key, TEvent value, CancellationToken cancellationToken = default)
+    public async Task ProduceAsync<TEvent>(string topic, string key, TEvent value, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -43,30 +50,32 @@ public class KafkaProducer(
 
         try
         {
-            _producer.Produce(topic, message, deliveryReport =>
-            {
-                if (deliveryReport.Error.IsError)
-                {
-                    logger.LogWarning(
-                        "Kafka failed to deliver message to topic {Topic}. Error: {Error}",
-                        topic,
-                        deliveryReport.Error.Reason);
-                    return;
-                }
+            var deliveryResult = await _producer
+                .ProduceAsync(topic, message, cancellationToken)
+                .ConfigureAwait(false);
 
-                logger.LogInformation(
-                    "Kafka delivered message to {TopicPartitionOffset}",
-                    deliveryReport.TopicPartitionOffset);
-            });
+            logger.LogInformation(
+                "Kafka delivered message to {TopicPartitionOffset} for topic {Topic} and key {Key}",
+                deliveryResult.TopicPartitionOffset,
+                topic,
+                key);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogWarning(
+                "Kafka message production was canceled for topic {Topic} and key {Key}",
+                topic,
+                key);
+            throw;
         }
         catch (ProduceException<string, string> ex)
         {
             logger.LogWarning(
                 ex,
-                "Kafka produce enqueue failed for topic {Topic}",
-                topic);
+                "Kafka failed to deliver message for topic {Topic} and key {Key}",
+                topic,
+                key);
+            throw;
         }
-
-        return Task.CompletedTask;
     }
 }

@@ -1,4 +1,4 @@
- using System.Text.Json;
+using System.Text.Json;
 using ChatRum.InterCommunication;
 using ChatRumi.Notification.Application;
 using Confluent.Kafka;
@@ -20,6 +20,12 @@ public class NotificationTriggeredConsumerBackgroundService(
     {
         return Task.Run(async () =>
         {
+            if (string.IsNullOrWhiteSpace(options.Value.ConnectionString))
+            {
+                throw new InvalidOperationException(
+                    $"Missing required Kafka setting: {KafkaOptions.Name}.ConnectionString");
+            }
+
             await KafkaTopicBootstrap.EnsureInterCommunicationTopicsAsync(options.Value.ConnectionString, stoppingToken)
                 .ConfigureAwait(false);
 
