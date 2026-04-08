@@ -2,7 +2,7 @@ using ChatRum.InterCommunication;
 using ChatRumi.Account.Application.IntegrationEvents;
 using ChatRumi.Account.Domain.Events;
 using FluentValidation;
-using Marten; 
+using Marten;
 using ErrorOr;
 using Mediator;
 
@@ -28,9 +28,9 @@ public static class UpdateAccount
     }
 
     public class Handler(
-        IDocumentStore store,
+        IDocumentSession session,
         IValidator<Command> validator,
-        IDispatcher dispatcher
+        IOutboxWriter outboxWriter
     ) : IRequestHandler<Command, ErrorOr<Guid>>
     {
         public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
@@ -46,8 +46,6 @@ public static class UpdateAccount
                         )
                     );
             }
-
-            await using var session = store.LightweightSession();
 
             var account =
                 await session.Events.AggregateStreamAsync<Domain.Aggregate.Account>(request.Id,
@@ -66,9 +64,8 @@ public static class UpdateAccount
                 LastName = request.LastName
             };
             var action = session.Events.Append(@event.AccountId, @event);
-            await session.SaveChangesAsync(cancellationToken);
 
-            await dispatcher.ProduceAsync(
+            await outboxWriter.EnqueueAsync(
                 Topics.AccountUpdatedTopic,
                 account.Id.ToString(),
                 new AccountModified(
@@ -79,6 +76,7 @@ public static class UpdateAccount
                 ),
                 cancellationToken
             );
+            await session.SaveChangesAsync(cancellationToken);
 
             return action.Id;
         }

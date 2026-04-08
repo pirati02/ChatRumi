@@ -41,6 +41,9 @@ public static class ModuleRegistration
 
                 options.Schema.For<StoredRefreshToken>()
                     .UniqueIndex(x => x.TokenHash);
+                options.Schema.For<AccountOutboxMessage>()
+                    .Index(x => x.ProcessedOnUtc)
+                    .Index(x => x.NextAttemptAtUtc);
 
                 options.Events.StreamIdentity = StreamIdentity.AsGuid;
             }).AddAsyncDaemon(DaemonMode.Solo);

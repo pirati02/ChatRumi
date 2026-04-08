@@ -1,5 +1,6 @@
 ﻿using ChatRumi.Feed.Application;
 using ChatRumi.Feed.Application.Dtos;
+using ChatRumi.Feed.Application.Outbox;
 using ChatRumi.Feed.Domain.ValueObject;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;
@@ -13,6 +14,7 @@ public static class PostIndexer
         var client = serviceProvider.GetRequiredService<IElasticClient>();
         await EnsurePostIndex(client);
         await EnsureCommentsIndex(client);
+        await EnsureOutboxIndex(client);
     }
 
     private static async Task EnsurePostIndex(IElasticClient client)
@@ -76,6 +78,33 @@ public static class PostIndexer
 
             if (!createResponse.IsValid)
                 throw new Exception($"Failed to create comments index: {createResponse.DebugInformation}");
+        }
+    }
+
+    private static async Task EnsureOutboxIndex(IElasticClient client)
+    {
+        const string indexName = PostIndexes.Outbox;
+
+        var exists = await client.Indices.ExistsAsync(indexName);
+        if (!exists.Exists)
+        {
+            var createResponse = await client.Indices.CreateAsync(indexName, c => c
+                .Map<FeedOutboxMessage>(m => m
+                    .AutoMap()
+                    .Properties(ps => ps
+                        .Date(d => d.Name(n => n.CreatedOnUtc))
+                        .Date(d => d.Name(n => n.NextAttemptAtUtc))
+                        .Date(d => d.Name(n => n.ProcessedOnUtc))
+                        .Number(n => n.Name(nn => nn.AttemptCount).Type(NumberType.Integer))
+                        .Keyword(k => k.Name(nn => nn.Topic))
+                        .Keyword(k => k.Name(nn => nn.Key))
+                        .Keyword(k => k.Name(nn => nn.EventType))
+                    )
+                )
+            );
+
+            if (!createResponse.IsValid)
+                throw new Exception($"Failed to create outbox index: {createResponse.DebugInformation}");
         }
     }
 

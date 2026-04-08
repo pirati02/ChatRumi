@@ -1,5 +1,6 @@
 using ChatRum.InterCommunication;
 using ChatRumi.Account.Application.Options;
+using ChatRumi.Account.Application.Outbox;
 using ChatRumi.Account.Application.Services;
 using ChatRumi.Account.Application.Services.Sms;
 using FluentValidation;
@@ -32,6 +33,8 @@ public static class ModuleRegistration
                 httpClient.BaseAddress = new Uri(options.BaseUrl);
             });
             services.AddSingleton<IDispatcher, KafkaProducer>();
+            services.AddScoped<IOutboxWriter, AccountOutboxWriter>();
+            services.AddOptions<OutboxRelayOptions>().BindConfiguration(OutboxRelayOptions.SectionName);
             services.AddSingleton<IJwtAccessTokenIssuer, JwtAccessTokenIssuer>();
         }
     }
