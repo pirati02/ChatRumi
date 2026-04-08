@@ -100,7 +100,7 @@ public static class PostIndexer
                         .Keyword(k => k.Name(nn => nn.Key))
                         .Keyword(k => k.Name(nn => nn.EventType))
                     )
-                ).Aliases(a => a.Alias("feed-outbox"))
+                )
             );
 
             if (!createResponse.IsValid)

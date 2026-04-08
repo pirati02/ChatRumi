@@ -43,6 +43,7 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
                 builder.ConfigureIntegrationTestLogging();
                 builder.UseEnvironment("Integration");
                 builder.UseSetting("ConnectionStrings:FeedContext", elasticUri);
+                builder.UseSetting("KafkaOptions:ConnectionString", "localhost:9092");
             });
 
         _client = _factory.CreateClient();
