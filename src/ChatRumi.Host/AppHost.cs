@@ -26,7 +26,10 @@ var neo4J = builder.AddNeo4JInternal();
 
 var jwtSigningKey = builder.AddParameter("jwt-signing-key", "local_dev_jwt_signing_key_at_least_32_chars");
 
-var accountService = builder.AddAccountService(postgres, redis, rabbitMq, kafka, defaultUser, defaultPassword)
+// MassTransit v9 is commercial; supply via user secrets: Parameters:masstransit-license
+var massTransitLicense = builder.AddParameter("masstransit-license", secret: true);
+
+var accountService = builder.AddAccountService(postgres, redis, rabbitMq, kafka, defaultUser, defaultPassword, massTransitLicense)
     .WithChatRumiJwt(jwtSigningKey);
 
 var chatDatabase = postgres.AddDatabase("chatDatabase", "chatDatabase");

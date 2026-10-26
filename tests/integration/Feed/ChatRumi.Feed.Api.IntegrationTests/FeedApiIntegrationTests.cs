@@ -24,18 +24,17 @@ public sealed class FeedApiIntegrationTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _elastic = new ElasticsearchBuilder()
-            .WithImage("elasticsearch:7.17.21")
+        _elastic = new ElasticsearchBuilder("elasticsearch:7.17.21")
             .WithEnvironment("discovery.type", "single-node")
             .WithEnvironment("xpack.security.enabled", "false")
+            // Testcontainers only treats the node as plain HTTP when both xpack flags are "false".
+            .WithEnvironment("xpack.security.http.ssl.enabled", "false")
             .WithEnvironment("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
             .Build();
 
         await _elastic.StartAsync();
 
         var elasticUri = _elastic.GetConnectionString();
-        if (elasticUri.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            elasticUri = "http://" + elasticUri["https://".Length..];
 
         _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>

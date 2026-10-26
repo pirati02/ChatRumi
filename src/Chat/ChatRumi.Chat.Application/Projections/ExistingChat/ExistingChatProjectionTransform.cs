@@ -5,15 +5,12 @@ namespace ChatRumi.Chat.Application.Projections.ExistingChat;
 
 public class ExistingChatProjectionTransform : SingleStreamProjection<ExistingChatProjection, Guid>
 {
-    public ExistingChatProjectionTransform()
+    public ExistingChatProjection Create(ChatStartedEvent @event) => new()
     {
-        ProjectEvent<ChatStartedEvent>((chatProjection, @event) =>
-        {
-            chatProjection.Id = @event.Id;
-            chatProjection.ParticipantsHash = string.Join("|", @event.Participants
-                .OrderBy(a => a.Id)
-                .Select(a => a.Id.ToString("N")));
-            chatProjection.IsGroupChat = @event.IsGroupChat;
-        });
-    }
+        Id = @event.Id,
+        ParticipantsHash = string.Join("|", @event.Participants
+            .OrderBy(a => a.Id)
+            .Select(a => a.Id.ToString("N"))),
+        IsGroupChat = @event.IsGroupChat
+    };
 }

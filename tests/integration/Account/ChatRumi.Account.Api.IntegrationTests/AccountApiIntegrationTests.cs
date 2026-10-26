@@ -25,14 +25,12 @@ public sealed class AccountApiIntegrationTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _postgres = new PostgreSqlBuilder()
-            .WithImage("postgres:16-alpine")
+        _postgres = new PostgreSqlBuilder("postgres:16-alpine")
             .WithDatabase("accountdb")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
-        _redis = new RedisBuilder()
-            .WithImage("redis:7-alpine")
+        _redis = new RedisBuilder("redis:7-alpine")
             .Build();
 
         await _postgres.StartAsync();
@@ -104,7 +102,7 @@ public sealed class AccountApiIntegrationTests : IAsyncLifetime
 
         await WaitForSmsRequestsAsync(minCount: 2, TimeSpan.FromSeconds(30));
 
-        Assert.All(_wireMock!.LogEntries, e => Assert.Contains("/api/v2/send", e.RequestMessage.Path, StringComparison.Ordinal));
+        Assert.All(_wireMock!.LogEntries, e => Assert.Contains("/api/v2/send", e.RequestMessage?.Path, StringComparison.Ordinal));
     }
 
     private async Task WaitForSmsRequestsAsync(int minCount, TimeSpan timeout)

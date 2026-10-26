@@ -10,4 +10,9 @@
       <ProjectReference Include="..\..\ChatRumi.Kernel\ChatRumi.Kernel.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="JasperFx.Events" />
+      <PackageReference Include="JasperFx.Events.SourceGenerator" PrivateAssets="all" />
+    </ItemGroup>
+
 </Project>

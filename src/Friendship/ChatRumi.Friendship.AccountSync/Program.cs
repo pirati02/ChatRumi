@@ -14,4 +14,8 @@ builder.Services.AddHostedService<AccountCreatedConsumerBackgroundService>();
 builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
+
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("friendship-account-sync-health");
+
 app.Run();
