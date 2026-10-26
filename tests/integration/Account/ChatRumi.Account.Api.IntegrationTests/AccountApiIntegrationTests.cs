@@ -102,7 +102,7 @@ public sealed class AccountApiIntegrationTests : IAsyncLifetime
 
         await WaitForSmsRequestsAsync(minCount: 2, TimeSpan.FromSeconds(30));
 
-        Assert.All(_wireMock!.LogEntries, e => Assert.Contains("/api/v2/send", e.RequestMessage.Path, StringComparison.Ordinal));
+        Assert.All(_wireMock!.LogEntries, e => Assert.Contains("/api/v2/send", e.RequestMessage?.Path, StringComparison.Ordinal));
     }
 
     private async Task WaitForSmsRequestsAsync(int minCount, TimeSpan timeout)
