@@ -13,10 +13,14 @@
     <PackageVersion Include="MassTransit" Version="8.5.5" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.5" />
     <!-- Marten + Weasel -->
-    <PackageVersion Include="Marten" Version="8.26.2" />
+    <PackageVersion Include="Marten" Version="9.54.1" />
+    <!-- Marten 9 dispatches aggregate Apply/Create via this generator; Domain projects reference it directly.
+         Keep both in step with the JasperFx.Events version Marten resolves. -->
+    <PackageVersion Include="JasperFx.Events" Version="2.95.1" />
+    <PackageVersion Include="JasperFx.Events.SourceGenerator" Version="2.95.1" />
     <PackageVersion Include="Mediator.Abstractions" Version="3.0.2" />
     <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.2" />
-    <PackageVersion Include="Weasel.Core" Version="8.10.2" />
+    <PackageVersion Include="Weasel.Core" Version="9.46.1" />
     <!-- Core utilities -->
     <PackageVersion Include="StackExchange.Redis" Version="2.12.8" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />

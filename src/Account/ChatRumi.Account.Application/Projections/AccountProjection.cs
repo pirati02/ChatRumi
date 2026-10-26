@@ -20,32 +20,29 @@ public sealed record AccountProjection
 
 public class AccountProjectionTransform : SingleStreamProjection<AccountProjection, Guid>
 {
-    public AccountProjectionTransform()
+    public AccountProjection Create(AccountCreateEvent @event) => new()
     {
-        ProjectEvent<AccountCreateEvent>((account, @event) =>
-        {
-            account.Id = @event.AccountId;
-            account.UserName = @event.UserName;
-            account.Email = @event.Email;
-            account.FirstName = @event.FirstName;
-            account.LastName = @event.LastName;
-            account.PhoneNumber = @event.PhoneNumber;
-            account.CountryCode = @event.CountryCode;
-        });
+        Id = @event.AccountId,
+        UserName = @event.UserName,
+        Email = @event.Email,
+        FirstName = @event.FirstName,
+        LastName = @event.LastName,
+        PhoneNumber = @event.PhoneNumber,
+        CountryCode = @event.CountryCode
+    };
 
-        ProjectEvent<AccountModifiedEvent>((account, @event) =>
-        {
-            account.Id = @event.AccountId;
-            account.UserName = @event.UserName;
-            account.FirstName = @event.FirstName;
-            account.LastName = @event.LastName;
-        });
+    public void Apply(AccountModifiedEvent @event, AccountProjection account)
+    {
+        account.Id = @event.AccountId;
+        account.UserName = @event.UserName;
+        account.FirstName = @event.FirstName;
+        account.LastName = @event.LastName;
+    }
 
-        ProjectEvent<VerifyAccountEvent>((account, @event) =>
-        {
-            account.Id = @event.AccountId;
-            account.IsVerified = true;
-            account.VerifiedOn = DateTimeOffset.UtcNow;
-        });
+    public void Apply(VerifyAccountEvent @event, AccountProjection account)
+    {
+        account.Id = @event.AccountId;
+        account.IsVerified = true;
+        account.VerifiedOn = DateTimeOffset.UtcNow;
     }
 }
