@@ -8,6 +8,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UserSecretsId>a5e42789-1989-42d2-b55a-1bf7d54209d4</UserSecretsId>
+        <!-- Source DCP/Dashboard from the Aspire CLI bundle (falls back to the SDK-paired Aspire.Cli via dnx) -->
+        <AspireUseCliBundle>true</AspireUseCliBundle>
     </PropertyGroup>
 
     <ItemGroup>

@@ -15,4 +15,7 @@ builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
 
+app.MapGet("/health", () => Results.Ok("Healthy ✅"))
+    .WithName("chat-account-sync-health");
+
 app.Run();
