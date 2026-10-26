@@ -24,8 +24,7 @@ public sealed class FriendshipApiIntegrationTests : IAsyncLifetime
     {
         const string neo4jPassword = "Passw0rd!Test";
 
-        _neo4j = new Neo4jBuilder()
-            .WithImage("neo4j:5")
+        _neo4j = new Neo4jBuilder("neo4j:5")
             .WithEnvironment("NEO4J_AUTH", $"neo4j/{neo4jPassword}")
             .Build();
 

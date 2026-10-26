@@ -24,14 +24,12 @@ public sealed class ChatApiIntegrationTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _postgres = new PostgreSqlBuilder()
-            .WithImage("postgres:16-alpine")
+        _postgres = new PostgreSqlBuilder("postgres:16-alpine")
             .WithDatabase("chatdb")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
-        _redis = new RedisBuilder()
-            .WithImage("redis:7-alpine")
+        _redis = new RedisBuilder("redis:7-alpine")
             .Build();
 
         await _postgres.StartAsync();
