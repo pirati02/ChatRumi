@@ -24,8 +24,6 @@
     <!-- Core utilities -->
     <PackageVersion Include="StackExchange.Redis" Version="3.4.20" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
-    <!-- CVE-2024-51417 / GHSA-4cv2-4hjh-77rx: override transitive 1.3.x from WireMock → Handlebars.Net.Helpers.DynamicLinq -->
-    <PackageVersion Include="System.Linq.Dynamic.Core" Version="1.7.4" />
     <PackageVersion Include="ErrorOr" Version="2.1.1" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
@@ -66,7 +64,7 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.14" />
-    <PackageVersion Include="WireMock.Net" Version="1.6.8" />
+    <PackageVersion Include="WireMock.Net" Version="2.20.0" />
     <PackageVersion Include="Testcontainers" Version="4.16.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.16.0" />
