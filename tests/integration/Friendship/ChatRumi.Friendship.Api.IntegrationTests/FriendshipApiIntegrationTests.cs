@@ -1,11 +1,13 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using ChatRum.InterCommunication;
 using ChatRumi.Friendship.Api;
 using ChatRumi.Friendship.Application.Dto.Request;
 using ChatRumi.Infrastructure;
 using ChatRumi.IntegrationTesting;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Testcontainers.Neo4j;
@@ -41,6 +43,10 @@ public sealed class FriendshipApiIntegrationTests : IAsyncLifetime
                 builder.UseSetting("Neo4jOptions:Neo4jUser", "neo4j");
                 builder.UseSetting("Neo4jOptions:Neo4jPassword", neo4jPassword);
                 builder.UseSetting("Neo4jOptions:Neo4jDatabase", "neo4j");
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton<IDispatcher, NoOpDispatcher>();
+                });
             });
 
         _client = _factory.CreateClient();
