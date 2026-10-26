@@ -243,6 +243,8 @@ services:
       - ASPNETCORE_URLS=http://+:5049
       - "ConnectionStrings__Marten=Host=${DB_HOST:-postgres};Port=${DB_PORT:-5432};Database=accountdb;Username=${DB_USER:-postgres};Password=${DB_PASSWORD:-postgres}"
       - "ConnectionStrings__MassTransit=amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASSWORD:-rbadminpass}@${RABBITMQ_HOST:-rabbitmq}:${RABBITMQ_PORT:-5672}/"
+      # MassTransit v9 is commercial: export MT_LICENSE before `docker compose up`
+      - "MT_LICENSE=${MT_LICENSE:-}"
       - "KafkaOptions__ConnectionString=${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}"
       - "RedisOptions__Host=${REDIS_HOST:-redis}"
       - "RedisOptions__Port=${REDIS_PORT:-6379}"

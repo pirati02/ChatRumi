@@ -26,3 +26,10 @@ docker compose up -d account-service chat-service friendship-service feed-servic
 ## Environment Variables
 See .env.example for all available environment variables.
 Use host.docker.internal on Windows/Mac for external services.
+
+**MassTransit license:** MassTransit v9 is commercial, so account-service will not start its RabbitMQ bus without a license.
+Set `MT_LICENSE` (license text) in `.env` or your shell. When running through Aspire, set it as a Host user secret instead:
+```bash
+dotnet user-secrets set "Parameters:masstransit-license" "<license>" --project src/ChatRumi.Host
+```
+Integration tests use the in-memory transport and need no license.

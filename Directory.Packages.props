@@ -10,8 +10,8 @@
     <PackageVersion Include="Aspire.Hosting.Redis" Version="13.6.4" />
     <PackageVersion Include="Consul" Version="1.8.0" />
     <!-- MassTransit 8.x -->
-    <PackageVersion Include="MassTransit" Version="8.5.5" />
-    <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.5" />
+    <PackageVersion Include="MassTransit" Version="9.2.4" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="9.2.4" />
     <!-- Marten + Weasel -->
     <PackageVersion Include="Marten" Version="9.54.1" />
     <!-- Marten 9 dispatches aggregate Apply/Create via this generator; Domain projects reference it directly.

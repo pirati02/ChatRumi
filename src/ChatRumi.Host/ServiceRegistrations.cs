@@ -35,7 +35,8 @@ public static class ServiceRegistrations
             IResourceBuilder<RabbitMQServerResource> rabbitMq,
             IResourceBuilder<ContainerResource> kafka,
             string defaultUser,
-            string defaultPassword
+            string defaultPassword,
+            IResourceBuilder<ParameterResource> massTransitLicense
         )
         {
             var accountDatabase = postgres.AddDatabase("accountDatabase", "accountDatabase");
@@ -57,7 +58,8 @@ public static class ServiceRegistrations
                 .WithEnvironment("RedisOptions__Expiration", "2")
                 .WithEnvironment("MassTransit_Url", rabbitMq.Resource.ConnectionStringExpression)
                 .WithEnvironment("MassTransit_User", defaultUser)
-                .WithEnvironment("MassTransit_Password", defaultPassword);
+                .WithEnvironment("MassTransit_Password", defaultPassword)
+                .WithEnvironment("MT_LICENSE", massTransitLicense);
         }
 
         public IResourceBuilder<ProjectResource> AddChatService(
