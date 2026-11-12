@@ -1,5 +1,5 @@
 using ChatRumi.Feed.Application.Dtos;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -11,14 +11,14 @@ public static class DeletePost
     public sealed record Command(
         Guid PostId,
         Guid ActorId
-    ) : Mediator.IRequest<ErrorOr<Updated>>;
+    ) : Mediator.IRequest<Response<Success>>;
 
     public sealed class Handler(
         IElasticClient client,
         ILogger<Handler> logger
-    ) : IRequestHandler<Command, ErrorOr<Updated>>
+    ) : IRequestHandler<Command, Response<Success>>
     {
-        public async ValueTask<ErrorOr<Updated>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Success>> Handle(Command request, CancellationToken cancellationToken)
         {
             var postResponse = await client.GetAsync<PostDocument>(
                 request.PostId,
@@ -27,13 +27,13 @@ public static class DeletePost
 
             if (!postResponse.Found || postResponse.Source is null || postResponse.Source.IsDeleted)
             {
-                return Error.NotFound("Post not found.");
+                return ResponseError.NotFound("Post not found.");
             }
 
             var post = postResponse.Source;
             if (post.Creator.Id != request.ActorId)
             {
-                return Error.Forbidden("feed.post.delete_forbidden", "Only post owner can delete this post.");
+                return ResponseError.Forbidden("feed.post.delete_forbidden", "Only post owner can delete this post.");
             }
 
             post.IsDeleted = true;
@@ -52,10 +52,10 @@ public static class DeletePost
             if (!updateResponse.IsValid)
             {
                 logger.LogError("Post delete failed for post {PostId}. {Error}", request.PostId, updateResponse.OriginalException?.Message);
-                return Error.Unexpected("Post delete failed.");
+                return ResponseError.Unexpected("Post delete failed.");
             }
 
-            return new Updated();
+            return new Success();
         }
     }
 }

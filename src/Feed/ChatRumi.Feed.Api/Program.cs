@@ -3,12 +3,13 @@ using ChatRum.InterCommunication;
 using ChatRumi.Feed.Api;
 using ChatRumi.Feed.Application;
 using ChatRumi.Feed.Application.Commands;
+using ChatRumi.Feed.Application.Dtos;
 using ChatRumi.Feed.Application.Queries;
 using ChatRumi.Feed.Domain.ValueObject;
 using ChatRumi.Feed.Infrastructure;
 using ChatRumi.Infrastructure;
 using ChatRumi.Infrastructure.Storage;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,10 +47,11 @@ const long MaxAttachmentSizeBytes = 20 * 1024 * 1024; // 20 MB
 feedGroup.MapGet("{id:guid}", async (Guid id, IMediator mediator) =>
     {
         var result = await mediator.Send(new GetPost.Query(id));
-        return result.Match(
-            Results.Ok,
-            Results.NotFound
-        );
+        return result switch
+        {
+            PostDocument post => Results.Ok(post),
+            IEnumerable<ResponseError> errors => Results.NotFound(errors)
+        };
     })
     .WithName("get-post");
 
@@ -73,10 +75,11 @@ feedGroup.MapPost("", async (HttpContext http, [FromBody] CreatePost.Command com
         }
 
         var result = await mediator.Send(command);
-        return result.Match(
-            value => Results.Created($"/api/feed/{value}", value),
-            Results.InternalServerError
-        );
+        return result switch
+        {
+            string postId => Results.Created($"/api/feed/{postId}", postId),
+            IEnumerable<ResponseError> errors => Results.InternalServerError(errors)
+        };
     })
     .WithName("create-post");
 
@@ -156,10 +159,11 @@ feedGroup.MapGet("/attachments/{attachmentId:guid}", async (
 feedGroup.MapGet("{id:guid}/details", async (Guid id, IMediator mediator) =>
     {
         var result = await mediator.Send(new GetPostDetails.Query(id));
-        return result.Match(
-            Results.Ok,
-            Results.NotFound
-        );
+        return result switch
+        {
+            PostDetailsDocument details => Results.Ok(details),
+            IEnumerable<ResponseError> errors => Results.NotFound(errors)
+        };
     })
     .WithName("get-post-details");
 
@@ -171,10 +175,11 @@ feedGroup.MapPut("{id:guid}/reactions", async (HttpContext http, Guid id, [FromB
         }
 
         var result = await mediator.Send(new TogglePostReaction.Command(id, request.Actor, request.ReactionType));
-        return result.Match(
-            _ => Results.NoContent(),
-            _ => Results.NotFound()
-        );
+        return result switch
+        {
+            Success => Results.NoContent(),
+            IEnumerable<ResponseError> => Results.NotFound()
+        };
     })
     .WithName("toggle-post-reaction");
 
@@ -191,10 +196,11 @@ feedGroup.MapPost("{postId:guid}/comments", async (HttpContext http, Guid postId
         }
 
         var result = await mediator.Send(new AddComment.Command(postId, request.Creator, request.Content));
-        return result.Match(
-            value => Results.Created($"/api/feed/{postId}/comments/{value}", value),
-            Results.NotFound
-        );
+        return result switch
+        {
+            Guid newCommentId => Results.Created($"/api/feed/{postId}/comments/{newCommentId}", newCommentId),
+            IEnumerable<ResponseError> errors => Results.NotFound(errors)
+        };
     })
     .WithName("add-comment");
 
@@ -211,10 +217,12 @@ feedGroup.MapPut("{postId:guid}", async (HttpContext http, Guid postId, [FromBod
         }
 
         var result = await mediator.Send(new EditPost.Command(postId, request.ActorId, request.Description));
-        return result.Match(
-            _ => Results.NoContent(),
-            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
-        );
+        return result switch
+        {
+            Success => Results.NoContent(),
+            IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Forbidden) => Results.Forbid(),
+            IEnumerable<ResponseError> => Results.NotFound()
+        };
     })
     .WithName("edit-post");
 
@@ -226,10 +234,12 @@ feedGroup.MapDelete("{postId:guid}", async (HttpContext http, Guid postId, [From
         }
 
         var result = await mediator.Send(new DeletePost.Command(postId, request.ActorId));
-        return result.Match(
-            _ => Results.NoContent(),
-            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
-        );
+        return result switch
+        {
+            Success => Results.NoContent(),
+            IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Forbidden) => Results.Forbid(),
+            IEnumerable<ResponseError> => Results.NotFound()
+        };
     })
     .WithName("delete-post");
 
@@ -246,10 +256,11 @@ feedGroup.MapPost("{postId:guid}/comments/{commentId:guid}/replies", async (Http
         }
 
         var result = await mediator.Send(new AddReply.Command(postId, commentId, request.Creator, request.Content));
-        return result.Match(
-            value => Results.Created($"/api/feed/{postId}/comments/{commentId}/replies/{value}", value),
-            _ => Results.NotFound()
-        );
+        return result switch
+        {
+            Guid replyId => Results.Created($"/api/feed/{postId}/comments/{commentId}/replies/{replyId}", replyId),
+            IEnumerable<ResponseError> => Results.NotFound()
+        };
     })
     .WithName("add-reply");
 
@@ -266,10 +277,12 @@ feedGroup.MapPut("comments/{commentId:guid}", async (HttpContext http, Guid comm
         }
 
         var result = await mediator.Send(new EditComment.Command(commentId, request.ActorId, request.Content));
-        return result.Match(
-            _ => Results.NoContent(),
-            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
-        );
+        return result switch
+        {
+            Success => Results.NoContent(),
+            IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Forbidden) => Results.Forbid(),
+            IEnumerable<ResponseError> => Results.NotFound()
+        };
     })
     .WithName("edit-comment");
 
@@ -281,10 +294,12 @@ feedGroup.MapDelete("comments/{commentId:guid}", async (HttpContext http, Guid c
         }
 
         var result = await mediator.Send(new DeleteComment.Command(commentId, request.ActorId));
-        return result.Match(
-            _ => Results.NoContent(),
-            errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound()
-        );
+        return result switch
+        {
+            Success => Results.NoContent(),
+            IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Forbidden) => Results.Forbid(),
+            IEnumerable<ResponseError> => Results.NotFound()
+        };
     })
     .WithName("delete-comment");
 
@@ -296,10 +311,11 @@ feedGroup.MapPut("comments/{commentId:guid}/reactions", async (HttpContext http,
         }
 
         var result = await mediator.Send(new ToggleCommentReaction.Command(commentId, request.Actor, request.ReactionType));
-        return result.Match(
-            _ => Results.NoContent(),
-            _ => Results.NotFound()
-        );
+        return result switch
+        {
+            Success => Results.NoContent(),
+            IEnumerable<ResponseError> => Results.NotFound()
+        };
     })
     .WithName("toggle-comment-reaction");
 

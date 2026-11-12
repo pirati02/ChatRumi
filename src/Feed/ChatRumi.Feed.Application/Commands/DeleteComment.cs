@@ -1,5 +1,5 @@
 using ChatRumi.Feed.Application.Dtos;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -11,14 +11,14 @@ public static class DeleteComment
     public sealed record Command(
         Guid CommentId,
         Guid ActorId
-    ) : Mediator.IRequest<ErrorOr<Updated>>;
+    ) : Mediator.IRequest<Response<Success>>;
 
     public sealed class Handler(
         IElasticClient client,
         ILogger<Handler> logger
-    ) : IRequestHandler<Command, ErrorOr<Updated>>
+    ) : IRequestHandler<Command, Response<Success>>
     {
-        public async ValueTask<ErrorOr<Updated>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Success>> Handle(Command request, CancellationToken cancellationToken)
         {
             var commentResponse = await client.GetAsync<CommentDocument>(
                 request.CommentId,
@@ -27,13 +27,13 @@ public static class DeleteComment
 
             if (!commentResponse.Found || commentResponse.Source is null || commentResponse.Source.IsDeleted)
             {
-                return Error.NotFound("Comment not found.");
+                return ResponseError.NotFound("Comment not found.");
             }
 
             var comment = commentResponse.Source;
             if (comment.Creator.Id != request.ActorId)
             {
-                return Error.Forbidden("feed.comment.delete_forbidden", "Only comment owner can delete this comment.");
+                return ResponseError.Forbidden("feed.comment.delete_forbidden", "Only comment owner can delete this comment.");
             }
 
             comment.IsDeleted = true;
@@ -50,10 +50,10 @@ public static class DeleteComment
             if (!updateResponse.IsValid)
             {
                 logger.LogError("Comment delete failed for comment {CommentId}. {Error}", request.CommentId, updateResponse.OriginalException?.Message);
-                return Error.Unexpected("Comment delete failed.");
+                return ResponseError.Unexpected("Comment delete failed.");
             }
 
-            return new Updated();
+            return new Success();
         }
     }
 }

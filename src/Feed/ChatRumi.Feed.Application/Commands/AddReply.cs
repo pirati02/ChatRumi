@@ -2,7 +2,7 @@ using ChatRumi.Feed.Application.Dtos;
 using ChatRum.InterCommunication;
 using ChatRumi.Feed.Application.IntegrationEvents;
 using ChatRumi.Feed.Domain.ValueObject;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -16,15 +16,15 @@ public static class AddReply
         Guid ParentCommentId,
         Participant Creator,
         string Content
-    ) : Mediator.IRequest<ErrorOr<Guid>>;
+    ) : Mediator.IRequest<Response<Guid>>;
 
     public sealed class Handler(
         IElasticClient client,
         IOutboxWriter outboxWriter,
         ILogger<Handler> logger
-    ) : IRequestHandler<Command, ErrorOr<Guid>>
+    ) : IRequestHandler<Command, Response<Guid>>
     {
-        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var parentCommentResponse = await client.GetAsync<CommentDocument>(
                 request.ParentCommentId,
@@ -33,12 +33,12 @@ public static class AddReply
 
             if (!parentCommentResponse.Found || parentCommentResponse.Source is null || parentCommentResponse.Source.IsDeleted)
             {
-                return Error.NotFound("Parent comment not found.");
+                return ResponseError.NotFound("Parent comment not found.");
             }
 
             if (parentCommentResponse.Source.PostId != request.PostId)
             {
-                return Error.Validation("Reply post mismatch.");
+                return ResponseError.Validation("Reply post mismatch.");
             }
 
             var reply = new CommentDocument
@@ -57,7 +57,7 @@ public static class AddReply
             if (!response.IsValid)
             {
                 logger.LogError("Reply creation failed for comment {CommentId}. {Error}", request.ParentCommentId, response.OriginalException?.Message);
-                return Error.Unexpected("Reply creation failed.");
+                return ResponseError.Unexpected("Reply creation failed.");
             }
 
             if (FeedNotificationRules.ShouldNotify(parentCommentResponse.Source.Creator.Id, request.Creator.Id))

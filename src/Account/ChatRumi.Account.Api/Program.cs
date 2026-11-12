@@ -5,7 +5,7 @@ using ChatRumi.Account.Application.Commands;
 using ChatRumi.Account.Application.Queries;
 using ChatRumi.Account.Infrastructure;
 using ChatRumi.Infrastructure;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -68,19 +68,15 @@ var accountGroup = app.MapGroup("/api/account").RequireAuthorization();
 accountGroup.MapPost("login", async ([FromBody] Login.Command command, IMediator mediator) =>
     {
         var result = await mediator.Send(command);
-        return result.Match(
-            Results.Ok,
-            errors =>
-            {
-                if (errors.Any(e => e.Type == ErrorType.Unauthorized))
-                {
-                    return Results.Json(
-                        new { message = "Invalid email or password." },
-                        statusCode: StatusCodes.Status401Unauthorized);
-                }
-
-                return Results.BadRequest(errors);
-            });
+        return result switch
+        {
+            AuthTokenResponse token => Results.Ok(token),
+            IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Unauthorized) =>
+                Results.Json(
+                    new { message = "Invalid email or password." },
+                    statusCode: StatusCodes.Status401Unauthorized),
+            IEnumerable<ResponseError> errors => Results.BadRequest(errors)
+        };
     })
     .WithName("login")
     .RequireRateLimiting("auth")
@@ -89,19 +85,15 @@ accountGroup.MapPost("login", async ([FromBody] Login.Command command, IMediator
 accountGroup.MapPost("refresh", async ([FromBody] Refresh.Command command, IMediator mediator) =>
     {
         var result = await mediator.Send(command);
-        return result.Match(
-            Results.Ok,
-            errors =>
-            {
-                if (errors.Any(e => e.Type == ErrorType.Unauthorized))
-                {
-                    return Results.Json(
-                        new { message = "Invalid or expired refresh token." },
-                        statusCode: StatusCodes.Status401Unauthorized);
-                }
-
-                return Results.BadRequest(errors);
-            });
+        return result switch
+        {
+            AuthTokenResponse token => Results.Ok(token),
+            IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Unauthorized) =>
+                Results.Json(
+                    new { message = "Invalid or expired refresh token." },
+                    statusCode: StatusCodes.Status401Unauthorized),
+            IEnumerable<ResponseError> errors => Results.BadRequest(errors)
+        };
     })
     .WithName("refresh")
     .RequireRateLimiting("auth")
@@ -110,10 +102,11 @@ accountGroup.MapPost("refresh", async ([FromBody] Refresh.Command command, IMedi
 accountGroup.MapPost("", async ([FromBody] Register.Command command, IMediator mediator) =>
     {
         var result = await mediator.Send(command);
-        return result.Match(
-            value => Results.Created(value.ToString(), value.ToString()),
-            Results.BadRequest
-        );
+        return result switch
+        {
+            Guid id => Results.Created(id.ToString(), id.ToString()),
+            IEnumerable<ResponseError> errors => Results.BadRequest(errors)
+        };
     })
     .WithName("register-account")
     .AllowAnonymous();
@@ -125,20 +118,22 @@ accountGroup.MapPut("{accountId:guid}", async ([FromRoute] Guid accountId, [From
             Id = accountId
         };
         var result = await mediator.Send(command);
-        return result.Match(
-            value => Results.Created(value.ToString(), value.ToString()),
-            Results.BadRequest
-        );
+        return result switch
+        {
+            Guid id => Results.Created(id.ToString(), id.ToString()),
+            IEnumerable<ResponseError> errors => Results.BadRequest(errors)
+        };
     })
     .WithName("update-account");
 
 accountGroup.MapPut("activate", async ([FromBody] VerifyAccount.Command request, IMediator mediator) =>
     {
         var result = await mediator.Send(request);
-        return result.Match(
-            Results.Ok,
-            Results.NotFound
-        );
+        return result switch
+        {
+            bool verified => Results.Ok(verified),
+            IEnumerable<ResponseError> errors => Results.NotFound(errors)
+        };
     })
     .WithName("activate-account")
     .AllowAnonymous();
@@ -146,10 +141,11 @@ accountGroup.MapPut("activate", async ([FromBody] VerifyAccount.Command request,
 accountGroup.MapPatch("{accountId:guid}/resend-code", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
         var result = await mediator.Send(new SendVerificationRequest.Command(accountId));
-        return result.Match(
-            Results.Ok,
-            Results.NotFound
-        );
+        return result switch
+        {
+            bool sent => Results.Ok(sent),
+            IEnumerable<ResponseError> errors => Results.NotFound(errors)
+        };
     })
     .WithName("verify-account")
     .AllowAnonymous();
@@ -157,10 +153,11 @@ accountGroup.MapPatch("{accountId:guid}/resend-code", async ([FromRoute] Guid ac
 accountGroup.MapGet("{accountId:guid}", async ([FromRoute] Guid accountId, IMediator mediator) =>
     {
         var result = await mediator.Send(new GetAccount.Query(accountId));
-        return result.Match(
-            Results.Ok,
-            Results.NotFound
-        );
+        return result switch
+        {
+            AccountResponse account => Results.Ok(account),
+            IEnumerable<ResponseError> errors => Results.NotFound(errors)
+        };
     })
     .WithName("get-account");
 

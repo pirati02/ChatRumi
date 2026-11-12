@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <!--
+      .NET SDK 11.0.100 registers the Blazor hot-reload browser-tools initializer as a JS module in every
+      Microsoft.NET.Sdk.Web project during Debug builds, which fails in API-only projects with
+      "The following scoped css bundles do not have matching endpoints: _framework/Microsoft.NET.Sdk.BlazorWeb.HotReload...".
+      None of the services ship JS modules or wwwroot assets, so the JS module pipeline is disabled.
+      Remove once the SDK fixes this.
+    -->
+    <JSModulesEnabled>false</JSModulesEnabled>
+  </PropertyGroup>
+</Project>

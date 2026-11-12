@@ -1,5 +1,5 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -8,20 +8,20 @@ namespace ChatRumi.Feed.Application.Queries;
 
 public static class GetPost
 {
-    public sealed record Query(Guid Id) : Mediator.IRequest<ErrorOr<PostDocument>>;
+    public sealed record Query(Guid Id) : Mediator.IRequest<Response<PostDocument>>;
 
     public class Handler(
         IElasticClient client,
         ILogger<Handler> logger
-    ) : IRequestHandler<Query, ErrorOr<PostDocument>>
+    ) : IRequestHandler<Query, Response<PostDocument>>
     {
-        public async ValueTask<ErrorOr<PostDocument>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<Response<PostDocument>> Handle(Query request, CancellationToken cancellationToken)
         {
             var response = await client.GetAsync<PostDocument>(request.Id, g => g.Index(PostIndexes.Posts), cancellationToken);
 
             if (!response.Found || response.Source is null || response.Source.IsDeleted)
             {
-                return Error.NotFound("Post not found.");
+                return ResponseError.NotFound("Post not found.");
             }
 
             if (response.IsValid)
@@ -31,7 +31,7 @@ public static class GetPost
             }
 
             logger.LogError("Post load failed for post {PostId}. {Error}", request.Id, response.OriginalException?.Message);
-            return Error.NotFound("Post not found.");
+            return ResponseError.NotFound("Post not found.");
         }
     }
 }

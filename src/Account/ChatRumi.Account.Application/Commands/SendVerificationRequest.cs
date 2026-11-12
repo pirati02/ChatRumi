@@ -1,21 +1,23 @@
 ﻿using ChatRumi.Account.Application.Projections;
-using ErrorOr;
 using Marten;
 using MassTransit;
 using Mediator;
 
 namespace ChatRumi.Account.Application.Commands;
 
+// Inside the namespace so it wins over MassTransit.Response<T>.
+using ChatRumi.Kernel.Results;
+
 public static class SendVerificationRequest
 {
-    public sealed record Command(Guid AccountId) : IRequest<ErrorOr<bool>>;
+    public sealed record Command(Guid AccountId) : IRequest<Response<bool>>;
 
     public sealed class Handler(
         IDocumentStore store,
         IPublishEndpoint publisher
-    ) : IRequestHandler<Command, ErrorOr<bool>>
+    ) : IRequestHandler<Command, Response<bool>>
     {
-        public async ValueTask<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var account = await session.Query<AccountProjection>().FirstOrDefaultAsync(
@@ -25,12 +27,12 @@ public static class SendVerificationRequest
 
             if (account is null)
             {
-                return Error.NotFound("Account not found.", $"Account with id {request.AccountId} not found.");
+                return ResponseError.NotFound("Account not found.", $"Account with id {request.AccountId} not found.");
             }
 
             if (account.IsVerified)
             {
-                return Error.Conflict("Account is already verified.",
+                return ResponseError.Conflict("Account is already verified.",
                     $"Account with id {request.AccountId} is aleady verified.");
             }
 

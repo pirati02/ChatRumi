@@ -2,7 +2,7 @@ using ChatRumi.Feed.Application.Dtos;
 using ChatRum.InterCommunication;
 using ChatRumi.Feed.Application.IntegrationEvents;
 using ChatRumi.Feed.Domain.ValueObject;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -15,15 +15,15 @@ public static class TogglePostReaction
         Guid PostId,
         Participant Actor,
         ReactionType ReactionType
-    ) : Mediator.IRequest<ErrorOr<Updated>>;
+    ) : Mediator.IRequest<Response<Success>>;
 
     public sealed class Handler(
         IElasticClient client,
         IOutboxWriter outboxWriter,
         ILogger<Handler> logger
-    ) : IRequestHandler<Command, ErrorOr<Updated>>
+    ) : IRequestHandler<Command, Response<Success>>
     {
-        public async ValueTask<ErrorOr<Updated>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Success>> Handle(Command request, CancellationToken cancellationToken)
         {
             var postResponse = await client.GetAsync<PostDocument>(
                 request.PostId,
@@ -32,7 +32,7 @@ public static class TogglePostReaction
 
             if (!postResponse.Found || postResponse.Source is null || postResponse.Source.IsDeleted)
             {
-                return Error.NotFound("Post not found.");
+                return ResponseError.NotFound("Post not found.");
             }
 
             var post = postResponse.Source;
@@ -53,7 +53,7 @@ public static class TogglePostReaction
             if (!updateResponse.IsValid)
             {
                 logger.LogError("Post reaction update failed for post {PostId}. {Error}", request.PostId, updateResponse.OriginalException?.Message);
-                return Error.Unexpected("Post reaction update failed.");
+                return ResponseError.Unexpected("Post reaction update failed.");
             }
 
             if (shouldPublishNotification)
@@ -77,7 +77,7 @@ public static class TogglePostReaction
                 );
             }
 
-            return new Updated();
+            return new Success();
         }
     }
 }

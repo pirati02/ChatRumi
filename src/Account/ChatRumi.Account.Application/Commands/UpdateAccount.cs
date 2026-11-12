@@ -3,7 +3,7 @@ using ChatRumi.Account.Application.IntegrationEvents;
 using ChatRumi.Account.Domain.Events;
 using FluentValidation;
 using Marten;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 
 namespace ChatRumi.Account.Application.Commands;
@@ -15,7 +15,7 @@ public static class UpdateAccount
         string UserName,
         string FirstName,
         string LastName
-    ) : IRequest<ErrorOr<Guid>>;
+    ) : IRequest<Response<Guid>>;
 
     public sealed class Validator : AbstractValidator<Command>
     {
@@ -31,16 +31,16 @@ public static class UpdateAccount
         IDocumentSession session,
         IValidator<Command> validator,
         IOutboxWriter outboxWriter
-    ) : IRequestHandler<Command, ErrorOr<Guid>>
+    ) : IRequestHandler<Command, Response<Guid>>
     {
-        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
             {
                 return validationResult.Errors
                     .ConvertAll(error =>
-                        Error.Validation(
+                        ResponseError.Validation(
                             code: error.PropertyName,
                             description: error.ErrorMessage
                         )
@@ -53,7 +53,7 @@ public static class UpdateAccount
 
             if (account is null)
             {
-                return Error.NotFound("Account not found.");
+                return ResponseError.NotFound("Account not found.");
             }
 
             var @event = new AccountModifiedEvent

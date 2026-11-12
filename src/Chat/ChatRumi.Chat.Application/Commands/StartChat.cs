@@ -1,7 +1,7 @@
 ﻿using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator; 
 
@@ -15,13 +15,13 @@ public static class StartChat
         string ChatName,
         ParticipantDto Creator,
         ParticipantDto[] Participants
-    ) : IRequest<ErrorOr<Guid>>;
+    ) : IRequest<Response<Guid>>;
 
     public sealed class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Command, ErrorOr<Guid>>
+    ) : IRequestHandler<Command, Response<Guid>>
     {
-        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 
