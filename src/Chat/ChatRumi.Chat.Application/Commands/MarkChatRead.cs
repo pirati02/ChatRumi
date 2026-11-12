@@ -1,7 +1,7 @@
 ﻿using ChatRumi.Chat.Application.Hubs;
 using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator;
 
@@ -10,15 +10,15 @@ namespace ChatRumi.Chat.Application.Commands;
 // ReSharper disable once ClassNeverInstantiated.Global
 public static class MarkChatRead
 {
-    public sealed record Command(Guid ChatId, Guid[] MessageIds, Guid RequestingUserId) : IRequest<ErrorOr<bool>>;
+    public sealed record Command(Guid ChatId, Guid[] MessageIds, Guid RequestingUserId) : IRequest<Response<bool>>;
 
     public sealed class Handler(
         IDocumentStore store,
         IChatHubContextProxy hubContext,
         AccountConnectionManager connectionManager
-    ) : IRequestHandler<Command, ErrorOr<bool>>
+    ) : IRequestHandler<Command, Response<bool>>
     {
-        public async ValueTask<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var chat = await session.Events.AggregateStreamAsync<Domain.Aggregates.Chat>(
@@ -27,12 +27,12 @@ public static class MarkChatRead
             );
             if (chat is null)
             {
-                return Error.NotFound("Chat not found.");
+                return ResponseError.NotFound("Chat not found.");
             }
 
             if (!chat.Participants.Any(p => p.Id == request.RequestingUserId))
             {
-                return Error.Forbidden("Chat.AccessDenied", "You do not have access to this chat.");
+                return ResponseError.Forbidden("Chat.AccessDenied", "You do not have access to this chat.");
             }
 
             chat.Fire(new MarkChatReadEvent

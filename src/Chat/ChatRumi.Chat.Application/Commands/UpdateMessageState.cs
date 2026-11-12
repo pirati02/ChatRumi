@@ -2,7 +2,7 @@ using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Request;
 using ChatRumi.Chat.Domain.Events;
 using ChatRumi.Chat.Domain.ValueObject;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator;
 
@@ -15,13 +15,13 @@ public static class UpdateMessageState
         Guid ChatId,
         ExistingMessageRequest Message,
         MessageStatus Status
-    ) : IRequest<ErrorOr<(Guid messageId, MessageStatus status)>>;
+    ) : IRequest<Response<(Guid messageId, MessageStatus status)>>;
 
     public sealed class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Command, ErrorOr<(Guid messageId, MessageStatus status)>>
+    ) : IRequestHandler<Command, Response<(Guid messageId, MessageStatus status)>>
     {
-        public async ValueTask<ErrorOr<(Guid messageId, MessageStatus status)>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<(Guid messageId, MessageStatus status)>> Handle(Command request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
             var chat = await session.Events.AggregateStreamAsync<Domain.Aggregates.Chat>(
@@ -30,7 +30,7 @@ public static class UpdateMessageState
             );
             if (chat is null)
             {
-                return Error.NotFound("Chat not found.", $"Chat by '{request.ChatId}' not found.");
+                return ResponseError.NotFound("Chat not found.", $"Chat by '{request.ChatId}' not found.");
             }
 
             var @event = new MessageStatusChangeEvent

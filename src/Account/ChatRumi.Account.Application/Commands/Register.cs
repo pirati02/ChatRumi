@@ -1,13 +1,15 @@
 ﻿using ChatRumi.Account.Application.Projections;
 using ChatRumi.Account.Application.Services;
 using ChatRumi.Account.Domain.Events;
-using ErrorOr;
 using FluentValidation;
 using Marten;
 using MassTransit;
 using Mediator;
 
 namespace ChatRumi.Account.Application.Commands;
+
+// Inside the namespace so it wins over MassTransit.Response<T>.
+using ChatRumi.Kernel.Results;
 
 public static class Register
 {
@@ -19,7 +21,7 @@ public static class Register
         string CountryCode,
         string PhoneNumber,
         string Password
-    ) : IRequest<ErrorOr<Guid>>;
+    ) : IRequest<Response<Guid>>;
 
     public sealed class Validator : AbstractValidator<Command>
     {
@@ -47,16 +49,16 @@ public static class Register
         IDocumentStore store,
         IValidator<Command> validator,
         IPublishEndpoint publisher
-    ) : IRequestHandler<Command, ErrorOr<Guid>>
+    ) : IRequestHandler<Command, Response<Guid>>
     {
-        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
             {
                 return validationResult.Errors
                     .ConvertAll(error =>
-                        Error.Validation(
+                        ResponseError.Validation(
                             code: error.PropertyName,
                             description: error.ErrorMessage
                         )
@@ -74,7 +76,7 @@ public static class Register
 
             if (exists)
             {
-                return Error.Conflict("Account already exists.");
+                return ResponseError.Conflict("Account already exists.");
             }
 
             PasswordHasher.CreatePasswordHash(request.Password, out var passwordHash, out var passwordSalt);

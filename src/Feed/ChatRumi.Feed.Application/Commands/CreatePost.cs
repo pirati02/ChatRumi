@@ -1,7 +1,7 @@
 ﻿using ChatRumi.Feed.Application.Dtos;
 using ChatRumi.Feed.Domain.Aggregates;
 using ChatRumi.Feed.Domain.ValueObject;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -14,14 +14,14 @@ public static class CreatePost
         Participant Creator,
         string Description,
         IReadOnlyCollection<Guid>? AttachmentIds
-    ) : Mediator.IRequest<ErrorOr<string>>;
+    ) : Mediator.IRequest<Response<string>>;
 
     public sealed class Handler(
         IElasticClient client,
         ILogger<Handler> logger
-    ) : IRequestHandler<Command, ErrorOr<string>>
+    ) : IRequestHandler<Command, Response<string>>
     {
-        public async ValueTask<ErrorOr<string>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<string>> Handle(Command request, CancellationToken cancellationToken)
         {
             var attachments = request.AttachmentIds?
                 .Distinct()
@@ -43,7 +43,7 @@ public static class CreatePost
             }
 
             logger.LogError("Post index failed. {Error}", response.OriginalException?.StackTrace);
-            return Error.Unexpected("Post creation failed.");
+            return ResponseError.Unexpected("Post creation failed.");
         }
     }
 }

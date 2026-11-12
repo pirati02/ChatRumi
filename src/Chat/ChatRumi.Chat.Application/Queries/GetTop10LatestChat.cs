@@ -1,7 +1,7 @@
 using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Application.Projections.LatestChat;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator;
 
@@ -11,13 +11,13 @@ namespace ChatRumi.Chat.Application.Queries;
 public static class GetTop10LatestChat
 {
     public sealed record Query(Guid ParticipantId)
-        : IRequest<ErrorOr<LatestChatResponse[]>>;
+        : IRequest<Response<LatestChatResponse[]>>;
 
     public sealed class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Query, ErrorOr<LatestChatResponse[]>>
+    ) : IRequestHandler<Query, Response<LatestChatResponse[]>>
     {
-        public async ValueTask<ErrorOr<LatestChatResponse[]>> Handle(Query request,
+        public async ValueTask<Response<LatestChatResponse[]>> Handle(Query request,
             CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();

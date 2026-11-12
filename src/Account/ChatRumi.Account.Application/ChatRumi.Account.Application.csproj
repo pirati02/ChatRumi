@@ -1,33 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net11.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ErrorOr"/>
-        <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation"/>
-        <PackageReference Include="FluentValidation"/>
-        <PackageReference Include="Marten"/>
-        <PackageReference Include="MassTransit"/>
+        <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" />
+        <PackageReference Include="FluentValidation" />
+        <PackageReference Include="Marten" />
+        <PackageReference Include="MassTransit" />
         <PackageReference Include="Mediator.Abstractions" />
         <PackageReference Include="Mediator.SourceGenerator">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Http"/>
-        <PackageReference Include="Microsoft.Extensions.Options"/>
-        <PackageReference Include="StackExchange.Redis"/>
+        <PackageReference Include="Microsoft.Extensions.Http" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="StackExchange.Redis" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj"/>
-        <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj"/>
-        <ProjectReference Include="..\ChatRumi.Account.Domain\ChatRumi.Account.Domain.csproj"/>
+        <ProjectReference Include="..\..\ChatRum.InterCommunication\ChatRum.InterCommunication.csproj" />
+        <ProjectReference Include="..\..\ChatRumi.Infrastructure\ChatRumi.Infrastructure.csproj" />
+        <ProjectReference Include="..\ChatRumi.Account.Domain\ChatRumi.Account.Domain.csproj" />
     </ItemGroup>
 
 </Project>

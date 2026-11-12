@@ -2,7 +2,7 @@ using ChatRumi.Feed.Application.Dtos;
 using ChatRum.InterCommunication;
 using ChatRumi.Feed.Application.IntegrationEvents;
 using ChatRumi.Feed.Domain.ValueObject;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -15,15 +15,15 @@ public static class AddComment
         Guid PostId,
         Participant Creator,
         string Content
-    ) : Mediator.IRequest<ErrorOr<Guid>>;
+    ) : Mediator.IRequest<Response<Guid>>;
 
     public sealed class Handler(
         IElasticClient client,
         IOutboxWriter outboxWriter,
         ILogger<Handler> logger
-    ) : IRequestHandler<Command, ErrorOr<Guid>>
+    ) : IRequestHandler<Command, Response<Guid>>
     {
-        public async ValueTask<ErrorOr<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var postResponse = await client.GetAsync<PostDocument>(
                 request.PostId,
@@ -32,7 +32,7 @@ public static class AddComment
 
             if (!postResponse.Found || postResponse.Source is null || postResponse.Source.IsDeleted)
             {
-                return Error.NotFound("Post not found.");
+                return ResponseError.NotFound("Post not found.");
             }
 
             var comment = new CommentDocument
@@ -50,7 +50,7 @@ public static class AddComment
             if (!response.IsValid)
             {
                 logger.LogError("Comment creation failed for post {PostId}. {Error}", request.PostId, response.OriginalException?.Message);
-                return Error.Unexpected("Comment creation failed.");
+                return ResponseError.Unexpected("Comment creation failed.");
             }
 
             if (FeedNotificationRules.ShouldNotify(postResponse.Source.Creator.Id, request.Creator.Id))

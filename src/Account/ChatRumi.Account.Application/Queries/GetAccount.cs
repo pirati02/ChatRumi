@@ -1,4 +1,4 @@
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator;
 
@@ -6,13 +6,13 @@ namespace ChatRumi.Account.Application.Queries;
 
 public static class GetAccount
 {
-    public record Query(Guid AccountId) : IRequest<ErrorOr<AccountResponse>>;
+    public record Query(Guid AccountId) : IRequest<Response<AccountResponse>>;
 
     public class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Query, ErrorOr<AccountResponse>>
+    ) : IRequestHandler<Query, Response<AccountResponse>>
     {
-        public async ValueTask<ErrorOr<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<Response<AccountResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 
@@ -21,7 +21,7 @@ public static class GetAccount
 
             if (account is null)
             {
-                return Error.NotFound("Account not found.",
+                return ResponseError.NotFound("Account not found.",
                     description: $"Account by id '{request.AccountId}' not found.");
             }
 

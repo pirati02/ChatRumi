@@ -2,7 +2,7 @@ using ChatRumi.Chat.Application.Dto;
 using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Application.Projections.ExistingChat;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator;
 
@@ -14,17 +14,17 @@ public static class SearchExistingChatByParticipant
     public sealed record Query(
         ParticipantDto[] Participants,
         Guid RequestingUserId
-    ) : IRequest<ErrorOr<ChatResponse?>>;
+    ) : IRequest<Response<ChatResponse>>;
 
     public sealed class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Query, ErrorOr<ChatResponse?>>
+    ) : IRequestHandler<Query, Response<ChatResponse>>
     {
-        public async ValueTask<ErrorOr<ChatResponse?>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<Response<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             if (!request.Participants.Any(p => p.Id == request.RequestingUserId))
             {
-                return Error.Forbidden("Chat.AccessDenied", "You must be a participant in the chat search.");
+                return ResponseError.Forbidden("Chat.AccessDenied", "You must be a participant in the chat search.");
             }
 
             await using var session = store.LightweightSession();
@@ -35,7 +35,7 @@ public static class SearchExistingChatByParticipant
             );
             if (existing is null)
             {
-                return Error.NotFound("Chat not found.", "Chat not found.");
+                return ResponseError.NotFound("Chat not found.", "Chat not found.");
             }
 
             var chat = await session.Events.AggregateStreamAsync<Domain.Aggregates.Chat>(
@@ -44,7 +44,7 @@ public static class SearchExistingChatByParticipant
             );
 
             if (chat is null)
-                return Error.NotFound("Chat not found.", "Chat not found.");
+                return ResponseError.NotFound("Chat not found.", "Chat not found.");
 
             return chat.ToDto();
         }

@@ -3,7 +3,7 @@ using ChatRumi.Account.Application.IntegrationEvents;
 using ChatRumi.Account.Application.Projections;
 using ChatRumi.Account.Domain.Events;
 using ChatRumi.Account.Domain.ValueObjects;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator;
 using StackExchange.Redis;
@@ -12,27 +12,27 @@ namespace ChatRumi.Account.Application.Commands;
 
 public static class VerifyAccount
 {
-    public sealed record Command(string Code, Guid AccountId) : IRequest<ErrorOr<bool>>;
+    public sealed record Command(string Code, Guid AccountId) : IRequest<Response<bool>>;
 
     public sealed class Handler(
         IDocumentSession session,
         IConnectionMultiplexer connectionMultiplexer,
         IOutboxWriter outboxWriter
-    ) : IRequestHandler<Command, ErrorOr<bool>>
+    ) : IRequestHandler<Command, Response<bool>>
     {
-        public async ValueTask<ErrorOr<bool>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             var account = await session.Query<AccountProjection>()
                 .FirstOrDefaultAsync(a => a.Id == request.AccountId, cancellationToken);
 
             if (account is null)
             {
-                return Error.NotFound("Account not found.", $"Account with id {request.AccountId} not found.");
+                return ResponseError.NotFound("Account not found.", $"Account with id {request.AccountId} not found.");
             }
 
             if (account.IsVerified)
             {
-                return Error.Conflict("Account is already verified.", $"Account with id {request.AccountId} is aleady verified.");
+                return ResponseError.Conflict("Account is already verified.", $"Account with id {request.AccountId} is aleady verified.");
             }
 
             await using (connectionMultiplexer)
@@ -43,7 +43,7 @@ public static class VerifyAccount
                 var accountCode = await database.StringGetDeleteAsync(smsCode.Key());
                 if (!accountCode.HasValue || accountCode != request.Code)
                 {
-                    return Error.Conflict("Invalid verification code.", "Invalid verification code.");
+                    return ResponseError.Conflict("Invalid verification code.", "Invalid verification code.");
                 }
 
                 var @event = new VerifyAccountEvent

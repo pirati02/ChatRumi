@@ -1,6 +1,7 @@
 using ChatRumi.Feed.Application.Commands;
 using ChatRumi.Feed.Application.Dtos;
 using ChatRumi.Feed.Domain.ValueObject;
+using ChatRumi.Kernel.Results;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Nest;
@@ -31,9 +32,8 @@ public class CreatePostHandlerTests
         var handler = new CreatePost.Handler(client.Object, NullLogger<CreatePost.Handler>.Instance);
         var result = await handler.Handle(new CreatePost.Command(creator, "Hello", [Guid.NewGuid()]), CancellationToken.None);
 
-        Assert.False(result.IsError);
-        Assert.NotNull(result.Value);
-        Assert.True(Guid.TryParse(result.Value, out var parsed));
+        var postId = Assert.IsType<string>(result.Value);
+        Assert.True(Guid.TryParse(postId, out var parsed));
         Assert.NotEqual(Guid.Empty, parsed);
     }
 
@@ -58,6 +58,7 @@ public class CreatePostHandlerTests
         var handler = new CreatePost.Handler(client.Object, NullLogger<CreatePost.Handler>.Instance);
         var result = await handler.Handle(new CreatePost.Command(creator, "D", null), CancellationToken.None);
 
-        Assert.True(result.IsError);
+        var errors = Assert.IsAssignableFrom<IEnumerable<ResponseError>>(result.Value);
+        Assert.Contains(errors, e => e.Type == ErrorType.Unexpected);
     }
 }

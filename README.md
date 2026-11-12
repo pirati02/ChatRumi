@@ -1,6 +1,6 @@
 # ChatRumi
 
-A microservices-based real-time chat and social platform built with .NET 10, featuring event sourcing, CQRS, and distributed tracing.
+A microservices-based real-time chat and social platform built with .NET 11, featuring event sourcing, CQRS, and distributed tracing.
 
 ---
 
@@ -66,7 +66,7 @@ Each service follows a clean layered structure:
 
 | Category           | Technology                                          |
 |--------------------|-----------------------------------------------------|
-| Language/Framework | .NET 10, ASP.NET Core Minimal APIs, C#              |
+| Language/Framework | .NET 11, ASP.NET Core Minimal APIs, C#              |
 | Real-time          | SignalR                                             |
 | CQRS / Mediator    | MediatR                                             |
 | Event Sourcing     | Marten (PostgreSQL)                                 |
@@ -123,7 +123,7 @@ ChatRumi/
 ### Prerequisites
 
 - [Docker & Docker Compose](https://docs.docker.com/get-docker/)
-- [.NET 10 SDK](https://dotnet.microsoft.com/download) (for local development)
+- [.NET 11 SDK](https://dotnet.microsoft.com/download) (for local development)
 
 ### Quick Start — Full Stack
 

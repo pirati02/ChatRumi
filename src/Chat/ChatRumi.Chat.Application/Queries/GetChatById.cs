@@ -1,6 +1,6 @@
 using ChatRumi.Chat.Application.Dto.Extensions;
 using ChatRumi.Chat.Application.Dto.Response;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Marten;
 using Mediator;
 
@@ -10,13 +10,13 @@ namespace ChatRumi.Chat.Application.Queries;
 public static class GetChatById
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public record Query(Guid ChatId, Guid RequestingUserId) : IRequest<ErrorOr<ChatResponse>>;
+    public record Query(Guid ChatId, Guid RequestingUserId) : IRequest<Response<ChatResponse>>;
 
     public sealed class Handler(
         IDocumentStore store
-    ) : IRequestHandler<Query, ErrorOr<ChatResponse>>
+    ) : IRequestHandler<Query, Response<ChatResponse>>
     {
-        public async ValueTask<ErrorOr<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
+        public async ValueTask<Response<ChatResponse>> Handle(Query request, CancellationToken cancellationToken)
         {
             await using var session = store.LightweightSession();
 
@@ -27,12 +27,12 @@ public static class GetChatById
 
             if (chat is null)
             {
-                return Error.NotFound("Chat not found.");
+                return ResponseError.NotFound("Chat not found.");
             }
 
             if (!chat.Participants.Any(p => p.Id == request.RequestingUserId))
             {
-                return Error.Forbidden("Chat.AccessDenied", "You do not have access to this chat.");
+                return ResponseError.Forbidden("Chat.AccessDenied", "You do not have access to this chat.");
             }
 
             return chat.ToDto();

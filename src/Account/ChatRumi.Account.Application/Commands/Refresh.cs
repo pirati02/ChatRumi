@@ -2,7 +2,7 @@ using ChatRumi.Account.Application.Documents;
 using ChatRumi.Account.Application.Projections;
 using ChatRumi.Account.Application.Services;
 using ChatRumi.Infrastructure;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using FluentValidation;
 using Marten;
 using Mediator;
@@ -12,7 +12,7 @@ namespace ChatRumi.Account.Application.Commands;
 
 public static class Refresh
 {
-    public sealed record Command(string refresh_token) : IRequest<ErrorOr<AuthTokenResponse>>;
+    public sealed record Command(string refresh_token) : IRequest<Response<AuthTokenResponse>>;
 
     public sealed class Validator : AbstractValidator<Command>
     {
@@ -27,16 +27,16 @@ public static class Refresh
         IValidator<Command> validator,
         IJwtAccessTokenIssuer jwtAccessTokenIssuer,
         IOptions<JwtOptions> jwtOptions
-    ) : IRequestHandler<Command, ErrorOr<AuthTokenResponse>>
+    ) : IRequestHandler<Command, Response<AuthTokenResponse>>
     {
-        public async ValueTask<ErrorOr<AuthTokenResponse>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<AuthTokenResponse>> Handle(Command request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
             {
                 return validationResult.Errors
                     .ConvertAll(error =>
-                        Error.Validation(
+                        ResponseError.Validation(
                             code: error.PropertyName,
                             description: error.ErrorMessage
                         )
@@ -52,7 +52,7 @@ public static class Refresh
 
             if (stored is null || stored.ExpiresAt < DateTimeOffset.UtcNow)
             {
-                return Error.Unauthorized(
+                return ResponseError.Unauthorized(
                     code: "Refresh.InvalidToken",
                     description: "Invalid or expired refresh token.");
             }
@@ -70,7 +70,7 @@ public static class Refresh
 
             if (projection is null || account is null)
             {
-                return Error.Unauthorized(
+                return ResponseError.Unauthorized(
                     code: "Refresh.InvalidToken",
                     description: "Invalid or expired refresh token.");
             }

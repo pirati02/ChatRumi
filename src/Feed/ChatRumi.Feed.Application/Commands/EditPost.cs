@@ -1,5 +1,5 @@
 using ChatRumi.Feed.Application.Dtos;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -12,14 +12,14 @@ public static class EditPost
         Guid PostId,
         Guid ActorId,
         string Description
-    ) : Mediator.IRequest<ErrorOr<Updated>>;
+    ) : Mediator.IRequest<Response<Success>>;
 
     public sealed class Handler(
         IElasticClient client,
         ILogger<Handler> logger
-    ) : IRequestHandler<Command, ErrorOr<Updated>>
+    ) : IRequestHandler<Command, Response<Success>>
     {
-        public async ValueTask<ErrorOr<Updated>> Handle(Command request, CancellationToken cancellationToken)
+        public async ValueTask<Response<Success>> Handle(Command request, CancellationToken cancellationToken)
         {
             var postResponse = await client.GetAsync<PostDocument>(
                 request.PostId,
@@ -28,13 +28,13 @@ public static class EditPost
 
             if (!postResponse.Found || postResponse.Source is null || postResponse.Source.IsDeleted)
             {
-                return Error.NotFound("Post not found.");
+                return ResponseError.NotFound("Post not found.");
             }
 
             var post = postResponse.Source;
             if (post.Creator.Id != request.ActorId)
             {
-                return Error.Forbidden("feed.post.edit_forbidden", "Only post owner can edit this post.");
+                return ResponseError.Forbidden("feed.post.edit_forbidden", "Only post owner can edit this post.");
             }
 
             post.Description = request.Description.Trim();
@@ -48,10 +48,10 @@ public static class EditPost
             if (!updateResponse.IsValid)
             {
                 logger.LogError("Post edit failed for post {PostId}. {Error}", request.PostId, updateResponse.OriginalException?.Message);
-                return Error.Unexpected("Post edit failed.");
+                return ResponseError.Unexpected("Post edit failed.");
             }
 
-            return new Updated();
+            return new Success();
         }
     }
 }

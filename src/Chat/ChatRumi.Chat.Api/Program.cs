@@ -4,11 +4,12 @@ using ChatRumi.Chat.Api.Hub;
 using ChatRumi.Chat.Application;
 using ChatRumi.Chat.Application.Commands;
 using ChatRumi.Chat.Application.Dto;
+using ChatRumi.Chat.Application.Dto.Response;
 using ChatRumi.Chat.Application.Queries;
 using ChatRumi.Chat.Infrastructure;
 using ChatRumi.Infrastructure;
 using ChatRumi.Infrastructure.Storage;
-using ErrorOr;
+using ChatRumi.Kernel.Results;
 using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
@@ -58,7 +59,11 @@ chatGroup.MapGet("/{participantId:guid}/top10", async (
     }
 
     var result = await mediator.Send(new GetTop10LatestChat.Query(participantId));
-    return result.Match(Results.Ok, Results.NotFound);
+    return result switch
+    {
+        LatestChatResponse[] chats => Results.Ok(chats),
+        IEnumerable<ResponseError> errors => Results.NotFound(errors)
+    };
 });
 
 chatGroup.MapGet("{chatId:guid}", async (
@@ -73,9 +78,12 @@ chatGroup.MapGet("{chatId:guid}", async (
     }
 
     var result = await mediator.Send(new GetChatById.Query(chatId, callerId));
-    return result.Match(
-        Results.Ok,
-        errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound());
+    return result switch
+    {
+        ChatResponse chat => Results.Ok(chat),
+        IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Forbidden) => Results.Forbid(),
+        IEnumerable<ResponseError> => Results.NotFound()
+    };
 });
 
 chatGroup.MapPost("/search-existing", async (
@@ -90,9 +98,12 @@ chatGroup.MapPost("/search-existing", async (
     }
 
     var result = await mediator.Send(new SearchExistingChatByParticipant.Query(participants, callerId));
-    return result.Match(
-        Results.Ok,
-        errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound());
+    return result switch
+    {
+        ChatResponse chat => Results.Ok(chat),
+        IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Forbidden) => Results.Forbid(),
+        IEnumerable<ResponseError> => Results.NotFound()
+    };
 });
 
 chatGroup.MapPost("/mark-as-read/{chatId:guid}", async (
@@ -108,9 +119,12 @@ chatGroup.MapPost("/mark-as-read/{chatId:guid}", async (
     }
 
     var result = await mediator.Send(new MarkChatRead.Command(chatId, messageIds, callerId));
-    return result.Match(
-        Results.Ok,
-        errors => errors.Any(e => e.Type == ErrorType.Forbidden) ? Results.Forbid() : Results.NotFound());
+    return result switch
+    {
+        bool marked => Results.Ok(marked),
+        IEnumerable<ResponseError> errors when errors.Any(e => e.Type == ErrorType.Forbidden) => Results.Forbid(),
+        IEnumerable<ResponseError> => Results.NotFound()
+    };
 });
 
 chatGroup.MapPost("/attachments", async (
